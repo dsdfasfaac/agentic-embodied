@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Runtime configuration schema.
 
 Dataclass schema + omegaconf loading. ``omegaconf`` is imported lazily, only
@@ -245,6 +246,8 @@ class RuntimeConfig:
     Attributes:
         env_family: The default env family.
         env_config: The default family configuration.
+        env_resource_hints: Default placement hints copied into
+            ``EnvSpecMsg.resource_hints`` by Runtime CLI entry points.
         cluster: The Ray cluster and placement configuration.
         gateway: The Gateway configuration.
         transport: The transport configuration.
@@ -256,6 +259,7 @@ class RuntimeConfig:
 
     env_family: str = "fake"
     env_config: dict[str, Any] = dataclasses.field(default_factory=dict)
+    env_resource_hints: dict[str, Any] = dataclasses.field(default_factory=dict)
     cluster: ClusterConfig = dataclasses.field(default_factory=ClusterConfig)
     gateway: GatewayConfig = dataclasses.field(default_factory=GatewayConfig)
     transport: TransportConfig = dataclasses.field(default_factory=TransportConfig)
@@ -330,8 +334,9 @@ def load_config(source: str | Path | dict[str, Any] | None = None) -> RuntimeCon
 def _validate(config: RuntimeConfig) -> None:
     """Load-time validation for combinations that "would silently become a correctness issue if misconfigured".
 
-    Currently there is only one rule: the heartbeat interval must be
-    significantly smaller than the heartbeat timeout. A real defect measured
+    Placement hints are type-checked first so a string such as ``"false"``
+    cannot become truthy during worker selection. The heartbeat interval must
+    also be significantly smaller than the heartbeat timeout. A real defect measured
     on a multi-GPU host: ``local_fake`` (5 s timeout / 1 s interval) paired
     with a **too-long liveness probing window** meant a single hung rank
     could stretch the heartbeat cadence past the timeout, causing **a
@@ -348,10 +353,17 @@ def _validate(config: RuntimeConfig) -> None:
         config: The merged configuration.
 
     Raises:
-        ValueError: ``heartbeat_interval_seconds`` is not significantly
-            smaller than ``heartbeat_timeout_seconds`` (must be at most a
-            third of the timeout, leaving room for three probes).
+        ValueError: A placement hint has the wrong type, or
+            ``heartbeat_interval_seconds`` is not significantly smaller than
+            ``heartbeat_timeout_seconds`` (must be at most a third of the
+            timeout, leaving room for three probes).
     """
+    accelerator_hint = config.env_resource_hints.get("accelerator")
+    if accelerator_hint is not None and not isinstance(accelerator_hint, bool):
+        raise ValueError(
+            "env_resource_hints.accelerator must be a boolean when provided"
+        )
+
     gateway = config.gateway
     interval = gateway.heartbeat_interval_seconds
     timeout = gateway.heartbeat_timeout_seconds

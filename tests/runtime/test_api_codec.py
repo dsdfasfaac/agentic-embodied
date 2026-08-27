@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Protocol codec tests.
 
 Assertion focus: msgpack round-trip fidelity, ``EnvSpecMsg.digest()`` stability,
@@ -99,6 +100,7 @@ def _step_result() -> StepResult:
         reward=2.5,
         terminated=True,
         truncated=False,
+        success=True,
         info={"libero_terminated": True},
         side_effect_applied=True,
         executed_horizon=4,
@@ -154,6 +156,7 @@ ROUND_TRIP_CASES = [
         executed_horizon=20,
         total_reward=3.0,
         terminated=True,
+        success=True,
         stop_reason="terminated",
         last_observation=_observation(),
     ),

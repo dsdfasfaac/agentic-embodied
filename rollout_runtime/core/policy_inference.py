@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Inference-core interface, batching-compatibility keys, and the
 mixable-parameter allowlist.
 
@@ -68,6 +69,7 @@ BATCHABLE_PARAM_KEYS: dict[str, frozenset[str]] = {
     "pi0": frozenset({"noise_seed"}),
     "pi05": frozenset({"noise_seed"}),
     "fake": frozenset(),
+    "rebot_g1d_skill": frozenset(),
 }
 """Per-policy-family declarations of "mixable" parameter keys: requests
 differing only in these keys may still enter the same batch.

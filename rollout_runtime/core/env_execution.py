@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """The environment execution-core interface.
 
 ``EnvExecutionCore`` is a thin adapter layer: **it does not rewrite rlinf
@@ -141,6 +142,8 @@ class ChunkOutcome:
         terminated: The termination flag (true if any step within the
             chunk terminated).
         truncated: The truncation flag.
+        success: The task-success signal. ``None`` means this family/task
+            does not expose a binary success metric.
         executed_horizon: The number of environment steps actually
             executed.
         per_step: Per-step records; ``None`` when
@@ -154,6 +157,7 @@ class ChunkOutcome:
     reward: float = 0.0
     terminated: bool = False
     truncated: bool = False
+    success: bool | None = None
     executed_horizon: int = 0
     per_step: list[PerStepRecord] | None = None
     per_step_obs_available: bool = True
@@ -318,6 +322,7 @@ def normalize_chunk_outcome(
     terminations: Sequence[bool],
     truncations: Sequence[bool],
     requested_horizon: int,
+    success: bool | None = None,
     per_step_info: Sequence[dict[str, Any]] | None = None,
     include_step_observations: bool = False,
     info: dict[str, Any] | None = None,
@@ -358,6 +363,8 @@ def normalize_chunk_outcome(
         truncations: Per-step truncation flags, same length as ``rewards``.
         requested_horizon: The requested chunk length, only recorded into
             ``info``.
+        success: The task-success signal after this chunk; ``None`` when
+            the task has no binary success definition.
         per_step_info: Per-step family-private information, same length
             as ``rewards`` or ``None``.
         include_step_observations: Whether to place per-step observations
@@ -422,6 +429,7 @@ def normalize_chunk_outcome(
         reward=float(sum(float(item) for item in rewards)),
         terminated=any(bool(item) for item in terminations),
         truncated=any(bool(item) for item in truncations),
+        success=success,
         executed_horizon=executed,
         per_step=per_step,
         per_step_obs_available=per_step_available,

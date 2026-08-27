@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Lane state and the lockstep coalescing executor shared by the three rlinf
 families (M6).
 
@@ -223,6 +224,8 @@ class LaneStatus:
         masked_steps: Cumulative number of steps carried forward by a hold
             action (not reset across episodes).
         started: Whether it has already been reset.
+        success: Latched benchmark success. ``None`` is reserved for a
+            lockstep family without a binary metric.
     """
 
     slot_index: int
@@ -232,6 +235,7 @@ class LaneStatus:
     frozen: bool
     masked_steps: int
     started: bool
+    success: bool | None = None
 
 
 def lane_statuses(lanes: Sequence[Any], slots: Sequence[int]) -> list[LaneStatus]:
@@ -277,6 +281,7 @@ def lane_statuses(lanes: Sequence[Any], slots: Sequence[int]) -> list[LaneStatus
                 frozen=bool(lane.frozen),
                 masked_steps=int(lane.masked_steps),
                 started=bool(lane.started),
+                success=bool(getattr(lane, "success", lane.terminated)),
             )
         )
     return statuses
@@ -609,6 +614,9 @@ def run_lockstep_chunk(
             terminations=terminations[slot_index],
             truncations=truncations[slot_index],
             requested_horizon=chunk_len,
+            # Preserve the historical semantics of the rlinf families:
+            # their termination signal is the benchmark success signal.
+            success=any(bool(item) for item in terminations[slot_index]),
             per_step_info=per_step_info[slot_index],
             include_step_observations=include_step_observations,
             info={

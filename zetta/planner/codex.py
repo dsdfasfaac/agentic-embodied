@@ -50,6 +50,7 @@ PHYSICAL_TOOL_NAMES = frozenset(
         "rotate_pitch",
         "move_pose",
         "vla_execute",
+        "run_rebot_skill",
     }
 )
 
@@ -467,13 +468,10 @@ class CodexPlanner:
         effective_base_url = (
             external_url or self._provider_proxy_base_url or self._base_url
         )
-        effective_api_key = (
-            external_key
-            or (
-                self._provider_proxy_api_key
-                if self._provider_proxy_base_url
-                else self._api_key
-            )
+        effective_api_key = external_key or (
+            self._provider_proxy_api_key
+            if self._provider_proxy_base_url
+            else self._api_key
         )
         if effective_api_key:
             env[PROVIDER_ENV_KEY] = effective_api_key
@@ -484,6 +482,7 @@ class CodexPlanner:
                     base_url=effective_base_url,
                     reasoning_effort=self._reasoning_effort,
                     reasoning_summary=self._reasoning_summary,
+                    tool_timeout_s=self._timeout_s,
                 )
             ),
             "cwd": self._repo_root,
@@ -716,6 +715,7 @@ def _codex_mcp_config_overrides(
     base_url: str | None,
     reasoning_effort: str | None = None,
     reasoning_summary: str | None = None,
+    tool_timeout_s: float | None = None,
 ) -> list[str]:
     config: list[tuple[str, Any]] = [
         ("mcp_servers.zetta.url", mcp_url),
@@ -752,6 +752,10 @@ def _codex_mcp_config_overrides(
                 f"{sorted(allowed_summaries)}; got {reasoning_summary!r}"
             )
         config.append(("model_reasoning_summary", normalized_summary))
+    if tool_timeout_s is not None:
+        if tool_timeout_s <= 0:
+            raise ValueError("Codex MCP tool timeout must be positive")
+        config.append(("mcp_servers.zetta.tool_timeout_sec", float(tool_timeout_s)))
     return [f"{key}={json.dumps(value)}" for key, value in config]
 
 

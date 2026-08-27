@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Layered import guard (five rules governing module boundaries).
 
 Uses AST scanning of import nodes without executing the module — this way the
@@ -45,6 +46,7 @@ RUNTIME_INJECTION_POINTS = frozenset(
     {
         "robots/libero/__init__.py",
         "robots/libero/run_evolution_rollout.py",
+        "robots/mujoco/task_adapter.py",
         "robots/robocasa/run_rollout.py",
     }
 )
@@ -60,6 +62,9 @@ RUNTIME_INJECTION_POINTS = frozenset(
   injection point therefore moved from ``robots/robocasa/__init__.py`` (an
   earlier CLI switch that the current branch no longer contains any
   rollout_runtime import for) to ``run_rollout.py`` itself.
+- ``robots/mujoco/task_adapter.py``: the Agent-facing reBot tool deliberately
+  drives the sole supported execution path through Runtime Gateway policy
+  steps; no simulator mutation is implemented on the ``robots`` side.
 
 New entries must also explain why they are a deliberate, application-initiated
 injection point rather than accidental coupling."""
@@ -68,6 +73,9 @@ RUNTIME_TOOLING_FILES = frozenset(
     {
         "scripts/deployment/runtime_parity_trace.py",
         "scripts/deployment/runtime_transport_spike.py",
+        "scripts/deployment/prepare_rebot_g1d_assets.py",
+        "scripts/deployment/smoke_mujoco_runtime.py",
+        "scripts/deployment/smoke_rebot_g1d.py",
         "scripts/deployment/m6_acceptance/rr_eval_bench.py",
         "scripts/deployment/m6_acceptance/rr_probe_libero_vec.py",
         "scripts/deployment/m6_acceptance/rr_probe_robocasa.py",
@@ -92,6 +100,12 @@ allowlist is a tool belonging to runtime itself (in the same category as
 - ``runtime_parity_trace.py``: a single-arm data-collection tool for parity
   checks (each arm runs its own process; see the module docstring of
   ``test_legacy_parity.py``);
+- ``smoke_mujoco_runtime.py``: staged native/Gymnasium/core/LocalRuntime/Ray
+  acceptance tooling for the Runtime's MuJoCo backend. It is not imported by
+  any application or legacy execution path.
+- ``prepare_rebot_g1d_assets.py`` / ``smoke_rebot_g1d.py``: constrained asset
+  preparation and real-scene acceptance tools for the MuJoCo backend. They are
+  not imported by an application or legacy execution path.
 - ``run_ab_runtime.py``: an A/B driver that needs to freeze the identity of
   the runtime preset (topology / policy backend / ``chunk_size`` / digest)
   into the report, otherwise the report would only say "rollout arm" without

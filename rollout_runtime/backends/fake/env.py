@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Fake env backend.
 
 A deterministic state machine: ``state = f(seed, step)``,
@@ -807,6 +808,7 @@ class FakeEnvCore:
             terminations=terminations,
             truncations=truncations,
             requested_horizon=int(block.shape[0]),
+            success=bool(slot.terminated),
             per_step_info=per_step_info if config.per_step_obs else None,
             include_step_observations=config.return_all_frames,
             info={"chunk_calls": slot.chunk_calls},

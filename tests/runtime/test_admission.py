@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Admission tests.
 
 Assertion focus: authentication, quota, deadline, backpressure rejection.
@@ -440,6 +441,31 @@ def test_accelerator_requirement_filters_ranks(clock: FakeClock) -> None:
         _worker(1, families=("maniskill",), needs_accelerator=True, accelerator=True)
     )
     assert registry.select_rank(EnvSpecMsg(env_family="maniskill")) == 1
+
+
+def test_per_spec_accelerator_hint_filters_cpu_capable_family(
+    clock: FakeClock,
+) -> None:
+    """A CPU-capable family can request a GPU for one concrete env spec."""
+    registry = EnvWorkerRegistry(time_source=clock)
+    registry.register(_worker(0, accelerator=False))
+    registry.register(_worker(1, accelerator=True))
+
+    state_only = EnvSpecMsg(env_family="fake")
+    rgb = EnvSpecMsg(env_family="fake", resource_hints={"accelerator": True})
+    assert registry.select_rank(state_only) == 0
+    assert registry.select_rank(rgb) == 1
+
+
+def test_per_spec_accelerator_hint_fails_without_gpu(clock: FakeClock) -> None:
+    """A required per-spec accelerator is a hard placement constraint."""
+    registry = EnvWorkerRegistry(time_source=clock)
+    registry.register(_worker(0, accelerator=False))
+    _expect(
+        ErrorCode.UNSUPPORTED_ENV_SPEC,
+        registry.select_rank,
+        EnvSpecMsg(env_family="fake", resource_hints={"accelerator": True}),
+    )
 
 
 def test_node_group_hint_filters_ranks(clock: FakeClock) -> None:

@@ -1,4 +1,6 @@
+# Copyright (c) 2026 Zetta Contributors
 """Physical agent main CLI entrypoint."""
+
 # `zetta/cli/`
 #
 # CLI entrypoints for Zetta (currently just `main.py`).
@@ -68,8 +70,10 @@ def _strip_images(value):
 def _serialize_messages(messages: list[dict]) -> list[dict]:
     """Strip inline image payloads from messages before writing the transcript."""
     return [
-        {**{k: v for k, v in m.items() if k != "content"},
-         "content": _strip_images(m.get("content"))}
+        {
+            **{k: v for k, v in m.items() if k != "content"},
+            "content": _strip_images(m.get("content")),
+        }
         for m in messages
     ]
 
@@ -81,52 +85,94 @@ def _serialize_messages(messages: list[dict]) -> list[dict]:
 
 def _build_argparser() -> argparse.ArgumentParser:
     ap = argparse.ArgumentParser(
-        description="Standalone hybrid LLM-in-the-loop agent for LIBERO PRO",
+        description="Standalone LLM-in-the-loop embodied agent",
     )
 
-    ap.add_argument("--env", dest="env_name", required=True, choices=["libero"],
-                    help="Environment backend: libero.")
+    ap.add_argument(
+        "--env",
+        dest="env_name",
+        required=True,
+        choices=["libero", "mujoco"],
+        help="Environment backend: libero | mujoco.",
+    )
 
     # models
-    ap.add_argument("--planner", default="api",
-                    choices=["api", "claude_code", "codex"],
-                    help="LLM backend: api | claude_code | codex.")
-    ap.add_argument("--model", default=None,
-                    help="Model id. For the 'api' planner, prefix the provider "
-                         "(e.g. anthropic:claude-opus-4-8, openai:gpt-5.5, "
-                         "openai-chat:glm-5.2). For claude_code/codex this "
-                         "overrides the backend default model.")
-    ap.add_argument("--base-url", default=None,
-                    help="API base URL. Defaults to the selected backend's base URL env var.")
+    ap.add_argument(
+        "--planner",
+        default="api",
+        choices=["api", "claude_code", "codex"],
+        help="LLM backend: api | claude_code | codex.",
+    )
+    ap.add_argument(
+        "--model",
+        default=None,
+        help="Model id. For the 'api' planner, prefix the provider "
+        "(e.g. anthropic:claude-opus-4-8, openai:gpt-5.5, "
+        "openai-chat:glm-5.2). For claude_code/codex this "
+        "overrides the backend default model.",
+    )
+    ap.add_argument(
+        "--base-url",
+        default=None,
+        help="API base URL. Defaults to the selected backend's base URL env var.",
+    )
     ap.add_argument("--max-turns", type=int, default=100)
     ap.add_argument("--max-tokens", type=int, default=8192)
-    ap.add_argument("--no-images", action="store_true",
-                    help="Never send image bytes to the model (api planner only). "
-                         "Use for text-only models that reject image input "
-                         "(e.g. 400 \"message type 'image_url' is not supported\"); "
-                         "read_image then returns the file path with a notice.")
-    ap.add_argument("--planner-timeout-s", type=int, default=None,
-                    help="Wall-clock cap for the claude_code/codex planner "
-                         "subprocess. Defaults to CODEX_TIMEOUT_S (codex only), "
-                         "CELL_TIMEOUT_S, or 1200.")
-    ap.add_argument("--claude-code-max-budget-usd", type=float, default=None,
-                    help="Budget passed to claude -p --max-budget-usd. "
-                         "Defaults to MAX_BUDGET_USD env or 10.")
+    ap.add_argument(
+        "--no-images",
+        action="store_true",
+        help="Never send image bytes to the model (api planner only). "
+        "Use for text-only models that reject image input "
+        "(e.g. 400 \"message type 'image_url' is not supported\"); "
+        "read_image then returns the file path with a notice.",
+    )
+    ap.add_argument(
+        "--planner-timeout-s",
+        type=int,
+        default=None,
+        help="Wall-clock cap for the claude_code/codex planner "
+        "subprocess. Defaults to CODEX_TIMEOUT_S (codex only), "
+        "CELL_TIMEOUT_S, or 1200.",
+    )
+    ap.add_argument(
+        "--claude-code-max-budget-usd",
+        type=float,
+        default=None,
+        help="Budget passed to claude -p --max-budget-usd. "
+        "Defaults to MAX_BUDGET_USD env or 10.",
+    )
 
     # other config
     ap.add_argument("--output-dir", default=None)
-    ap.add_argument("--dashboard", action="store_true",
-                    help="Start a local dashboard server for this single run.")
-    ap.add_argument("--dashboard-host", default="127.0.0.1",
-                    help="Dashboard bind host. Defaults to 127.0.0.1.")
-    ap.add_argument("--dashboard-port", type=int, default=0,
-                    help="Dashboard port. 0 asks the OS for a free port.")
-    ap.add_argument("--dashboard-language", choices=["en", "zh-cn"], default="en",
-                    help="Dashboard UI language. 'zh-cn' serves the Chinese "
-                         "variant (index.zh-cn.html); defaults to English.")
-    ap.add_argument("--verbose", action="store_true",
-                    help="Enable DEBUG-level logging for stdout and the run.log "
-                         "file. Defaults to INFO when not set.")
+    ap.add_argument(
+        "--dashboard",
+        action="store_true",
+        help="Start a local dashboard server for this single run.",
+    )
+    ap.add_argument(
+        "--dashboard-host",
+        default="127.0.0.1",
+        help="Dashboard bind host. Defaults to 127.0.0.1.",
+    )
+    ap.add_argument(
+        "--dashboard-port",
+        type=int,
+        default=0,
+        help="Dashboard port. 0 asks the OS for a free port.",
+    )
+    ap.add_argument(
+        "--dashboard-language",
+        choices=["en", "zh-cn"],
+        default="en",
+        help="Dashboard UI language. 'zh-cn' serves the Chinese "
+        "variant (index.zh-cn.html); defaults to English.",
+    )
+    ap.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Enable DEBUG-level logging for stdout and the run.log "
+        "file. Defaults to INFO when not set.",
+    )
     ap.add_argument(
         "--task-memory-snapshot",
         default=None,
@@ -143,8 +189,12 @@ def _build_argparser() -> argparse.ArgumentParser:
             "write_text_file is limited to this run's output_dir."
         ),
     )
-    ap.add_argument("--interactive", "-i", action="store_true",
-                    help="Interactive mode: opens an interactive cli session.")
+    ap.add_argument(
+        "--interactive",
+        "-i",
+        action="store_true",
+        help="Interactive mode: opens an interactive cli session.",
+    )
 
     return ap
 
@@ -171,7 +221,8 @@ def main() -> int:
         from zetta.dashboard.launcher import apply_to_args, defaults_from_args
 
         dashboard_server = DashboardServer(
-            host=args.dashboard_host, port=args.dashboard_port,
+            host=args.dashboard_host,
+            port=args.dashboard_port,
             language=args.dashboard_language,
         )
         dashboard_url = dashboard_server.start()
@@ -240,7 +291,10 @@ def main() -> int:
         logger.info("launcher config applied: %s", launch_config)
     logger.info("physical agent cmd: %s", shlex.join([sys.executable, *sys.argv]))
 
-    ensure_resources(env_name)
+    # MuJoCo assets are supplied explicitly and hash-pinned by the env plugin;
+    # they must never be replaced by an implicit HuggingFace resource sync.
+    if env_name != "mujoco":
+        ensure_resources(env_name)
 
     # --- dashboard state ---------------------------------------------------
     if dashboard_state is not None and dashboard_server is not None:
@@ -273,8 +327,8 @@ def main() -> int:
         variables=prompt_vars,
     )
     if memory_snapshot is not None:
-        system_prompt = system_prompt.rstrip() + "\n\n" + render_episode_memory(
-            memory_snapshot
+        system_prompt = (
+            system_prompt.rstrip() + "\n\n" + render_episode_memory(memory_snapshot)
         )
 
     input_queue: "queue.Queue[str | None] | None" = None
@@ -355,10 +409,12 @@ def main() -> int:
         json.dump(record, f, indent=2, default=str)
 
     logger.info("elapsed: %.1fs", elapsed)
-    logger.info("usage: in=%s out=%s tool_calls=%s",
-                 stats.get('total_input_tokens', '?'),
-                 stats.get('total_output_tokens', '?'),
-                 stats.get('tool_calls', '?'))
+    logger.info(
+        "usage: in=%s out=%s tool_calls=%s",
+        stats.get("total_input_tokens", "?"),
+        stats.get("total_output_tokens", "?"),
+        stats.get("tool_calls", "?"),
+    )
     logger.info("transcript: %s", transcript_path)
     if agent_error:
         logger.error("error: %s", agent_error)

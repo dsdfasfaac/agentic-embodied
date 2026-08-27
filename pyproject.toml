@@ -64,6 +64,20 @@ ray = [
     "ray",
     "omegaconf>=2.3,<3",
 ]
+mujoco = [
+    "gymnasium==1.1.1",
+    "mujoco==3.3.1",
+]
+mujoco-rebot = [
+    "gymnasium==1.1.1",
+    "mujoco==3.3.1",
+    "numpy==1.26.4",
+    "PyYAML>=6,<7",
+    "opencv-python-headless==4.10.0.84",
+    "pillow>=10",
+    "imageio-ffmpeg>=0.5,<1",
+    "omegaconf>=2.3,<3",
+]
 openpi = [
     "rlinf-openpi",
 ]
@@ -91,6 +105,7 @@ prerelease = "allow"
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
 markers = [
+    "mujoco: requires the optional Gymnasium MuJoCo runtime",
     "remote: requires a configured GPU host (real env / VLA backends)",
     "ray: needs a local Ray cluster (rollout runtime data plane)",
     "ray_launch: launches Zetta worker groups in separate Ray processes (slow)",

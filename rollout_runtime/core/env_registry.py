@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """The env family registry.
 
 ``EnvFamilyAdapter`` absorbs family differences (reset signature,
@@ -41,6 +42,7 @@ __all__ = [
     "ENV_FAMILY_REGISTRY",
     "LIBERO_ENV_FAMILY",
     "MANISKILL_ENV_FAMILY",
+    "MUJOCO_ENV_FAMILY",
     "ROBOCASA_ENV_FAMILY",
     "ROBOCASA_EXTENSIONS",
     "EnvFamilyAdapter",
@@ -59,6 +61,9 @@ LIBERO_ENV_FAMILY = "libero"
 
 MANISKILL_ENV_FAMILY = "maniskill"
 """The maniskill family name (GPU-batched)."""
+
+MUJOCO_ENV_FAMILY = "mujoco"
+"""The generic Gymnasium MuJoCo family name."""
 
 ROBOCASA_ENV_FAMILY = "robocasa"
 """The robocasa family name (a second family, CPU subprocess)."""
@@ -168,6 +173,19 @@ ENV_FAMILY_BEHAVIORS: dict[str, EnvFamilyBehavior] = {
         # lanes inside a single sapien scene.
         core_forms=frozenset({PER_SLOT_FORM, LOCKSTEP_VECTOR_FORM}),
         obs_extraction="ManiskillEnv._wrap_obs -> EnvOutput.prepare_observations",
+    ),
+    MUJOCO_ENV_FAMILY: EnvFamilyBehavior(
+        env_family=MUJOCO_ENV_FAMILY,
+        env_type="mujoco_gymnasium",
+        reset_signature="seed_options",
+        chunk_obs_layout="per_step",
+        action_layout="numpy_env_chunk_dim",
+        device_kind="cpu_subproc",
+        # MuJoCo physics is CPU-capable. RGB/EGL specs request an
+        # accelerator through EnvSpecMsg.resource_hints instead of making
+        # every state-only task consume a GPU.
+        core_forms=frozenset({PER_SLOT_FORM}),
+        obs_extraction="Gymnasium observation/render -> Observation",
     ),
     ROBOCASA_ENV_FAMILY: EnvFamilyBehavior(
         env_family=ROBOCASA_ENV_FAMILY,
@@ -413,7 +431,7 @@ def get_env_family(env_family: str) -> EnvFamilyAdapter:
         message = (
             f"env family {env_family!r} is declared in ENV_FAMILY_BEHAVIORS but no "
             "adapter is registered in this build (this build ships libero / "
-            "maniskill / robocasa; robotwin stays declaration-only because the "
+            "maniskill / mujoco / robocasa; robotwin stays declaration-only because the "
             "`robotwin` package is absent from the validated runtime images)"
             if declared
             else f"unknown env family: {env_family!r}"
@@ -469,6 +487,15 @@ def validate_env_spec(
             make_error(
                 ErrorCode.INVALID_ARGUMENT,
                 f"pool_size must be >= 1, got {env_spec.pool_size}",
+            )
+        )
+    accelerator_hint = env_spec.resource_hints.get("accelerator")
+    if accelerator_hint is not None and not isinstance(accelerator_hint, bool):
+        raise RuntimeApiError(
+            make_error(
+                ErrorCode.INVALID_ARGUMENT,
+                "resource_hints['accelerator'] must be a boolean when provided",
+                accelerator=accelerator_hint,
             )
         )
     if capabilities is not None:

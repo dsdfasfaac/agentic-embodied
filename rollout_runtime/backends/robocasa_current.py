@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """The robocasa family's ``EnvExecutionCore``.
 
 **Does not reimplement RoboCasaSession**: ``robots.robocasa.session_core.RoboCasaSession``
@@ -476,9 +477,6 @@ class RobocasaCurrentCore:
             RuntimeApiError: ``num_envs`` is invalid, or ``env_config`` is
                 missing ``task``/contains an unknown key
                 (``INVALID_ARGUMENT``).
-            robots.robocasa.session_process.RemoteSessionCrashed:
-                When ``process_isolation=True``, a subprocess failed to start
-                or construct.
         """
         if num_envs < 1:
             raise RuntimeApiError(
@@ -489,7 +487,9 @@ class RobocasaCurrentCore:
         self.config = RobocasaCurrentConfig.from_mapping(env_spec.env_config)
         self.env_spec = env_spec
         self.seed_offset = seed_offset
-        self._slots = [_RobocasaSlot(session=self._make_session()) for _ in range(num_envs)]
+        self._slots = [
+            _RobocasaSlot(session=self._make_session()) for _ in range(num_envs)
+        ]
         del total_num_processes
 
     def _make_session(self) -> Any:
@@ -511,10 +511,6 @@ class RobocasaCurrentCore:
             same public signature for the rest of ``RobocasaCurrentCore``'s
             methods (see the module docstring).
 
-        Raises:
-            robots.robocasa.session_process.RemoteSessionCrashed:
-                When ``process_isolation=True``, the subprocess failed to
-                start or construct.
         """
         if self.config.process_isolation:
             from robots.robocasa.session_process import spawn_robocasa_subprocess
@@ -589,13 +585,6 @@ class RobocasaCurrentCore:
         Raises:
             RuntimeApiError: The family failed to construct
                 (``ENV_FAILURE``).
-            robots.robocasa.session_process.RemoteSessionCrashed:
-                When ``process_isolation=True``, the subprocess failed to
-                start or construct (not wrapped as ``RuntimeApiError``,
-                consistent with ``build()``/``spawn_robocasa_subprocess``'s
-                existing exception contract; the caller
-                ``EnvPool._cold_create_slot`` re-raises any exception other
-                than ``RuntimeApiError``/``MemoryError`` as-is).
         """
         del seed_offset  # See the docstring above: this family's reset does no slot offsetting, so the hint is unused.
         with self._slot_mutation_lock:
@@ -672,9 +661,6 @@ class RobocasaCurrentCore:
         Returns:
             The initial observations, in the same order as ``slots``.
 
-        Raises:
-            RuntimeApiError: ``options`` contains an unknown key
-                (``INVALID_ARGUMENT``).
         """
         options = _EpisodeOptions.from_mapping(reset_spec.options)
         enable_task_program = (
@@ -923,7 +909,9 @@ class RobocasaCurrentCore:
             extra_view = self._encode_camera(raw, _CAMERA_SLOTS[1])
             attestation = session.snapshot(include_images=False)
             step_index = session.step_index
-            description = raw.get("task_descriptions") if isinstance(raw, dict) else None
+            description = (
+                raw.get("task_descriptions") if isinstance(raw, dict) else None
+            )
         state_payload = attestation["observation"]["state"]
         # ``_json_scalar`` (session_core.py) converts 1D numpy vectors into
         # python lists; most RoboCasa state fields (e.g.
@@ -1103,6 +1091,14 @@ class RobocasaCurrentCore:
             terminations=terminations,
             truncations=truncations,
             requested_horizon=int(block.shape[0]),
+            success=bool(
+                result.get(
+                    "authoritative_success",
+                    result.get(
+                        "official_success", result.get("success_latched", False)
+                    ),
+                )
+            ),
             per_step_info=per_step_info,
             include_step_observations=False,
             info={

@@ -1,3 +1,5 @@
+# Copyright (c) 2026 Zetta Contributors
+
 from __future__ import annotations
 
 import unittest
@@ -77,8 +79,10 @@ class GeneralistIntegrationTests(unittest.TestCase):
             base_url="https://example.invalid/v1",
             reasoning_effort="medium",
             reasoning_summary="detailed",
+            tool_timeout_s=900,
         )
         self.assertIn('model_reasoning_summary="detailed"', overrides)
+        self.assertIn("mcp_servers.zetta.tool_timeout_sec=900.0", overrides)
 
     def test_codex_recorder_reads_nested_total_usage(self):
         recorder = _Recorder(max_turns=2)
@@ -126,7 +130,11 @@ class GeneralistIntegrationTests(unittest.TestCase):
         toolkit = Toolkit()
         toolkit.add_tool(
             "proposal",
-            {"name": "proposal", "description": "test", "input_schema": {"type": "object"}},
+            {
+                "name": "proposal",
+                "description": "test",
+                "input_schema": {"type": "object"},
+            },
             lambda: {"ok": True},
             contract=ToolContract(
                 capabilities=("grasp",), proposal_only=True, risk_level="read_only"
@@ -157,18 +165,16 @@ class GeneralistIntegrationTests(unittest.TestCase):
 
     def test_vla_prompt_override_is_restored_after_backend_error(self):
         env = _FakeEnv()
-        primitives = LiberoPrimitives(
-            env=env, model=_FailingModel(), sam3_client=None
-        )
+        primitives = LiberoPrimitives(env=env, model=_FailingModel(), sam3_client=None)
         primitives.reset()
         with self.assertRaisesRegex(RuntimeError, "backend unavailable"):
             primitives.vla_execute("temporary subtask", max_chunks=1)
-        self.assertEqual(
-            primitives._last_obs["task_descriptions"], "original task"
-        )
+        self.assertEqual(primitives._last_obs["task_descriptions"], "original task")
 
     def test_pi0_pick_rejects_an_unbounded_chunk_budget(self):
-        primitives = LiberoPrimitives(env=_FakeEnv(), model=_FakeModel(), sam3_client=None)
+        primitives = LiberoPrimitives(
+            env=_FakeEnv(), model=_FakeModel(), sam3_client=None
+        )
         primitives.reset()
         with self.assertRaisesRegex(ValueError, r"\[1, 8\]"):
             primitives.pi0_pick("pick up the bottle", max_chunks=9)

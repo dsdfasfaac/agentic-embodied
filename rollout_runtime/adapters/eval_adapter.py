@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Evaluation Adapter.
 
 ``run_episodes(tasks, seeds, policy)``: N tasks x M seeds -> batch-create
@@ -24,13 +25,12 @@ Three deliberate boundaries:
    ``env_spec.pool_size`` to ``ceil(total_concurrency / env_ranks)``
    yourself — otherwise the number of environment instances will multiply
    by the rank count.
-3. **Success is judged solely by the environment's termination signal,
-   valid and invalid episodes are booked separately** (a hard requirement
-   from the README). ``success`` = ``EpisodeResult.terminated``;
-   ``max_steps`` / ``deadline`` / truncation are all **valid failures**
-   (counted in the denominator); infrastructure faults (``Err`` /
-   ``ENV_FAILURE`` / ``WORKER_LOST``) are **invalid episodes**, counted in
-   neither the numerator nor the denominator, and listed separately under
+3. **Success is an explicit environment result, and valid / invalid
+   episodes are booked separately.** ``EpisodeResult.success=None`` means a
+   return-only task with no binary success metric; it remains a valid
+   episode but is excluded from the binary success-rate denominator.
+   Infrastructure faults (``Err`` / ``ENV_FAILURE`` / ``WORKER_LOST``) are
+   invalid episodes, counted in neither metric and listed separately under
    ``invalid``.
 
 This is the second piece of evidence (the first being the Gym Adapter) that
@@ -72,7 +72,7 @@ _INVALID_EPISODE_NOTE = (
     "WORKER_LOST, as well as manifest-level INVALID_ARGUMENT / "
     "UNSUPPORTED_ENV_SPEC / QUOTA_EXCEEDED) is booked as an **invalid "
     "episode**: it means this cell did not run to completion, and counts "
-    "toward neither the numerator nor the denominator of the success rate. "
+    "toward neither the numerator nor the binary-scored denominator. "
     "The original error code is preserved via EpisodeOutcome.error, and the "
     "report counts it per code, so the two categories of cause remain "
     "distinguishable."
@@ -132,7 +132,8 @@ class EpisodeOutcome:
     Attributes:
         task: This cell's task and seed.
         valid: Whether this is a valid episode (counted in the success rate denominator).
-        success: Whether it succeeded; determined **solely** by the environment's termination signal.
+        success: Whether it succeeded; ``None`` for return-only tasks with
+            no binary success metric.
         stop_reason: The termination reason reported by ``run_episode``.
         num_policy_steps: The number of ``policy_step`` calls executed.
         executed_horizon: The number of env steps actually executed.
@@ -144,7 +145,7 @@ class EpisodeOutcome:
 
     task: EvaluationTask
     valid: bool
-    success: bool = False
+    success: bool | None = None
     stop_reason: str = ""
     num_policy_steps: int = 0
     executed_horizon: int = 0
@@ -161,9 +162,11 @@ class EvaluationReport:
     Attributes:
         outcomes: Per-cell results, in the same order as the input ``tasks``.
         attempted: The number of cells attempted.
-        valid: The number of valid episodes (the success rate denominator).
+        valid: The number of valid episodes, including return-only tasks.
         invalid: The number of invalid episodes (infrastructure / manifest
             errors, **not** counted in the denominator).
+        binary_scored: Number of valid episodes that expose a binary success
+            value; this is the success-rate denominator.
         successes: The number of successes.
         wall_clock_seconds: Wall-clock time for the whole batch.
         error_counts: Error code -> count.
@@ -174,19 +177,24 @@ class EvaluationReport:
     attempted: int
     valid: int
     invalid: int
+    binary_scored: int
     successes: int
     wall_clock_seconds: float
     error_counts: dict[str, int]
     sink_id: str | None = None
 
     @property
-    def success_rate(self) -> float:
-        """The success rate (the denominator is the **valid** episode count).
+    def success_rate(self) -> float | None:
+        """The binary success rate.
 
         Returns:
-            The success rate; ``0.0`` when there are no valid episodes.
+            ``successes / binary_scored``; ``None`` when valid episodes
+            exist but none defines a binary success metric. ``0.0`` is kept
+            for the historical all-invalid case.
         """
-        return self.successes / self.valid if self.valid else 0.0
+        if self.binary_scored:
+            return self.successes / self.binary_scored
+        return 0.0 if not self.valid else None
 
     @property
     def episodes_per_hour(self) -> float:
@@ -210,19 +218,23 @@ class EvaluationReport:
             "valid": self.valid,
             "invalid": self.invalid,
             "successes": self.successes,
-            "success_rate": round(self.success_rate, 6),
+            "binary_scored": self.binary_scored,
+            "success_rate": (
+                round(self.success_rate, 6) if self.success_rate is not None else None
+            ),
             "wall_clock_seconds": round(self.wall_clock_seconds, 3),
             "episodes_per_hour": round(self.episodes_per_hour, 3),
             "error_counts": dict(sorted(self.error_counts.items())),
             "sink_id": self.sink_id,
             "definitions": {
                 "success": (
-                    "Determined solely by the environment's termination signal "
-                    "(EpisodeResult.terminated); running out max_steps, exceeding "
-                    "the deadline, or being truncated are all valid failures"
+                    "Taken from EpisodeResult.success; None means a return-only "
+                    "task and is excluded from the binary success-rate denominator"
                 ),
                 "invalid_episode": _INVALID_EPISODE_NOTE,
-                "success_rate_denominator": "valid (the valid episode count), not attempted",
+                "success_rate_denominator": (
+                    "binary_scored (valid episodes with success != None), not attempted"
+                ),
             },
         }
 
@@ -327,12 +339,16 @@ class EvaluationAdapter:
                 key = outcome.error.code.name
                 error_counts[key] = error_counts.get(key, 0) + 1
         valid = sum(1 for outcome in outcomes if outcome.valid)
+        binary_scored = sum(
+            1 for outcome in outcomes if outcome.valid and outcome.success is not None
+        )
         return EvaluationReport(
             outcomes=tuple(outcomes),
             attempted=len(outcomes),
             valid=valid,
             invalid=len(outcomes) - valid,
-            successes=sum(1 for outcome in outcomes if outcome.success),
+            binary_scored=binary_scored,
+            successes=sum(1 for outcome in outcomes if outcome.success is True),
             wall_clock_seconds=elapsed,
             error_counts=error_counts,
             sink_id=self._sink_id,
@@ -484,7 +500,7 @@ class EvaluationAdapter:
         return EpisodeOutcome(
             task=task,
             valid=False,
-            success=False,
+            success=None,
             stop_reason=f"error:{error.code.name}",
             wall_clock_seconds=time.perf_counter() - started,
             error=error,
@@ -495,9 +511,9 @@ class EvaluationAdapter:
     ) -> EpisodeOutcome:
         """Book a completed episode as a **valid episode**.
 
-        ``success`` looks **solely** at ``EpisodeResult.terminated`` (the
-        environment's termination signal). Running out ``max_steps``,
-        exceeding the deadline, or being truncated are all valid failures.
+        ``success`` comes from ``EpisodeResult.success``. ``None`` is kept
+        intact for a return-only environment, so generic evaluation never
+        guesses task success from a termination condition.
 
         Args:
             task: This cell.
@@ -510,7 +526,7 @@ class EvaluationAdapter:
         return EpisodeOutcome(
             task=task,
             valid=True,
-            success=bool(result.terminated),
+            success=result.success,
             stop_reason=result.stop_reason,
             num_policy_steps=int(result.num_policy_steps),
             executed_horizon=int(result.executed_horizon),

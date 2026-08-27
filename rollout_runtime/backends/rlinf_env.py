@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """The libero family's ``EnvExecutionCore``.
 
 **Does not reimplement rlinf's env**: ``rlinf.envs.libero.libero_env.LiberoEnv``
@@ -1183,10 +1184,6 @@ class LiberoEnvCore:
         Returns:
             Normalized results, in the same order as ``slots``.
 
-        Raises:
-            RuntimeApiError: A lane in the pool has never been reset
-                (``SESSION_NOT_READY``), or the action shape / chunk length
-                is invalid (``INVALID_ARGUMENT``).
         """
         from zetta.compat.actions import prepare_actions
 
@@ -1532,6 +1529,7 @@ class LiberoEnvCore:
             terminations=terminations,
             truncations=truncations,
             requested_horizon=int(block.shape[0]),
+            success=any(bool(item) for item in terminations),
             per_step_info=per_step_info,
             include_step_observations=self.config.return_all_frames,
             info=info,

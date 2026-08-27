@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Env and policy backends, plus the sole resolution point for "select a backend by config."
 
 ``fake`` is pure stdlib + numpy; ``rlinf_env`` / ``rlinf_policy`` and
@@ -40,7 +41,7 @@ __all__ = [
     "register_env_family_for",
 ]
 
-ENV_BACKENDS = ("fake", "libero", "maniskill", "robocasa")
+ENV_BACKENDS = ("fake", "libero", "maniskill", "mujoco", "robocasa")
 """Env families that actually have an adapter in this build.
 
 ``robotwin`` **has a declaration in ``ENV_FAMILY_BEHAVIORS`` but no
@@ -54,9 +55,8 @@ image, so it remains "declared but not implemented," and
 ``RoboCasaSession``) will be added later.
 """
 
-POLICY_BACKENDS = ("fake", "zetta_openpi", "groot")
-"""Optional policy backends: ``fake``, ``zetta_openpi`` (openpi / pi0.5), and
-``groot`` (the current branch's GR00T)."""
+POLICY_BACKENDS = ("fake", "zetta_openpi", "groot", "rebot_g1d_skill")
+"""Optional policy backends, including the hash-pinned reBot expert skill."""
 
 
 def register_env_family_for(env_family: str) -> Any:
@@ -86,6 +86,10 @@ def register_env_family_for(env_family: str) -> Any:
         )
 
         return register_maniskill_env_family(replace=True)
+    if env_family == "mujoco":
+        from rollout_runtime.backends.mujoco_env import register_mujoco_env_family
+
+        return register_mujoco_env_family(replace=True)
     if env_family == "robocasa":
         from rollout_runtime.backends.robocasa_current import (
             register_robocasa_current_env_family,
@@ -178,6 +182,21 @@ def build_policy_core(
         if model_version:
             merged.setdefault("model_version", model_version)
         return GrootPolicyCore(GrootPolicyConfig.from_mapping(merged))
+    if backend == "rebot_g1d_skill":
+        from rollout_runtime.backends.rebot_g1d_policy import (
+            RebotG1DSkillPolicyConfig,
+            RebotG1DSkillPolicyCore,
+        )
+
+        merged = dict(policy_config or {})
+        merged.setdefault("device", device)
+        merged.setdefault("dtype", dtype)
+        merged.setdefault("policy_family", policy_family)
+        merged.setdefault("action_dim", action_dim)
+        merged.setdefault("actions_per_chunk", actions_per_chunk)
+        if model_version:
+            merged.setdefault("model_version", model_version)
+        return RebotG1DSkillPolicyCore(RebotG1DSkillPolicyConfig.from_mapping(merged))
     raise ValueError(
         f"unknown policy backend {backend!r}; expected one of {list(POLICY_BACKENDS)}"
     )

@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """``RuntimeEnvWorker``.
 
 The M1 deliverable is "complete method signatures + a ``handle_command`` dispatch
@@ -135,6 +136,7 @@ class SessionSlot:
         last_observation: Cached observation; ``observe`` only reads it.
         terminated: Termination flag.
         truncated: Truncation flag.
+        success: Latched task-success signal; ``None`` for return-only tasks.
         lease_expiration: Lease expiration time.
         active_op: The mutating operation currently in progress.
         last_operation_seq: The highest executed operation sequence number, used to
@@ -158,6 +160,7 @@ class SessionSlot:
     last_observation: Observation | None = None
     terminated: bool = False
     truncated: bool = False
+    success: bool | None = None
     lease_expiration: float = 0.0
     active_op: RequestId | None = None
     last_operation_seq: int = 0
@@ -363,10 +366,6 @@ class EnvPool:
         Returns:
             Slot index.
 
-        Raises:
-            RuntimeApiError: ``QUOTA_EXCEEDED`` if the pool is full and cannot grow;
-                ``RESOURCE_EXHAUSTED`` if resources are insufficient for cold
-                creation.
         """
         async with self._state_lock:
             if self.warm_free_slots:
@@ -486,8 +485,13 @@ class EnvPool:
                 raise
             async with self._state_lock:
                 self._pending_cold_creates = max(0, self._pending_cold_creates - 1)
-                self._reserved_slot_count = max(self._reserved_slot_count, new_index + 1)
-                if new_index not in self.active_slots and new_index not in self.warm_free_slots:
+                self._reserved_slot_count = max(
+                    self._reserved_slot_count, new_index + 1
+                )
+                if (
+                    new_index not in self.active_slots
+                    and new_index not in self.warm_free_slots
+                ):
                     self.warm_free_slots.append(new_index)
                     self.warm_free_slots.sort()
                     added += 1
@@ -973,12 +977,6 @@ class SlotGroupCoalescer:
         Returns:
             This slot's ``ChunkOutcome``.
 
-        Raises:
-            BaseException: If the whole group's execution fails (or the leader is
-                cancelled), the exception is propagated as-is to **every** waiter
-                in the group (already normalized by ``_call_core``); the leader
-                itself also receives the same exception from its own future, so
-                no future is left dangling.
         """
         if not self.enabled or expected <= 1:
             outcomes = await execute([slot_index], [block])
@@ -1975,8 +1973,6 @@ class RuntimeEnvWorker:
         Returns:
             The binding identifier.
 
-        Raises:
-            RuntimeApiError: The EnvPool could not allocate a slot.
         """
         existing = self.sessions.get(session_id)
         if existing is not None:
@@ -2120,6 +2116,7 @@ class RuntimeEnvWorker:
         slot.step_index = 0
         slot.terminated = False
         slot.truncated = False
+        slot.success = None
         slot.last_observation = self._stamp(observations[0], slot)
         # ``masked_steps_seen`` is deliberately **not** reset to zero: the
         # core-side ``masked_steps`` also accumulates across episodes (see
@@ -2245,6 +2242,9 @@ class RuntimeEnvWorker:
             # a True back to False.
             slot.terminated = slot.terminated or bool(status.terminated)
             slot.truncated = slot.truncated or bool(status.truncated)
+            status_success = getattr(status, "success", None)
+            if status_success is not None:
+                slot.success = bool(slot.success) or bool(status_success)
             masked = int(status.masked_steps)
             if masked == slot.masked_steps_seen:
                 continue
@@ -2746,6 +2746,8 @@ class RuntimeEnvWorker:
         # through this path.
         slot.terminated = slot.terminated or bool(outcome.terminated)
         slot.truncated = slot.truncated or bool(outcome.truncated)
+        if outcome.success is not None:
+            slot.success = bool(slot.success) or bool(outcome.success)
         if outcome.observation is not None:
             slot.last_observation = self._stamp(outcome.observation, slot)
             slot.step_index = outcome.observation.step_index
@@ -2759,6 +2761,7 @@ class RuntimeEnvWorker:
             reward=float(outcome.reward),
             terminated=slot.terminated,
             truncated=slot.truncated,
+            success=slot.success,
             info={
                 **outcome.info,
                 "per_step_obs_available": outcome.per_step_obs_available,
@@ -2862,6 +2865,7 @@ class RuntimeEnvWorker:
             total_reward=total_reward,
             terminated=slot.terminated,
             truncated=slot.truncated,
+            success=slot.success,
             stop_reason=stop_reason,
             sink_id=episode_request.sink_id,
             last_observation=slot.last_observation,
@@ -2942,6 +2946,7 @@ class RuntimeEnvWorker:
                 "reward": step_result.reward,
                 "terminated": step_result.terminated,
                 "truncated": step_result.truncated,
+                "success": step_result.success,
                 "executed_horizon": step_result.executed_horizon,
             },
         )

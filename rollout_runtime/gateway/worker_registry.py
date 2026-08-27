@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """EnvWorker capability, capacity, and heartbeat.
 
 Invariant: on heartbeat timeout, the rank is immediately marked unhealthy,
@@ -230,7 +231,10 @@ class EnvWorkerRegistry:
         capability = entry.info.capabilities.get(env_spec.env_family)
         if capability is None:
             return False
-        if capability.needs_accelerator and not entry.info.has_accelerator:
+        needs_accelerator = capability.needs_accelerator or bool(
+            env_spec.resource_hints.get("accelerator", False)
+        )
+        if needs_accelerator and not entry.info.has_accelerator:
             return False
         node_group = env_spec.resource_hints.get("node_group")
         if node_group and entry.info.node_id and node_group != entry.info.node_id:

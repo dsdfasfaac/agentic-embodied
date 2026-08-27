@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """``rollout-runtime`` command-line entry point.
 
 Three subcommands:
@@ -254,6 +255,7 @@ async def _run_smoke(args: argparse.Namespace) -> int:
         env_spec = EnvSpecMsg(
             env_family=config.env_family,
             env_config=dict(config.env_config),
+            resource_hints=dict(config.env_resource_hints),
             # Design decision D6: the pool is pre-allocated, and one slot
             # serves only one session. Running N concurrent sessions
             # therefore requires requesting N slots in the spec, otherwise
@@ -441,6 +443,7 @@ async def _run_bench(args: argparse.Namespace) -> int:
             env_spec = EnvSpecMsg(
                 env_family=base.env_family,
                 env_config=dict(base.env_config),
+                resource_hints=dict(base.env_resource_hints),
                 pool_size=per_rank,
             )
             created = await gateway.create_sessions(
@@ -550,5 +553,7 @@ def _build_bench_runtime(base: Any, sessions: int, launch: str) -> Any:
     return build_local_components(config)
 
 
-if __name__ == "__main__":  # pragma: no cover - convenience for `python -m rollout_runtime.cli`
+if (
+    __name__ == "__main__"
+):  # pragma: no cover - convenience for `python -m rollout_runtime.cli`
     raise SystemExit(main())

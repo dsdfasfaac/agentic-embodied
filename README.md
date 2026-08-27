@@ -44,7 +44,7 @@ Runtime role boundaries:
 | Path | Purpose |
 |---|---|
 | `zetta/evolution/` | Immutable manifests, queues, clustering, stages, gates, promotion, and supervision |
-| `rollout_runtime/` | The Rollout Runtime: Gateway, EnvWorker/RolloutWorker groups, and backends for LIBERO/RoboCasa/ManiSkill |
+| `rollout_runtime/` | The Rollout Runtime: Gateway, EnvWorker/RolloutWorker groups, and backends for LIBERO/RoboCasa/ManiSkill/MuJoCo |
 | `robots/libero/`, `robots/robocasa/` | Env clients, Role1/Critic/Recovery, tools, and rendering contracts |
 | `scripts/evolution/` | Campaign preparation, workers, capacity probes, and plots |
 | `scripts/deployment/` | Service start/stop, VLA env install, and Docker build helpers |
@@ -118,6 +118,21 @@ Prebuilt Docker images, built from `scripts/deployment/Dockerfile.vla-env`, are 
 
 - **LIBERO-Pro** image: preconfigured with the LIBERO-Pro simulator stack and Pi0.5 dependencies. [百度网盘](https://pan.baidu.com/s/1HW7AstjCLE_BTScRFOQT2g?pwd=qv7c)
 - **RoboCasa** image: preconfigured with the RoboCasa/robosuite/Isaac-GR00T stack. [百度网盘](https://pan.baidu.com/s/1Zyg2i_3tMp249PPLK6_JAw?pwd=ztcp)
+
+### Generic MuJoCo runtime
+
+Gymnasium MuJoCo is an independent optional track and must use its own venv:
+
+```bash
+python -m venv /path/to/mujoco-venv
+/path/to/mujoco-venv/bin/python -m pip install -e ".[test,ray,mujoco]"
+/path/to/mujoco-venv/bin/python -m pip check
+```
+
+The first-class `env_family: mujoco` backend supports state and headless EGL RGB
+observations, continuous action chunks, LocalRuntime, and Ray EnvWorkers. See the
+[MuJoCo integration guide](docs/integration/mujoco.md) for its configuration,
+process-isolation model, success semantics, and staged validation commands.
 
 ## Runtime Rollout System
 

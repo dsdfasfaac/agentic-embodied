@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """ManiSkill family adapter.
 
 **Does not reimplement rlinf's env**: ``rlinf.envs.maniskill.maniskill_env.ManiskillEnv``
@@ -605,9 +606,6 @@ class ManiskillEnvCore:
             method: Extension method name.
             args: Method arguments.
 
-        Returns:
-            Never returns.
-
         Raises:
             RuntimeApiError: Always ``UNSUPPORTED_EXTENSION`` — maniskill's
                 ``extensions`` in the declaration table is an empty set, so this
@@ -707,6 +705,7 @@ class ManiskillEnvCore:
             A float32 tensor on the device.
         """
         import torch
+
         from zetta.compat.actions import prepare_actions
 
         prepared = prepare_actions(
@@ -822,6 +821,9 @@ class ManiskillEnvCore:
             terminations=terminations,
             truncations=truncations,
             requested_horizon=int(block.shape[0]),
+            # Backward-compatible with the pre-success-field evaluation
+            # contract, which treated this family's termination as success.
+            success=any(bool(item) for item in terminations),
             per_step_info=per_step_info,
             include_step_observations=self.config.return_all_frames,
             info={

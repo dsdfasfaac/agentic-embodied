@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """External-facing protocol messages of the Runtime API.
 
 All are ``@dataclass(frozen=True, kw_only=True)`` and depend only on stdlib.
@@ -396,6 +397,9 @@ class StepResult:
         reward: The cumulative reward for the chunk.
         terminated: The termination flag.
         truncated: The truncation flag.
+        success: The task-success signal. ``None`` means this environment
+            does not define a binary success metric; it must not be inferred
+            from ``terminated`` by generic callers.
         info: Family-private information.
         side_effect_applied: Whether the environment side effect has
             already occurred.
@@ -414,6 +418,7 @@ class StepResult:
     reward: float = 0.0
     terminated: bool = False
     truncated: bool = False
+    success: bool | None = None
     info: dict[str, Any] = dataclasses.field(default_factory=dict)
     side_effect_applied: bool = False
     executed_horizon: int = 0
@@ -481,6 +486,8 @@ class EpisodeResult:
         total_reward: The cumulative reward.
         terminated: The termination flag.
         truncated: The truncation flag.
+        success: The latched task-success signal. ``None`` means the task
+            exposes return only and has no binary success metric.
         stop_reason: ``"terminated"`` / ``"truncated"`` / ``"max_steps"`` /
             ``"deadline"`` / ``"cancelled"`` / ``"error"``.
         sink_id: The transition sink identifier.
@@ -497,6 +504,7 @@ class EpisodeResult:
     total_reward: float = 0.0
     terminated: bool = False
     truncated: bool = False
+    success: bool | None = None
     stop_reason: str = ""
     sink_id: str | None = None
     last_observation: Observation | None = None

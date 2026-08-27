@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Batch evaluation semantics for ``adapters/eval_adapter.py``.
 
 Assertion focus:
@@ -8,8 +9,8 @@ Assertion focus:
   slots can be reused by later batches (the pool never grows);
 - ``pool_size`` is automatically raised to the concurrency level, otherwise
   the ``pool_size + 1``-th session gets ``QUOTA_EXCEEDED``;
-- The success rate is judged only by the environment's termination signal,
-  with **valid / invalid episodes tallied separately**;
+- Binary success comes only from the environment's explicit success signal,
+  with return-only and invalid episodes tallied separately;
 - The transition genuinely reaches the sink.
 """
 
@@ -18,7 +19,9 @@ from __future__ import annotations
 from typing import Any
 
 from rollout_runtime.adapters.eval_adapter import (
+    EpisodeOutcome,
     EvaluationAdapter,
+    EvaluationReport,
     EvaluationTask,
 )
 from rollout_runtime.api.messages import EnvSpecMsg
@@ -84,8 +87,8 @@ def test_pool_size_is_raised_to_the_concurrency() -> None:
 async def test_run_episodes_reports_success_only_from_the_env_signal(
     transport_kind: str,
 ) -> None:
-    """All 8 cells run to completion: the success rate is judged only by
-    the environment's termination signal, and the transition reaches the sink."""
+    """All 8 cells use the fake backend's explicit compatibility success
+    signal, and each transition reaches the sink."""
     config = local_runtime_config(
         transport_kind, env_worker={"max_sessions_per_rank": CONCURRENCY}
     )
@@ -103,6 +106,7 @@ async def test_run_episodes_reports_success_only_from_the_env_signal(
         assert report.attempted == 8
         assert report.invalid == 0, report.error_counts
         assert report.valid == 8
+        assert report.binary_scored == 8
         # The fake env terminates after episode_length=4 steps, and the
         # fake policy gives 4 steps each time
         # (``rollout_worker.actions_per_chunk``), so a single policy_step
@@ -124,6 +128,7 @@ async def test_run_episodes_reports_success_only_from_the_env_signal(
         assert len(records) == 8, len(records)
         summary = report.summary()
         assert summary["success_rate"] == 1.0
+        assert summary["binary_scored"] == 8
         assert "invalid_episode" in summary["definitions"]
     finally:
         await runtime.gateway.stop()
@@ -131,8 +136,7 @@ async def test_run_episodes_reports_success_only_from_the_env_signal(
 
 
 async def test_sessions_are_closed_after_every_batch(transport_kind: str) -> None:
-    """"Closed as soon as it finishes": after 3 batches complete, no
-    session remains on the worker, and all pool slots are returned."""
+    """Verify each batch closes its sessions and returns all pool slots."""
     config = local_runtime_config(
         transport_kind, env_worker={"max_sessions_per_rank": 2}
     )
@@ -180,8 +184,9 @@ async def test_infrastructure_failures_are_invalid_not_zero_scores(
         assert report.attempted == 2
         assert report.valid == 0
         assert report.invalid == 2
+        assert report.binary_scored == 0
         assert report.successes == 0
-        # The denominator is valid, so the success rate is not the kind of
+        # There is no binary-scored denominator, so this is not the kind of
         # "0/2" accounting that counts a fault as a failure.
         assert report.success_rate == 0.0
         assert report.error_counts == {"ENV_FAILURE": 2}
@@ -214,6 +219,7 @@ async def test_max_steps_stop_is_a_valid_failure(transport_kind: str) -> None:
         report = await adapter.run_episodes(tasks(2))
         assert report.valid == 2
         assert report.invalid == 0
+        assert report.binary_scored == 2
         assert report.successes == 0
         assert report.success_rate == 0.0
         for outcome in report.outcomes:
@@ -224,6 +230,30 @@ async def test_max_steps_stop_is_a_valid_failure(transport_kind: str) -> None:
     finally:
         await runtime.gateway.stop()
         await runtime.aclose()
+
+
+def test_return_only_episodes_have_no_binary_success_rate() -> None:
+    """Valid return-only episodes are excluded from binary scoring."""
+    task = EvaluationTask(task_id=0, seed=7)
+    report = EvaluationReport(
+        outcomes=(
+            EpisodeOutcome(
+                task=task,
+                valid=True,
+                success=None,
+                total_reward=12.5,
+            ),
+        ),
+        attempted=1,
+        valid=1,
+        invalid=0,
+        binary_scored=0,
+        successes=0,
+        wall_clock_seconds=1.0,
+        error_counts={},
+    )
+    assert report.success_rate is None
+    assert report.summary()["success_rate"] is None
 
 
 async def test_eval_adapter_drives_a_lockstep_pool(transport_kind: str) -> None:

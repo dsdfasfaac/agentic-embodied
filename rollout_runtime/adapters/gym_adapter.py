@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Zetta Contributors
 """Gym Adapter.
 
 ``RuntimeGymEnv`` is the Runtime's first client Adapter: a thin wrapper
@@ -195,6 +196,7 @@ class RuntimeGymEnv:
                 **result.info,
                 "executed_horizon": result.executed_horizon,
                 "episode_id": result.episode_id,
+                "success": result.success,
             },
         )
 

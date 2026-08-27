@@ -1,0 +1,97 @@
+# Single-RTX-4090 validation preset for Gymnasium MuJoCo + EGL.
+#
+# The MuJoCo family is CPU-capable. This concrete RGB spec opts into GPU
+# placement through env_resource_hints.accelerator; the EnvWorker actor is
+# reserved on GPU 0 and each RGB slot owns a spawned renderer process.
+
+env_family: mujoco
+env_config:
+  provider: gymnasium
+  env_id: InvertedPendulum-v5
+  observation_mode: rgb_state
+  render_mode: rgb_array
+  render_backend: egl
+  camera_name: null
+  image_width: 256
+  image_height: 256
+  action_dim: 1
+  chunk_size: 4
+  clip_actions: true
+  max_episode_steps: 1000
+  core_form: per_slot
+  process_isolation: true
+  rpc_timeout_s: 120.0
+  instruction: Keep the pendulum upright
+  success_mode: none
+  return_all_frames: false
+
+env_resource_hints:
+  accelerator: true
+
+cluster:
+  num_nodes: 1
+  component_placement:
+    env:
+      placement: "0"
+
+gateway:
+  gateway_epoch: 1
+  maintenance_interval_seconds: 1.0
+  default_lease_seconds: 600.0
+  error_retention_seconds: 120.0
+  result_ttl_seconds: 120.0
+  heartbeat_timeout_seconds: 60.0
+  heartbeat_interval_seconds: 10.0
+  max_concurrency_per_rank: 8
+  metrics_namespace: rr
+
+transport:
+  kind: ray_channel
+  command_queue_size: 64
+  control_queue_size: 16
+  result_queue_size: 64
+  infer_request_queue_size: 64
+  infer_response_queue_size: 64
+  command_timeout_seconds: 180.0
+
+env_worker:
+  group_name: env
+  num_ranks: 1
+  placement_strategy: packed
+  has_accelerator: true
+  max_sessions_per_rank: 4
+  default_pool_size: 1
+  seed_offset: 0
+
+rollout_worker:
+  group_name: rollout
+  num_ranks: 1
+  placement_strategy: node
+  tensor_parallel_size: 1
+  pipeline_parallel_size: 1
+  policy_id: fake
+  policy_family: fake
+  policy_backend: fake
+  device: cpu
+  dtype: float32
+  max_concurrent_inferences: 8
+  scheduler:
+    max_batch_size: 4
+    max_wait_ms: 5.0
+    max_queue_depth: 64
+    max_inflight_per_application: 16
+    max_inflight_per_session: 1
+    fixed_batch_size: null
+
+admission:
+  require_auth: false
+  tokens: {}
+  max_sessions_per_application: 16
+  max_inflight_operations_per_application: 32
+  max_inflight_operations_per_session: 2
+  max_total_inflight_operations: 64
+
+payload:
+  inline_threshold_bytes: 262144
+  request_limit_bytes: 8388608
+  image_codec: png
