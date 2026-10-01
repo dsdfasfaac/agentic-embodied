@@ -397,16 +397,16 @@ must specify:
     - expected success signal;
     - failure or escalation condition;
     - nominal VLA re-entry state.
-    
+
     Example playbooks:
-    
+
     - object lost or grasp unstable → retreat, regrasp, or restage;
     - target progress stalled → inspect state, retry, restage, or regenerate plan;
     - collision or blocked motion → stop the current attempt and propose retreat,
     replanning, or restaging.
-    
+
     Playbooks are references for the Agent, not autonomous fallbacks.
-    
+
 
 Proposal and decision protocol:
 
@@ -443,16 +443,16 @@ must specify:
     - expected success signal;
     - failure or escalation condition;
     - nominal VLA re-entry state.
-    
+
     Example playbooks:
-    
+
     - object lost or grasp unstable → retreat, regrasp, or restage;
     - target progress stalled → inspect state, retry, restage, or regenerate plan;
     - collision or blocked motion → stop the current attempt and propose retreat,
     replanning, or restaging.
-    
+
     Playbooks are references for the Agent, not autonomous fallbacks.
-    
+
 
 Proposal and decision protocol:
 

@@ -146,4 +146,3 @@ def set_gripper(command, *, opening):
         raise ValueError('opening must be between 0 and 1')
     target=vector(command,14).copy(); target[13]=-3.4*opening
     return target
-
