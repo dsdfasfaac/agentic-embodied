@@ -1,0 +1,18 @@
+{
+  "schema_version": "cosmos3_edge_arx_task7_v1",
+  "domain_name": "arx-task7-x5",
+  "domain_id": 17,
+  "cameras": [
+    {"name": "front_rgb", "width": 320, "height": 240, "channels": 3, "dtype": "uint8", "color_order": "RGB", "calibration_id": "arx-task7-front-v1"},
+    {"name": "left_rgb", "width": 320, "height": 240, "channels": 3, "dtype": "uint8", "color_order": "RGB", "calibration_id": "arx-task7-left-v1"},
+    {"name": "right_rgb", "width": 320, "height": 240, "channels": 3, "dtype": "uint8", "color_order": "RGB", "calibration_id": "arx-task7-right-v1"}
+  ],
+  "state_dim": 14,
+  "action_dim": 14,
+  "action_horizon": 32,
+  "conditioning_fps": 15.0,
+  "action_semantic": "continuous raw positions",
+  "action_normalization": "raw",
+  "prompt_format": "json",
+  "view_mode": "concat_view"
+}

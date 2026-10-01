@@ -1,0 +1,40 @@
+{
+  "schema_version": "zetta_arx_camera_config_v1",
+  "image_size": [320, 240],
+  "color_order": "RGB",
+  "intrinsics_source": "/data4/zhengyikai/Zeva_arx/assets/ac_one/front_d405_rgbd_calibration.json",
+  "intrinsics_shared": true,
+  "cameras": {
+    "front_rgb": {
+      "role": "top_scene",
+      "parent_body": "base_link",
+      "pose_xyz_m": [0.1, 0.0, 0.3],
+      "pose_quat_wxyz": [0.65702981, 0.28098504, -0.28310464, -0.63969602],
+      "calibration_id": "arx-task7-front-mast-estimate-v1"
+    },
+    "left_rgb": {
+      "role": "left_wrist",
+      "parent_body": "left_link6",
+      "pose_xyz_m": [0.084796927438, 0.035831938409, 0.070030470897],
+      "pose_quat_wxyz": [-0.60655443, -0.3375714, 0.36733385, 0.61903402],
+      "calibration_id": "arx-task7-left-wrist-v1"
+    },
+    "right_rgb": {
+      "role": "right_wrist",
+      "parent_body": "right_link16",
+      "pose_xyz_m": [0.084796927438, 0.035831938409, 0.070030470897],
+      "pose_quat_wxyz": [-0.60655443, -0.3375714, 0.36733385, 0.61903402],
+      "calibration_id": "arx-task7-right-wrist-v1"
+    }
+  },
+  "diagnostic_cameras": {
+    "back_overview": {
+      "parent_body": "world",
+      "pose_xyz_m": [0.0, -1.3, 1.35],
+      "xyaxes": [1.0, 0.0, 0.0, 0.0, 0.39, 0.921],
+      "fovy_deg": 55.0
+    }
+  },
+  "status": "front_position_estimated_left_measured_right_derived",
+  "notes": "front_rgb position is a provisional mesh-based estimate at the top/table-facing surface of the central mast: [0.100, 0.000, 0.300] in base_link. Its calibrated orientation is preserved. Optical-frame transforms are converted to MuJoCo camera basis (+X right, +Y up, -Z forward). Left wrist is measured; right wrist is copied from left by mechanical isomorphism and remains unvalidated."
+}

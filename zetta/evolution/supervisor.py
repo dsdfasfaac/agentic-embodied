@@ -296,14 +296,12 @@ def build_child_manifest(
     )
     for seed in heldout:
         policy_rng[str(seed)] = parent.policy_rng_by_seed[str(seed)]
-    bundle_path = (
-        store.root / "candidates" / promoted_bundle_sha256 / "bundle.json"
-    ).resolve()
-    if (
-        not bundle_path.is_file()
-        or canonical_sha256(read_json(bundle_path)) != promoted_bundle_sha256
-    ):
-        raise ValueError("promoted bundle artifact is missing or corrupted")
+    from zetta.evolution.candidate_artifacts import resolve_candidate_artifact
+
+    try:
+        bundle_path = Path(resolve_candidate_artifact(store.root, parent_runtime, promoted_bundle_sha256))
+    except (ValueError, FileNotFoundError) as exc:
+        raise ValueError("promoted bundle artifact is missing or corrupted") from exc
     bundle_files = dict(parent_runtime.get("bundle_files_by_sha", {}))
     bundle_files[promoted_bundle_sha256] = str(bundle_path)
     lineage_id = str(parent_runtime.get("campaign_lineage_id", parent.campaign_id))
@@ -382,11 +380,14 @@ def _recover_or_promote(store: CampaignStore) -> dict[str, Any]:
         )
 
     promoted_sha256 = str(promotion["candidate_sha256"])
-    candidate_path = store.root / "candidates" / promoted_sha256 / "bundle.json"
-    candidate = read_json(candidate_path)
-    if canonical_sha256(candidate) != promoted_sha256:
-        raise ValueError("promotion candidate artifact digest mismatch")
-    if candidate.get("parent_sha256") != promotion.get("parent_sha256"):
+    from zetta.evolution.candidate_artifacts import (
+        candidate_kind, load_artifact, resolve_candidate_artifact,
+    )
+
+    runtime = store.manifest().runtime
+    candidate_path = Path(resolve_candidate_artifact(store.root, runtime, promoted_sha256))
+    candidate = load_artifact(candidate_path, promoted_sha256, candidate_kind(runtime))
+    if candidate.parent_sha256 != promotion.get("parent_sha256"):
         raise ValueError("promotion candidate parent changed")
     if promotion.get("promotion_id") != f"promote-{promoted_sha256[:20]}":
         raise ValueError("promotion ledger identity changed")

@@ -1,0 +1,73 @@
+{
+  "schema_version": "arx.deployment.package.v1",
+  "package_id": "arx-candidate-rgb-v1",
+  "parent_package_sha256": null,
+  "generation": 0,
+  "contract_sha256": "5d122db94a62b9d0fc220d1efb0995d57384b379a95a8d8dc030b9b2928b298e",
+  "tool_catalog_sha256": "ee51a555320c69ce630e89343292b6458073986f11ddacc3a7b63531e5f4baf3",
+  "feature_schema_sha256": "62f4eb4c0398b1bedfe1d8398a4f77ee7f6c770f8a7c5e32373440c1399ec7af",
+  "deployment_bootstrap_sha256": "3a611e079be01b421b4386b4a13215c921712c67f31056beb13b7b7f49e372c6",
+  "files": [
+    {
+      "relative_path": "critic/config.json",
+      "sha256": "e8bdf72dc705bf5971ebaf266eee581384250326ec5924ce60592805c4c61310",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "critic/feature_schema.json",
+      "sha256": "5aea33444741944e1850600f516a998f3c899320788afcce4a0ccb57e6278c6c",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "critic/features.py",
+      "sha256": "39f9ff1a8c92ed6e15a33f20cc0b8ecddedd22f8c848c06fc842d37174e098b4",
+      "media_type": "text/plain"
+    },
+    {
+      "relative_path": "critic/manifest.json",
+      "sha256": "ced6f54483a1d76ab417dcd674aebd1c91738209ee623bb8917feec805a4f0bc",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "evidence/claims.json",
+      "sha256": "3394e28a3592b4a4acaf66ea40f4485625ca67afa5dca3815fa7ee9681182d06",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "recovery_bindings.json",
+      "sha256": "188eb55429c119968ad45c78e86e8656ecc335a9ca03f981fc3b822e417d502e",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "reentry/config.json",
+      "sha256": "ca3d163bab055381827226140568f3bef7eaac187cebd76878e0b63e9e442356",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "reentry/manifest.json",
+      "sha256": "5544fc6857a480e7369e1b565b718329640e4a4df521894bb3369693075627aa",
+      "media_type": "application/json"
+    },
+    {
+      "relative_path": "skill/SKILL.md",
+      "sha256": "75ba0235dc42c5833087a5feeeebc738664bfb12b7aeb8f01147868269294dc0",
+      "media_type": "text/plain"
+    },
+    {
+      "relative_path": "tests/replay_cases.json",
+      "sha256": "a1b51ed90ab0b52a331d85a79a2d892783035fb06739e5d2e0ce4a048f947445",
+      "media_type": "application/json"
+    }
+  ],
+  "mechanism_hypothesis": "Synthetic mean-red dwell triggers observation handoff",
+  "changed_components": [
+    "critic",
+    "skill",
+    "bindings"
+  ],
+  "predicted_effect": "Interrupt at third post-step frame",
+  "evidence_ids": [
+    "fixture-red-sequence"
+  ],
+  "validation_plan": "Sandbox replay and gateway executed-prefix tests only"
+}

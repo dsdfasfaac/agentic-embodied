@@ -440,11 +440,17 @@ class CampaignFaultHarness:
                 raise ValueError("stale parent bundle detected during recovery")
             candidate_sha = state.get("candidate_sha256")
             if candidate_sha:
-                candidate_path = (
-                    self.store.root / "candidates" / candidate_sha / "bundle.json"
+                from zetta.evolution.candidate_artifacts import (
+                    candidate_kind, load_artifact, resolve_candidate_artifact,
                 )
-                candidate = read_json(candidate_path)
-                if candidate.get("parent_sha256") != plan.parent_bundle_sha256:
+
+                manifest = self.store.manifest()
+                kind = candidate_kind(manifest.runtime)
+                candidate_path = Path(resolve_candidate_artifact(
+                    self.store.root, manifest.runtime, str(candidate_sha)
+                ))
+                candidate = load_artifact(candidate_path, str(candidate_sha), kind)
+                if candidate.parent_sha256 != plan.parent_bundle_sha256:
                     raise ValueError("candidate parent is stale")
             return
         output = terminals[LifecycleStage.PROMOTE]["output"]
@@ -541,15 +547,15 @@ class CampaignFaultHarness:
             candidate_sha = self.store.state().get("candidate_sha256")
             if not isinstance(candidate_sha, str):
                 raise ValueError("propose terminal requires a current candidate")
-            candidate_path = (
-                self.store.root / "candidates" / candidate_sha / "bundle.json"
-            )
-            candidate = read_json(candidate_path)
-            if candidate.get("parent_sha256") != plan.parent_bundle_sha256:
+            from zetta.evolution.candidate_artifacts import candidate_kind, load_artifact, resolve_candidate_artifact
+            candidate_path = Path(resolve_candidate_artifact(self.store.root, self.store.manifest().runtime, candidate_sha))
+            kind = candidate_kind(self.store.manifest().runtime)
+            ref = load_artifact(candidate_path, candidate_sha, kind)
+            if ref.parent_sha256 != plan.parent_bundle_sha256:
                 raise ValueError("candidate parent is stale")
             return {
                 "candidate_sha256": candidate_sha,
-                "candidate_artifact_sha256": file_sha256(candidate_path),
+                "candidate_artifact_sha256": candidate_sha,
             }
         if stage in {
             LifecycleStage.SAME_SEED_GATE,
@@ -640,13 +646,13 @@ class CampaignFaultHarness:
             return
         if stage == LifecycleStage.PROPOSE:
             candidate_sha = output.get("candidate_sha256")
-            path = self.store.root / "candidates" / str(candidate_sha) / "bundle.json"
-            if not path.is_file() or file_sha256(path) != output.get(
-                "candidate_artifact_sha256"
-            ):
+            from zetta.evolution.candidate_artifacts import candidate_kind, load_artifact, resolve_candidate_artifact
+            try:
+                path = Path(resolve_candidate_artifact(self.store.root, self.store.manifest().runtime, str(candidate_sha)))
+                ref = load_artifact(path, str(candidate_sha), candidate_kind(self.store.manifest().runtime))
+            except (ValueError, OSError):
                 raise ValueError("candidate terminal artifact mismatch")
-            candidate = read_json(path)
-            if candidate.get("parent_sha256") != self.plan().parent_bundle_sha256:
+            if output.get("candidate_artifact_sha256") != candidate_sha or ref.parent_sha256 != self.plan().parent_bundle_sha256:
                 raise ValueError("candidate terminal has a stale parent")
             return
         if stage in {

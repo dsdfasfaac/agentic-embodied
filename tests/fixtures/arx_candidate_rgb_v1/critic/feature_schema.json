@@ -1,0 +1,22 @@
+{
+  "schema_version": "arx.features.schema.v1",
+  "features": [
+    {
+      "name": "visual.mean_red",
+      "scalar_type": "number",
+      "units": "fraction",
+      "source_cameras": [
+        "front_rgb"
+      ],
+      "extractor_version": "mean-red-v1",
+      "validity_condition": "configured uint8 RGB frame available",
+      "sampling": "one_per_observation",
+      "history_window": 1,
+      "phase_reset_policy": "episode_reset_only",
+      "value_range": [
+        0.0,
+        1.0
+      ]
+    }
+  ]
+}

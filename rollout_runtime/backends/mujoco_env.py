@@ -59,7 +59,7 @@ __all__ = [
 _OBSERVATION_MODES = frozenset({"state", "rgb", "rgb_state"})
 _SUCCESS_MODES = frozenset({"none", "info_key", "return_threshold"})
 _RENDER_BACKENDS = frozenset({"egl", "glfw", "osmesa"})
-_PROVIDERS = frozenset({"gymnasium", "rebot_g1d"})
+_PROVIDERS = frozenset({"gymnasium", "rebot_g1d", "arx_ac_one"})
 _REBOT_TASKS = frozenset({"grasp", "fallen"})
 _SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
 _REBOT_ACTION_DIM = 22
@@ -77,6 +77,10 @@ class MujocoEnvConfig:
     rebot_scene_config: str | None = None
     rebot_randomize_bottle: bool = True
     rebot_task: str | None = None
+    arx_prepared_scene_bundle: str | None = None
+    arx_mapping_path: str | None = None
+    arx_task_manifest: str | None = None
+    camera_names: dict[str, str] | None = None
     observation_mode: str = "state"
     render_mode: str | None = None
     render_backend: str = "egl"
@@ -131,7 +135,9 @@ class MujocoEnvConfig:
                 raise self._invalid("rebot_scene_config requires provider='rebot_g1d'")
             if self.rebot_task is not None:
                 raise self._invalid("rebot_task requires provider='rebot_g1d'")
-        else:
+            if any((self.arx_prepared_scene_bundle, self.arx_mapping_path, self.arx_task_manifest, self.camera_names)):
+                raise self._invalid("ARX fields require provider='arx_ac_one'")
+        elif self.provider == "rebot_g1d":
             if self.env_id != "reBot-DevArm-Grasp-v0":
                 raise self._invalid(
                     "provider='rebot_g1d' requires env_id='reBot-DevArm-Grasp-v0'"
@@ -203,6 +209,29 @@ class MujocoEnvConfig:
                     "reBot tasks require success_mode='info_key' and "
                     "success_info_key='is_success'"
                 )
+            if any((self.arx_prepared_scene_bundle, self.arx_mapping_path, self.arx_task_manifest, self.camera_names)):
+                raise self._invalid("ARX fields require provider='arx_ac_one'")
+        else:
+            for name in ("arx_prepared_scene_bundle", "arx_mapping_path", "arx_task_manifest"):
+                value = getattr(self, name)
+                if not isinstance(value, str) or not Path(value).expanduser().is_absolute():
+                    raise self._invalid(f"provider='arx_ac_one' requires absolute {name}")
+            if not isinstance(self.camera_names, dict) or tuple(self.camera_names) != (
+                "front_rgb", "left_rgb", "right_rgb"
+            ):
+                raise self._invalid("ARX camera_names must contain ordered front_rgb,left_rgb,right_rgb")
+            if len(set(self.camera_names.values())) != 3 or any(not str(value).strip() for value in self.camera_names.values()):
+                raise self._invalid("ARX MuJoCo camera names must be unique and non-empty")
+            if self.env_kwargs or self.asset_root is not None or self.rebot_task is not None:
+                raise self._invalid("ARX provider rejects Gymnasium/reBot-specific fields")
+            if self.action_dim != 14 or self.chunk_size != 32:
+                raise self._invalid("ARX provider requires action_dim=14 and chunk_size=32")
+            if (self.image_width, self.image_height) != (320, 240):
+                raise self._invalid("ARX provider requires 320x240 camera images")
+            if self.observation_mode != "rgb_state" or self.render_mode != "rgb_array":
+                raise self._invalid("ARX provider requires observation_mode='rgb_state' and render_mode='rgb_array'")
+            if self.success_mode != "info_key" or self.success_info_key != "is_success":
+                raise self._invalid("ARX provider requires environment-owned is_success")
         if not isinstance(self.rebot_randomize_bottle, bool):
             raise self._invalid("rebot_randomize_bottle must be a boolean")
         if (
@@ -303,7 +332,7 @@ class MujocoEnvConfig:
 
     @property
     def resolved_process_isolation(self) -> bool:
-        if self.provider == "rebot_g1d":
+        if self.provider in {"rebot_g1d", "arx_ac_one"}:
             return True
         if self.process_isolation is not None:
             return self.process_isolation
@@ -320,6 +349,10 @@ class MujocoEnvConfig:
             "rebot_scene_config": self.rebot_scene_config,
             "rebot_randomize_bottle": self.rebot_randomize_bottle,
             "rebot_task": self.rebot_task,
+            "arx_prepared_scene_bundle": self.arx_prepared_scene_bundle,
+            "arx_mapping_path": self.arx_mapping_path,
+            "arx_task_manifest": self.arx_task_manifest,
+            "camera_names": dict(self.camera_names or {}),
             "render_mode": self.render_mode,
             "render_backend": self.render_backend,
             "camera_name": self.camera_name,
@@ -776,6 +809,31 @@ class MujocoEnvCore:
         self, slot_index: int, raw: Any, frame: np.ndarray | None
     ) -> Observation:
         slot = self._require_slot(slot_index)
+        if self.config.provider == "arx_ac_one":
+            if not isinstance(raw, Mapping) or "state" not in raw:
+                raise RuntimeApiError(make_error(ErrorCode.INVALID_ARGUMENT, "ARX observation must contain state"))
+            state_array = np.asarray(raw["state"], dtype=np.float32)
+            if state_array.shape != (14,) or not np.isfinite(state_array).all():
+                raise RuntimeApiError(make_error(ErrorCode.INVALID_ARGUMENT, "ARX state must be finite [14]"))
+            refs = {}
+            for name in ("front_rgb", "left_rgb", "right_rgb"):
+                array = np.asarray(raw.get(name))
+                expected = (self.config.image_height, self.config.image_width, 3)
+                if array.dtype != np.uint8 or array.shape != expected:
+                    raise RuntimeApiError(make_error(ErrorCode.INVALID_ARGUMENT, f"ARX {name} must be uint8 {expected}"))
+                refs[name] = payload_module.encode_image(np.ascontiguousarray(array))
+            return Observation(
+                session_id=SessionId(""), episode_id=EpisodeId(0), step_index=slot.step_index,
+                main_image=refs["front_rgb"], wrist_image=refs["left_rgb"],
+                extra_view_images=[refs["right_rgb"]], state=state_array.tolist(),
+                instruction=slot.instruction or self.config.instruction,
+                extras={
+                    "env_family": MUJOCO_ENV_FAMILY, "env_id": self.config.env_id,
+                    "provider": self.config.provider, "raw_state": state_array.tolist(),
+                    "camera_names": {"front_rgb": "main_image", "left_rgb": "wrist_image", "right_rgb": "extra_view_images.0"},
+                    "seed": slot.seed, "slot_index": slot_index,
+                },
+            )
         state: list[float] = []
         layout: tuple[tuple[str, tuple[int, ...]], ...] = ()
         if self.config.observation_mode in {"state", "rgb_state"}:

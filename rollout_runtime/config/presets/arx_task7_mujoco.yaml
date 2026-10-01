@@ -1,0 +1,81 @@
+# ARX AC one + remote Zeva/Cosmos3-Edge Task7 deployment template.
+# Replace every /path/to value and the calibrated MuJoCo camera names.
+
+env_family: mujoco
+env_config:
+  provider: arx_ac_one
+  env_id: ZettaArxManipulation-v0
+  arx_prepared_scene_bundle: /path/to/prepared/real2sim-scene
+  arx_mapping_path: /path/to/Zeva_arx/assets/ac_one/ac_one_14d_mapping.json
+  arx_task_manifest: /path/to/Agentic-Embodied/robots/arx/manifests/pickup_test_tube.yaml
+  camera_names:
+    front_rgb: calibrated_front_rgb
+    left_rgb: calibrated_left_rgb
+    right_rgb: calibrated_right_rgb
+  observation_mode: rgb_state
+  render_mode: rgb_array
+  render_backend: egl
+  image_width: 320
+  image_height: 240
+  action_dim: 14
+  chunk_size: 32
+  clip_actions: false
+  max_episode_steps: 600
+  core_form: per_slot
+  process_isolation: true
+  rpc_timeout_s: 600.0
+  instruction: Pick up test tube with the pink label.
+  success_mode: info_key
+  success_info_key: is_success
+  return_all_frames: true
+
+env_resource_hints:
+  accelerator: true
+
+transport:
+  kind: inproc
+  command_timeout_seconds: 600.0
+
+env_worker:
+  num_ranks: 1
+  placement_strategy: node
+  has_accelerator: true
+  max_sessions_per_rank: 1
+
+rollout_worker:
+  num_ranks: 1
+  placement_strategy: node
+  policy_id: zeva_arx_task7
+  policy_family: cosmos3_edge_arx
+  policy_backend: cosmos3_edge_arx_remote
+  device: remote
+  dtype: float32
+  max_concurrent_inferences: 1
+  policy_config:
+    host: 127.0.0.1
+    port: 5581
+    timeout_sec: 300.0
+    model_contract: /path/to/Agentic-Embodied/robots/arx/manifests/task7_model_a.yaml
+    task_manifest: /path/to/Agentic-Embodied/robots/arx/manifests/pickup_test_tube.yaml
+    policy_id: zeva_arx_task7
+    policy_family: cosmos3_edge_arx
+    action_dim: 14
+    actions_per_chunk: 32
+  scheduler:
+    max_batch_size: 1
+    max_wait_ms: 0.0
+    max_queue_depth: 8
+    max_inflight_per_application: 1
+    max_inflight_per_session: 1
+    fixed_batch_size: null
+
+gateway:
+  default_lease_seconds: 1800.0
+  heartbeat_timeout_seconds: 600.0
+  heartbeat_interval_seconds: 30.0
+
+admission:
+  max_sessions_per_application: 1
+  max_inflight_operations_per_application: 2
+  max_inflight_operations_per_session: 1
+  max_total_inflight_operations: 2

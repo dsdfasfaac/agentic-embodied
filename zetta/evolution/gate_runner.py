@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any, Literal
 
 from zetta.evolution.campaign import resolve_bundle_file
+from zetta.evolution.candidate_artifacts import ARX, CandidateRef, candidate_kind, load_artifact
 from zetta.evolution.gating import (
     evaluate_fixed_heldout_20,
     evaluate_paired_gate,
@@ -118,11 +119,22 @@ class PairedGateRunner:
             key="authorization_id",
         )
 
-    def _load_and_validate_candidate(self) -> CandidateBundle:
+    def _load_and_validate_candidate(self) -> CandidateBundle | CandidateRef:
         state = self.store.state()
         if state.get("candidate_sha256") != self.candidate_sha256:
             raise StaleCandidateError("paired gate candidate is stale")
-        path = self.store.root / "candidates" / self.candidate_sha256 / "bundle.json"
+        kind = candidate_kind(self.store.manifest().runtime)
+        path = self.store.root / "candidates" / self.candidate_sha256 / (
+            "package" if kind == ARX else "bundle.json"
+        )
+        if kind == ARX:
+            candidate = load_artifact(path, self.candidate_sha256, kind)
+            manifest = self.store.manifest()
+            if candidate.generation != manifest.generation:
+                raise ValueError("candidate generation does not match campaign")
+            if candidate.parent_sha256 != state.get("current_bundle_sha256"):
+                raise StaleCandidateError("candidate parent no longer matches campaign")
+            return candidate
         payload = read_json(path)
         if canonical_sha256(payload) != self.candidate_sha256:
             raise ValueError("candidate artifact digest mismatch")
@@ -714,7 +726,7 @@ class PairedGateRunner:
             "result_file",
         )
         missing = [name for name in required if f"{{{name}}}" not in joined]
-        if "{bundle_file}" not in joined and "{bundle}" not in joined:
+        if not any(token in joined for token in ("{bundle_file}", "{bundle}", "{candidate_path}")):
             missing.append("bundle_file")
         if missing:
             raise ValueError(
@@ -1058,6 +1070,8 @@ class PairedGateRunner:
             ),
             "bundle_file": bundle_file,
             "bundle": bundle_file,
+            "candidate_path": bundle_file,
+            "candidate_kind": candidate_kind(manifest.runtime),
             "output_dir": str(output_dir),
             "result_file": str(output_dir / "episode_record.json"),
             "heartbeat_file": str(output_dir / "heartbeat.jsonl"),

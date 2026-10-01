@@ -13,6 +13,19 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+
+def _bounded_proposal_artifact_index(artifact_index: dict[str, Any]) -> dict[str, Any]:
+    """Bound proposal payloads below the Codex JSON-RPC parameter limit."""
+    safe = blind_artifact_index(artifact_index)
+    artifacts = [row for row in safe.get("artifacts", ()) if isinstance(row, dict)]
+    selected = artifacts[:48]
+    result = {"artifacts": selected, "relationships": []}
+    while len(json.dumps(result, separators=(",", ":"))) > 700_000 and len(selected) > 8:
+        selected = selected[: max(8, len(selected) // 2)]
+        result["artifacts"] = selected
+    result["selection"] = {"source_artifact_count": len(artifacts), "selected_artifact_count": len(selected)}
+    return result
+
 from zetta.evolution.jsonio import (
     atomic_write_json,
     canonical_sha256,
@@ -116,7 +129,9 @@ proposal may carry its bounded scalar evidence to Role1 for recovery review,
 but the Actor cannot query the sidecar or use absolute coordinates as a direct
 motion oracle.
 For VLA recovery steps, prefer server-side action chunks with
-`actions_per_chunk=5` (or the frozen runtime default). A value of 1 is an
+`actions_per_chunk=5` (or the frozen runtime default). This transport hint is
+not an ARX tool argument: never put `actions_per_chunk` inside ARX recovery
+tool parameters; ARX chunking is controlled by the gateway/runtime. A value of 1 is an
 exception for a demonstrated per-action boundary requirement and must be
 justified in the validation plan; do not turn every recovery step into a
 one-action RPC loop. Critic evaluation remains per physical action even when
@@ -805,12 +820,31 @@ def _cluster_visual_contract(
 
     # Compatibility fallback for historical/unit-test indexes without the
     # Harness relationship table. New campaigns must use the overview path.
+    #
+    # ARX can currently emit one artifact row per camera frame. Passing that
+    # entire index to the planner can exceed the provider's 1 MiB JSON-RPC
+    # request limit (and provides no additional information until the agent
+    # explicitly reads an artifact). Keep a deterministic, bounded visual
+    # index; the read_campaign_artifact tool remains the authoritative path
+    # for inspecting any selected artifact.
     visual_rows = [
         dict(row)
         for row in rows
         if isinstance(row, dict) and row.get("type") in {"image", "video"}
     ]
-    return {"artifacts": visual_rows, "relationships": []}, set(), set()
+    max_fallback_rows = 256
+    if len(visual_rows) > max_fallback_rows:
+        stride = (len(visual_rows) + max_fallback_rows - 1) // max_fallback_rows
+        visual_rows = visual_rows[::stride][:max_fallback_rows]
+    return {
+        "artifacts": visual_rows,
+        "relationships": [],
+        "selection_contract": {
+            "visual_role": "bounded_compatibility_sample",
+            "max_visual_artifacts": max_fallback_rows,
+            "selection": "deterministic stride sample; inspect additional artifacts by content_id",
+        },
+    }, set(), set()
 
 
 def _require_group_visual_coverage(
@@ -971,6 +1005,59 @@ class CodexStageAgent:
         self.inherited_evidence_access_logs = tuple(
             (Path(path), expected_sha256)
             for path, expected_sha256 in inherited_evidence_access_logs
+        )
+
+    def propose_arx_package(
+        self, *, diagnosis: CausalDiagnosis, artifact_index: dict[str, Any],
+        parent_sha256: str | None, generation: int, tool_catalog: dict[str, Any],
+        contract_sha256: str, catalog_sha256: str, bootstrap_sha256: str,
+    ) -> dict[str, Any]:
+        """Stage2 output contract for executable RGB packages, not scalar rules."""
+        from robots.arx.evolution_candidate_adapter import REQUIRED_FILES
+
+        payload = {
+            "diagnosis": diagnosis.as_dict(),
+            "artifact_index": blind_artifact_index(artifact_index),
+            "tool_catalog": tool_catalog,
+            "generation": generation,
+            "parent_package_sha256": parent_sha256,
+            "contract_sha256": contract_sha256,
+            "tool_catalog_sha256": catalog_sha256,
+            "deployment_bootstrap_sha256": bootstrap_sha256,
+            "required_files": sorted(REQUIRED_FILES),
+            "format": {"metadata": "PackageManifest fields except files and feature_schema_sha256",
+                       "files": "mapping of relative package paths to UTF-8 text"},
+        }
+
+        def validate(output: dict[str, Any]) -> None:
+            if set(output) != {"metadata", "files"}:
+                raise ValueError("ARX proposal must contain metadata and files")
+            metadata, files = output["metadata"], output["files"]
+            if not isinstance(metadata, dict) or not isinstance(files, dict):
+                raise ValueError("ARX proposal metadata and files must be objects")
+            if not REQUIRED_FILES <= files.keys() or not all(isinstance(v, str) for v in files.values()):
+                raise ValueError("ARX proposal lacks required UTF-8 package files")
+            for key, expected in (("generation", generation),
+                                  ("parent_package_sha256", parent_sha256),
+                                  ("contract_sha256", contract_sha256),
+                                  ("tool_catalog_sha256", catalog_sha256),
+                                  ("deployment_bootstrap_sha256", bootstrap_sha256)):
+                if metadata.get(key) != expected:
+                    raise ValueError(f"ARX proposal changed frozen {key}")
+
+        return self._invoke(
+            stage="stage2-arx-package",
+            system_prompt=("You are the offline ARX RGB campaign evolver. Return exactly "
+                           "one JSON object with metadata and files. Produce one complete "
+                           "ARX deployment package implementing one falsifiable diagnosis. "
+                           "Feature extraction receives only public current/past RGB and public "
+                           "execution acknowledgements. Never use simulator state, evaluator "
+                           "internals, private telemetry, seeds, filesystem paths or privileged "
+                           "coordinates. Critics may propose but never write actions. Recovery "
+                           "must use the frozen gateway tool catalog and bounded Role1 skill. "
+                           "The harness seals manifest.json; do not include it in files. "
+                           "Provide nonempty RGB replay_cases with expected firing steps."),
+            payload=payload, validator=validate,
         )
 
     @staticmethod
@@ -1505,6 +1592,18 @@ class CodexStageAgent:
     ) -> CausalDiagnosis:
         contract = _normalize_task_contract(task_contract)
         safe_index = blind_artifact_index(artifact_index)
+        # ARX privileged campaigns may contain one descriptor per RGB frame.
+        # Use the same relationship-driven compact visual index as cluster
+        # review so Stage1 diagnosis cannot exceed the provider request limit.
+        if any(
+            isinstance(row, dict) and row.get("type") in {"image", "video"}
+            for row in artifact_index.get("artifacts", ())
+        ):
+            compact_visual, _, _ = _cluster_visual_contract(artifact_index)
+            safe_index = {
+                **compact_visual,
+                "diagnostic_telemetry": safe_index.get("diagnostic_telemetry", []),
+            }
         telemetry_contract = _diagnostic_telemetry_contract(
             cluster=cluster,
             artifact_index=safe_index,
@@ -1525,6 +1624,23 @@ class CodexStageAgent:
             "artifact_index": safe_index,
             "telemetry_read_contract": telemetry_contract,
             "visual_read_contract": visual_read_contract,
+            "required_visual_citations": {
+                "failure_overview_ids": visual_read_contract[
+                    "eligible_failure_overview_ids"
+                ][: max(3, visual_read_contract["minimum_distinct_failure_overviews"])] ,
+                "minimum_distinct_failure_overviews": visual_read_contract[
+                    "minimum_distinct_failure_overviews"
+                ],
+                "minimum_distinct_event_windows": visual_read_contract[
+                    "minimum_distinct_event_windows"
+                ],
+                "instruction": (
+                    "Your visual_evidence must cite at least the stated number of "
+                    "distinct failure_overview_ids. An event_window ID does not "
+                    "count as a failure overview. Also cite the stated number of "
+                    "distinct event-window IDs."
+                ),
+            },
             "tool_catalog": tool_catalog,
             "output_schema": {
                 "diagnosis_id": "string",
@@ -1630,7 +1746,25 @@ class CodexStageAgent:
                 raise ValueError("Stage1 did not inspect a successful comparator overview")
         value = self._invoke(
             stage="stage1-diagnosis",
-            system_prompt=DIAGNOSIS_SYSTEM_PROMPT,
+            system_prompt=(
+                "You are the offline ARX Diagnoser. Inspect the ordered three-camera "
+                "overview and event windows. When a privileged-state timeline is "
+                "provided, use it as diagnostic evidence for gripper opening, "
+                "contact, task progress, and success, and align those values to "
+                "the labeled image steps. Do not use privileged data as an actor "
+                "control oracle. Compare competing hypotheses and return exactly "
+                "one JSON diagnosis matching the supplied schema."
+                if self.environment_name == "arx_mujoco" and artifact_index.get("privileged_state_summary")
+                else (
+                    "You are the offline ARX RGB Diagnoser. Use only published RGB "
+                    "frames, public action acknowledgements, and terminal success. "
+                    "Read the ordered three-camera overview and event windows and "
+                    "compare competing hypotheses. Do not infer hidden simulator "
+                    "state from absent evidence. Return exactly one JSON diagnosis "
+                    "matching the supplied schema."
+                    if self.environment_name == "arx_mujoco" else DIAGNOSIS_SYSTEM_PROMPT
+                )
+            ),
             payload=payload,
             validator=validate,
             require_visual_evidence=bool(visual_candidates),
@@ -1827,7 +1961,7 @@ class CodexStageAgent:
                 "model": self.model,
                 "reasoning_effort": self.reasoning_effort,
             },
-            "artifact_index": blind_artifact_index(artifact_index or {}),
+            "artifact_index": _bounded_proposal_artifact_index(artifact_index or {}),
             "refinement_context": safe_refinement,
             "provisional_hypothesis_authorization": (
                 {
@@ -1853,6 +1987,10 @@ class CodexStageAgent:
                 parent_bundle.as_dict() if parent_bundle is not None else None
             ),
             "available_critic_features": feature_catalog,
+            "feature_catalog_contract": {
+                "rule": "Use only feature names listed here; do not invent public.* names.",
+                "features": list(feature_catalog or ()),
+            },
             "constraints": {
                 "one_causal_change": True,
                 "effective_bundle_is_parent_plus_atomic_delta": True,
@@ -1902,10 +2040,7 @@ class CodexStageAgent:
                         "steps": [
                             {
                                 "tool": "catalog tool",
-                                "parameters": {
-                                    "actions_per_chunk": "5 by default; 1 only with "
-                                    "per-action boundary evidence"
-                                },
+                                "parameters": "exactly the input_schema for the named frozen tool; no extra keys",
                                 "stop_when": "string",
                             }
                         ],

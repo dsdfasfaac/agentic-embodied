@@ -1286,6 +1286,57 @@ def _agent_visual_relationships(
     return sorted(relationships, key=lambda item: item["episode"])
 
 
+def _arx_indexed_visual_relationships(
+    *, rows: list[dict[str, Any]], resolver: dict[str, Any]
+) -> list[dict[str, Any]]:
+    """Build bounded episode/frame ownership for privileged ARX records.
+
+    Older ARX attempts index RGB frames as generic ``indexed_artifact`` rows
+    rather than publishing the Libero/RoboCasa visual artifact roles. Preserve
+    those campaigns by deriving the same episode/segment relationship contract
+    from the resolver's episode ownership metadata.
+    """
+    aliases = resolver["aliases"]
+    visuals_by_episode: dict[str, list[dict[str, str]]] = {}
+    for entry in resolver["entries"].values():
+        for source in entry.get("sources", ()):
+            if source.get("role") != "indexed_artifact":
+                continue
+            episode = source.get("episode_id")
+            if isinstance(episode, str) and "image" in entry.get("types", ()):
+                visuals_by_episode.setdefault(episode, []).append(
+                    {"content_id": _content_id(resolver=resolver, digest=entry["content_sha256"]), "type": "image"}
+                )
+    relationships = []
+    for row in rows:
+        if row.get("status") != "valid":
+            continue
+        raw_episode = str(row["episode_id"])
+        episode_alias = aliases["episode_id"].get(raw_episode)
+        visuals = sorted(visuals_by_episode.get(raw_episode, ()),
+                         key=lambda item: item["content_id"])
+        if not episode_alias or not visuals:
+            continue
+        selected = visuals[::max(1, len(visuals) // 3)][:3]
+        evidence = [dict(item, role="episode_overview") for item in selected]
+        if len(visuals) > 3:
+            evidence.append(dict(visuals[len(visuals) // 2], role="event_window"))
+        segments = []
+        for segment in EpisodeRecord.from_dict(row).all_failure_segments:
+            segment_alias = aliases["segment_id"].get(segment.segment_id)
+            if segment_alias is None:
+                continue
+            segments.append({"segment": segment_alias,
+                             "start_step": segment.start_step,
+                             "earliest_divergence_step": segment.earliest_divergence_step,
+                             "end_step": segment.end_step})
+        relationships.append({"episode": episode_alias,
+                              "outcome": "success" if row.get("success") is True else "failure",
+                              "segments": segments,
+                              "visual_evidence": evidence})
+    return sorted(relationships, key=lambda item: item["episode"])
+
+
 def _agent_artifact_context(
     store: CampaignStore,
 ) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
@@ -1296,11 +1347,14 @@ def _agent_artifact_context(
     schedules remain exclusively in ``.harness-private/artifact-resolver.json``.
     """
 
+    if store.manifest().runtime.get("evidence_policy") == "arx_rgb_public_v1":
+        return _arx_public_artifact_context(store)
     path = _resolver_path(store)
     path.parent.mkdir(parents=True, exist_ok=True)
     with directory_lock(path.with_name(".artifact-resolver.lock")):
         resolver = _load_resolver(store)
         descriptors: dict[tuple[str, str], dict[str, str]] = {}
+        visual_by_episode: dict[str, list[dict[str, str]]] = {}
         for row in store.episodes.records():
             # CampaignStore never accepts infra-invalid rows into this ledger,
             # but keep the prompt boundary fail-safe if a legacy ledger exists.
@@ -1340,15 +1394,20 @@ def _agent_artifact_context(
             is not None
         ]
         _persist_resolver(store, resolver)
+        relationships = _agent_visual_relationships(
+            rows=rollout_rows,
+            resolver=resolver,
+        )
+        if not relationships and store.manifest().environment == "arx_mujoco":
+            relationships = _arx_indexed_visual_relationships(
+                rows=rollout_rows, resolver=resolver
+            )
         index = {
             "artifacts": sorted(
                 descriptors.values(),
                 key=lambda item: (item["content_id"], item["type"]),
             ),
-            "relationships": _agent_visual_relationships(
-                rows=rollout_rows,
-                resolver=resolver,
-            ),
+            "relationships": relationships,
             "diagnostic_telemetry": sorted(
                 diagnostic_telemetry,
                 key=lambda item: (item["outcome"], item["episode"]),
@@ -1362,6 +1421,136 @@ def _agent_artifact_context(
 
 def _agent_artifact_index(store: CampaignStore) -> dict[str, Any]:
     return _agent_artifact_context(store)[0]
+
+
+def _candidate_cluster_key(store: CampaignStore, candidate_sha256: str) -> str:
+    """Return the immutable diagnosis/package identity for either artifact kind."""
+    manifest = store.manifest()
+    from zetta.evolution.candidate_artifacts import candidate_kind, load_artifact, resolve_candidate_artifact
+    kind = candidate_kind(manifest.runtime)
+    path = Path(resolve_candidate_artifact(store.root, manifest.runtime, candidate_sha256))
+    ref = load_artifact(path, candidate_sha256, kind)
+    if kind == "arx_rgb_package_v1":
+        return f"arx-package:{ref.candidate_id}"
+    payload = read_json(path)
+    return str(payload["diagnosis_sha256"])
+
+
+def _candidate_cluster_id(store: CampaignStore, candidate_sha256: str) -> str:
+    manifest = store.manifest()
+    if manifest.runtime.get("candidate_kind") == "arx_rgb_package_v1":
+        return _candidate_cluster_key(store, candidate_sha256)
+    return _diagnosis_cluster_id(store, _candidate_cluster_key(store, candidate_sha256))
+
+
+def _arx_public_artifact_context(
+    store: CampaignStore,
+) -> tuple[dict[str, Any], dict[str, dict[str, str]]]:
+    """Allowlist ARX RGB and already-published public execution rows only."""
+    from zetta.evolution.evidence_policy import ArxRgbPublicEvidencePolicy
+
+    policy = ArxRgbPublicEvidencePolicy()
+    path = _resolver_path(store)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with directory_lock(path.with_name(".artifact-resolver.lock")):
+        resolver = _load_resolver(store)
+        descriptors: dict[tuple[str, str], dict[str, str]] = {}
+        for row in store.episodes.records():
+            if row.get("status") != "valid":
+                continue
+            index = row.get("artifact_index", {})
+            if not isinstance(index, dict) or not isinstance(index.get("artifacts"), list):
+                raise ValueError("ARX episode has no public artifact index")
+            overview = {"success": bool(row.get("success")), "terminal_reason": "completed",
+                        "event_id": _agent_hash(resolver=resolver, digest=canonical_sha256(str(row["episode_id"])))}
+            descriptor = _register_artifact(
+                resolver=resolver, digest=canonical_sha256(overview),
+                artifact_type="episode_record", summary="public ARX episode outcome",
+                source={"kind": "inline", "value": overview, "role": "episode_record",
+                        "episode_id": row["episode_id"]},
+            )
+            descriptors[(descriptor["content_id"], descriptor["type"])] = descriptor
+            _set_alias(resolver, namespace="episode_id", raw=str(row["episode_id"]),
+                       content_id=descriptor["content_id"])
+            attempt = store.root / "attempts" / str(row["logical_id"]) / f"attempt-{int(row['attempt_index']):03d}"
+            for artifact in index["artifacts"]:
+                if not isinstance(artifact, dict) or set(artifact) != {"path", "sha256"}:
+                    raise ValueError("invalid ARX public artifact descriptor")
+                relative = str(artifact["path"])
+                if not (relative.startswith("frames/") and relative.endswith(".png")
+                        or relative in {f"trajectory/{name}.jsonl" for name in ("chunks", "actions", "states", "tools")}):
+                    raise ValueError("ARX public index contains a private or unsupported artifact")
+                source_path = (attempt / relative).resolve()
+                if (not source_path.is_relative_to(attempt.resolve()) or source_path.is_symlink()
+                        or not source_path.is_file() or file_sha256(source_path) != artifact["sha256"]):
+                    raise ValueError("ARX public artifact digest changed")
+                if source_path.suffix == ".jsonl":
+                    with source_path.open(encoding="utf-8") as stream:
+                        for line in stream:
+                            if line.strip():
+                                policy.validate_public_event(json.loads(line))
+                descriptor = _register_artifact(
+                    resolver=resolver, digest=str(artifact["sha256"]),
+                    artifact_type="image" if source_path.suffix == ".png" else "text",
+                    summary="public RGB frame" if source_path.suffix == ".png" else "public RGB/action acknowledgement rows",
+                    source={"kind": "file", "path": str(source_path), "role": "arx_public",
+                            "episode_id": str(row["episode_id"])},
+                )
+                descriptors[(descriptor["content_id"], descriptor["type"])] = descriptor
+                if source_path.suffix == ".png":
+                    visual_by_episode.setdefault(str(row["episode_id"]), []).append({
+                        "content_id": descriptor["content_id"],
+                        "type": "image",
+                    })
+        relationships = []
+        aliases = resolver["aliases"]
+        for row in store.episodes.records():
+            if row.get("status") != "valid":
+                continue
+            raw_episode = str(row["episode_id"])
+            episode_alias = aliases["episode_id"].get(raw_episode)
+            if episode_alias is None:
+                raise ValueError("ARX visual relationship has no episode alias")
+            visuals = sorted(visual_by_episode.get(raw_episode, ()),
+                             key=lambda item: item["content_id"])
+            if not visuals:
+                continue
+            # Keep the prompt index compact while providing an overview and a
+            # temporal comparator for every episode. The artifact reader can
+            # still inspect any other frame by content_id.
+            overview = visuals[::max(1, len(visuals) // 3)][:3]
+            evidence = [dict(item, role="episode_overview") for item in overview]
+            if len(visuals) > 3:
+                evidence.append(dict(visuals[len(visuals) // 2], role="event_window"))
+            segments = []
+            for segment in EpisodeRecord.from_dict(row).all_failure_segments:
+                segment_alias = aliases["segment_id"].get(segment.segment_id)
+                if segment_alias is None:
+                    segment_alias = "segment-" + _agent_hash(
+                        resolver=resolver,
+                        digest=canonical_sha256(
+                            {"episode_id": raw_episode, "segment_id": segment.segment_id}
+                        ),
+                    )[:32]
+                    _set_alias(
+                        resolver,
+                        namespace="segment_id",
+                        raw=segment.segment_id,
+                        content_id=segment_alias,
+                    )
+                segments.append({"segment": segment_alias,
+                                 "start_step": segment.start_step,
+                                 "earliest_divergence_step": segment.earliest_divergence_step,
+                                 "end_step": segment.end_step})
+            relationships.append({"episode": episode_alias,
+                                  "outcome": "success" if row.get("success") is True else "failure",
+                                  "segments": segments,
+                                  "visual_evidence": evidence})
+        _persist_resolver(store, resolver)
+        return {"artifacts": sorted(descriptors.values(), key=lambda x: (x["content_id"], x["type"])),
+                "relationships": relationships, "diagnostic_telemetry": []}, {
+                    namespace: dict(values) for namespace, values in resolver["aliases"].items()
+                }
 
 
 def _scalar_feature_names(value: Any, *, prefix: str = "") -> set[str]:
@@ -2364,6 +2553,7 @@ def resolve_agent_artifact(
     if expected_id != content_id or entry.get("agent_hash") != expected_hash:
         raise ValueError("artifact resolver entry failed keyed-integrity validation")
     stale_sources = 0
+    arx_public = store.manifest().runtime.get("evidence_policy") == "arx_rgb_public_v1"
     for source in entry.get("sources", ()):
         if source.get("kind") == "file":
             source_path = Path(str(source.get("path", "")))
@@ -2376,6 +2566,19 @@ def resolve_agent_artifact(
             ):
                 stale_sources += 1
                 continue
+            if arx_public:
+                from zetta.evolution.evidence_policy import ArxRgbPublicEvidencePolicy
+
+                if (source.get("role") != "arx_public"
+                        or not (resolved.suffix == ".png" and resolved.parent.name == "frames"
+                                or resolved.suffix == ".jsonl" and resolved.parent.name == "trajectory")):
+                    raise ValueError("ARX resolver refused a non-public artifact")
+                if resolved.suffix == ".jsonl":
+                    policy = ArxRgbPublicEvidencePolicy()
+                    with resolved.open(encoding="utf-8") as stream:
+                        for line in stream:
+                            if line.strip():
+                                policy.validate_public_event(json.loads(line))
             return {
                 "content_id": content_id,
                 "content_sha256": digest,
@@ -2387,6 +2590,12 @@ def resolve_agent_artifact(
             source.get("kind") == "inline"
             and canonical_sha256(source.get("value")) == digest
         ):
+            if arx_public:
+                from zetta.evolution.evidence_policy import ArxRgbPublicEvidencePolicy
+
+                if source.get("role") != "episode_record":
+                    raise ValueError("ARX resolver refused a private inline artifact")
+                ArxRgbPublicEvidencePolicy().validate_public_event(source["value"])
             return {
                 "content_id": content_id,
                 "content_sha256": digest,
@@ -3284,10 +3493,7 @@ def _rejected_candidates_for_cluster(
         candidate_sha256 = decision.get("candidate_sha256")
         if not isinstance(candidate_sha256, str):
             raise ValueError("gate decision has no candidate binding")
-        bundle = read_json(
-            store.root / "candidates" / candidate_sha256 / "bundle.json"
-        )
-        if _diagnosis_cluster_id(store, str(bundle["diagnosis_sha256"])) == cluster_id:
+        if _candidate_cluster_id(store, candidate_sha256) == cluster_id:
             rejected.add(candidate_sha256)
     for rejection in _shadow_candidate_rejections(store):
         if rejection.get("cluster_id") == cluster_id:
@@ -3320,10 +3526,7 @@ def _advance_after_candidate_rejection(
 ) -> tuple[CampaignPhase, dict[str, Any]]:
     """Choose refine, secondary-cluster, or bounded completion after rejection."""
 
-    candidate = read_json(
-        store.root / "candidates" / candidate_sha256 / "bundle.json"
-    )
-    cluster_id = _diagnosis_cluster_id(store, str(candidate["diagnosis_sha256"]))
+    cluster_id = _candidate_cluster_id(store, candidate_sha256)
     rejected = _rejected_candidates_for_cluster(store, cluster_id)
     if candidate_sha256 not in rejected:
         raise ValueError("candidate rejection is not recorded in the immutable ledger")
@@ -4276,16 +4479,111 @@ def _recover_unadvanced_candidate(store: CampaignStore) -> dict[str, Any] | None
             != canonical_sha256(shadow_report)
         ):
             raise ValueError("candidate shadow precommit binding changed")
-        _validate_shadow_live_gate_admission(store, shadow_report)
+        if store.manifest().runtime.get("candidate_kind") == "arx_rgb_package_v1":
+            if (shadow_report.get("candidate_sha256") != candidate_sha256
+                    or not shadow_report.get("eligible_for_live_gate")):
+                raise ValueError("ARX package lacks an eligible immutable RGB replay")
+        else:
+            _validate_shadow_live_gate_admission(store, shadow_report)
     store.recover_registered_candidate(candidate_sha256)
     store.transition(CampaignPhase.SAME_SEED_GATE)
-    bundle = read_json(store.root / "candidates" / candidate_sha256 / "bundle.json")
+    from zetta.evolution.candidate_artifacts import (
+        ARX, candidate_kind, load_artifact, resolve_candidate_artifact,
+    )
+
+    kind = candidate_kind(store.manifest().runtime)
+    artifact = Path(resolve_candidate_artifact(store.root, store.manifest().runtime, candidate_sha256))
+    bundle = (
+        {"candidate_kind": kind, "candidate_sha256": candidate_sha256,
+         "candidate_path": str(artifact)}
+        if kind == ARX else read_json(artifact)
+    )
+    load_artifact(artifact, candidate_sha256, kind)
     return {
         "candidate_sha256": candidate_sha256,
         "bundle": bundle,
         "shadow_replay": shadow_report,
         "recovered_registration": True,
     }
+
+
+def _run_arx_proposal_stage(
+    *, store: CampaignStore, diagnosis: CausalDiagnosis,
+    tool_catalog: dict[str, Any], model: str,
+) -> dict[str, Any]:
+    """Author, preflight, and shadow-test an ARX package in shared PROPOSE."""
+    from robots.arx.critics.contracts import WorkerLimits
+    from robots.arx.critics.packages import load_candidate
+    from robots.arx.evolution_candidate_adapter import (
+        author_package, replay_package, replay_public_episodes,
+    )
+
+    manifest = store.manifest()
+    state = store.state()
+    parent_sha256 = state.get("current_bundle_sha256")
+    runtime = manifest.runtime
+    limits_file = store.root / str(runtime["critic_runtime_limits"])
+    if not limits_file.resolve().is_relative_to(store.root.resolve()):
+        raise ValueError("ARX worker limits must belong to the campaign")
+    limits = WorkerLimits.model_validate_json(limits_file.read_text())
+    artifact_index = _agent_artifact_index(store)
+    proposal_root = store.root / "agents" / "arx-stage2"
+    agent = CodexStageAgent(
+        output_root=proposal_root, model=model,
+        reasoning_effort=manifest.reasoning_effort,
+        environment_name=manifest.environment,
+        artifact_reader=lambda content_id: resolve_agent_artifact(store.root, content_id),
+    )
+    proposal = agent.propose_arx_package(
+        diagnosis=diagnosis, artifact_index=artifact_index,
+        parent_sha256=parent_sha256, generation=manifest.generation,
+        tool_catalog=tool_catalog,
+        contract_sha256=str(_authoritative_task_contract(store)["digest"]),
+        catalog_sha256=manifest.tool_catalog_sha256,
+        bootstrap_sha256=str(runtime["deployment_bootstrap_sha256"]),
+    )
+    draft = proposal_root / "drafts" / canonical_sha256(proposal)
+    if draft.is_dir():
+        package = load_candidate(draft)
+        if package.sha256 != canonical_sha256(read_json(draft / "manifest.json")):
+            raise ValueError("resumed ARX draft digest changed")
+    else:
+        package = author_package(
+            draft, files=proposal["files"], metadata=proposal["metadata"],
+            parent_sha256=parent_sha256, generation=manifest.generation,
+            limits=limits,
+        )
+    replay_package(draft, limits)
+    episodes: list[tuple[Path, bool]] = []
+    for row in store.episodes.records():
+        if row.get("status") != "valid":
+            continue
+        attempt = store.root / "attempts" / str(row["logical_id"]) / f"attempt-{int(row['attempt_index']):03d}"
+        episodes.append((attempt, bool(row["success"])))
+    report = replay_public_episodes(draft, limits, episodes)
+    report["eligible_for_live_gate"] = bool(
+        report["target_count"]
+        and report["target_detected"] == report["target_count"]
+        and report["success_control_false_positives"] == 0
+    )
+    report["validation_kind"] = "arx_rgb_observational_shadow_v1"
+    shadow_path = store.root / "analysis" / "candidate-shadow-replay" / f"{package.sha256}.json"
+    precommit_path = shadow_path.with_suffix(".precommit.json")
+    precommit = {"schema_version": 1, "candidate_sha256": package.sha256,
+                 "parent_bundle_sha256": parent_sha256,
+                 "shadow_report_sha256": canonical_sha256(report)}
+    for destination, payload in ((shadow_path, report), (precommit_path, precommit)):
+        if destination.is_file():
+            if read_json(destination) != payload:
+                raise ValueError("ARX shadow replay changed after commit")
+        else:
+            atomic_write_json(destination, payload, overwrite=False)
+    if not report["eligible_for_live_gate"]:
+        raise ValueError("ARX RGB shadow replay failed target recall or successful controls")
+    candidate_sha256 = store.register_candidate(draft)
+    store.transition(CampaignPhase.SAME_SEED_GATE)
+    return {"candidate_sha256": candidate_sha256, "candidate_kind": "arx_rgb_package_v1",
+            "shadow_replay": report}
 
 
 def run_proposal_stage(
@@ -4337,6 +4635,11 @@ def _run_proposal_stage_locked(
         raise ValueError("total candidate round limit is exhausted")
     if len(rejected_rounds) >= policy["max_candidate_rounds_per_cluster"]:
         raise ValueError("candidate round limit is exhausted for the active cluster")
+    if manifest.runtime.get("candidate_kind") == "arx_rgb_package_v1":
+        return _run_arx_proposal_stage(
+            store=store, diagnosis=diagnosis, tool_catalog=tool_catalog,
+            model=model or manifest.model,
+        )
     artifact_index = _agent_artifact_index(store)
     refinement_context = _rejected_gate_refinement_context(
         store,
@@ -4401,6 +4704,18 @@ def _run_proposal_stage_locked(
     observed_features = _observed_critic_features(
         store, require_command_rows=not committed_stage2_output.is_file()
     )
+    if manifest.environment == "arx_mujoco" and manifest.runtime.get("privileged"):
+        observed_features = tuple(sorted(set(observed_features) | {
+            "privileged.selected.target_gripper_distance_m",
+            "privileged.interaction.gripper_closed",
+            "privileged.interaction.grasped",
+            "privileged.interaction.progress",
+            "privileged.interaction.lift_m",
+            "privileged.interaction.success",
+            "privileged.interaction.in_target",
+            "privileged.interaction.retained",
+            "privileged.contact_summary.gripper_count",
+        }))
     parent_bundle: CandidateBundle | None = None
     parent_sha256 = state.get("current_bundle_sha256")
     if parent_sha256 is not None:
@@ -4483,6 +4798,18 @@ def _run_proposal_stage_locked(
             if isinstance(index, dict)
             else None
         )
+        # ARX public trajectories intentionally strip privileged state.  The
+        # privileged campaign replay must bind the immutable private sidecar.
+        if states_path is None and isinstance(index, dict):
+            states_path = _existing_artifact_path(
+                store, row, index.get("privileged_observations")
+            )
+            if states_path is None:
+                for artifact in index.get("artifacts", ()):
+                    if isinstance(artifact, dict) and str(artifact.get("path", "")).endswith("privileged_observations.jsonl"):
+                        states_path = _existing_artifact_path(store, row, artifact.get("path"))
+                        if states_path is not None:
+                            break
         if states_path is None:
             continue
         if record.episode_id in target_episode_ids:

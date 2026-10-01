@@ -294,6 +294,30 @@ def _detect_event_steps(rows: list[dict[str, Any]]) -> list[int]:
     return sorted(set(events))
 
 
+def label_overview_steps(step_indices: list[int], frame_count: int | None = None) -> list[int]:
+    """Return uniformly distributed, ordered overview timestamps."""
+    steps = sorted({int(step) for step in step_indices if int(step) >= 0})
+    if not steps:
+        return []
+    count = frame_count or (25 if max(steps) >= 400 else 17)
+    return sorted({int(round(value)) for value in np.linspace(steps[0], steps[-1], int(count))})
+
+
+def label_event_steps(
+    rows: list[dict[str, Any]],
+    divergence_steps: tuple[int, ...] = (),
+    maximum_event_windows: int = _DEFAULT_EVENT_WINDOW_COUNT,
+) -> list[int]:
+    """Return ordered event centers, prioritizing causal divergence timestamps."""
+    candidates = sorted({int(step) for step in divergence_steps} | set(_detect_event_steps(rows)))
+    prioritized = list(dict.fromkeys(int(step) for step in divergence_steps))
+    remaining = [step for step in candidates if step not in prioritized]
+    slots = max(0, int(maximum_event_windows) - len(prioritized))
+    if len(remaining) > slots > 0:
+        remaining = [remaining[int(round(index))] for index in np.linspace(0, len(remaining) - 1, slots)]
+    return prioritized[: int(maximum_event_windows)] + remaining[:slots]
+
+
 def _frame(reader: Any, index: int) -> np.ndarray:
     try:
         value = reader.get_data(index)
@@ -344,12 +368,16 @@ def build_episode_visual_artifacts(
     divergence_steps: tuple[int, ...] = (),
     source_fps: int = 20,
     include_privileged_state_summary: bool = False,
+    evidence_policy: str | None = None,
     overview_frame_count: int | None = None,
     event_window_radius_steps: int = _DEFAULT_EVENT_WINDOW_RADIUS,
     event_window_stride_steps: int = _DEFAULT_EVENT_WINDOW_STRIDE,
     maximum_event_windows: int = _DEFAULT_EVENT_WINDOW_COUNT,
 ) -> dict[str, Any]:
     """Create overview, divergence windows and one synchronized short clip."""
+
+    if evidence_policy == "arx_rgb_public_v1" and include_privileged_state_summary:
+        raise ValueError("ARX public evidence forbids privileged state summaries")
 
     import imageio.v2 as iio
 
@@ -384,14 +412,7 @@ def build_episode_visual_artifacts(
         frame_counts = [reader.count_frames() for _, reader in readers]
         maximum_frame = min(max(0, count - 1) for count in frame_counts)
         maximum_step = min(max(steps), maximum_frame)
-        overview_indexes = sorted(
-            {
-                int(round(value))
-                for value in np.linspace(
-                    0, maximum_step, int(overview_frame_count)
-                )
-            }
-        )
+        overview_indexes = label_overview_steps(list(range(maximum_step + 1)), overview_frame_count)
         overview = root / f"overview-{camera_token}-contact-sheet.png"
         _contact_sheet(readers, overview_indexes, overview)
 
@@ -414,22 +435,9 @@ def build_episode_visual_artifacts(
                 {"path": str(path), "center_step": center, "sample_steps": window}
             )
 
-        event_candidates = sorted(
-            {int(step) for step in divergence_steps}
-            | set(_detect_event_steps(state_rows))
-        )
-        prioritized = list(dict.fromkeys(int(step) for step in divergence_steps))
-        remaining = [step for step in event_candidates if step not in prioritized]
-        remaining_slots = max(0, int(maximum_event_windows) - len(prioritized))
-        if len(remaining) > remaining_slots > 0:
-            remaining = [
-                remaining[int(round(index))]
-                for index in np.linspace(0, len(remaining) - 1, remaining_slots)
-            ]
-        prioritized.extend(remaining[:remaining_slots])
         event_centers = [
             max(0, min(int(step), maximum_step))
-            for step in prioritized[: int(maximum_event_windows)]
+            for step in label_event_steps(state_rows, divergence_steps, maximum_event_windows)
         ]
         event_files = []
         event_offsets = range(

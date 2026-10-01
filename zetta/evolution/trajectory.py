@@ -661,6 +661,7 @@ def index_episode_trajectory(
     context_before: int = 8,
     context_after: int = 8,
     no_progress_window: int = 8,
+    evidence_policy: str | None = None,
 ) -> TrajectoryAnalysis:
     """Build a stable index and structured failure segments for one episode."""
 
@@ -681,6 +682,13 @@ def index_episode_trajectory(
         name: _strict_jsonl(named_paths[name])
         for name in ("chunks", "actions", "states", "tools")
     }
+    if evidence_policy is not None:
+        from zetta.evolution.evidence_policy import get_evidence_policy
+
+        visibility = get_evidence_policy(evidence_policy)
+        for records in rows.values():
+            for row in records:
+                visibility.validate_public_event(row)
     for name, path in named_paths.items():
         if name.startswith("video-") and (
             not path.is_file() or path.stat().st_size == 0

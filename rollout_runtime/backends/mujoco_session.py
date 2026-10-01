@@ -233,7 +233,54 @@ def create_mujoco_session(config: dict[str, Any]) -> Any:
         from rollout_runtime.backends.rebot_g1d_session import RebotG1DSession
 
         return RebotG1DSession(config)
+    if provider == "arx_ac_one":
+        return ArxAcOneSession(config)
     raise MujocoSessionError(f"unsupported MuJoCo provider {provider!r}")
+
+
+class ArxAcOneSession:
+    """Blocking adapter around the prepared ARX Gymnasium environment."""
+
+    def __init__(self, config: dict[str, Any]) -> None:
+        try:
+            from robots.arx.environment import ArxMujocoEnv
+
+            self._env = ArxMujocoEnv(
+                prepared_scene_bundle=str(config["arx_prepared_scene_bundle"]),
+                mapping_path=str(config["arx_mapping_path"]),
+                task_manifest=str(config["arx_task_manifest"]),
+                camera_names=dict(config["camera_names"]),
+                image_width=int(config["image_width"]),
+                image_height=int(config["image_height"]),
+            )
+        except BaseException as exc:
+            raise MujocoSessionError(f"cannot construct ARX AC one environment: {type(exc).__name__}: {exc}") from exc
+        self.descriptor = {
+            "action_shape": (14,),
+            "action_low": np.asarray(self._env.action_space.low, dtype=np.float32),
+            "action_high": np.asarray(self._env.action_space.high, dtype=np.float32),
+            "action_names": [f"arx_policy_{index}" for index in range(14)],
+        }
+        self._last = None
+
+    def reset(self, *, seed: int | None, options: dict[str, Any] | None):
+        self._last, info = self._env.reset(seed=seed, options=options)
+        return self._last, info
+
+    def step(self, action: np.ndarray):
+        result = self._env.step(action)
+        self._last = result[0]
+        info = dict(result[4])
+        info["is_success"] = bool(result[2] and info.get("terminal_reason") == "success")
+        return result[:4] + (info,)
+
+    def render(self) -> np.ndarray | None:
+        if self._last is None:
+            return None
+        return np.asarray(self._last["front_rgb"])
+
+    def close(self) -> None:
+        self._env.close()
 
 
 def _error_payload(exc: BaseException) -> dict[str, str]:

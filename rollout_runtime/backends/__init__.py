@@ -55,7 +55,13 @@ image, so it remains "declared but not implemented," and
 ``RoboCasaSession``) will be added later.
 """
 
-POLICY_BACKENDS = ("fake", "zetta_openpi", "groot", "rebot_g1d_skill")
+POLICY_BACKENDS = (
+    "fake",
+    "zetta_openpi",
+    "groot",
+    "rebot_g1d_skill",
+    "cosmos3_edge_arx_remote",
+)
 """Optional policy backends, including the hash-pinned reBot expert skill."""
 
 
@@ -197,6 +203,23 @@ def build_policy_core(
         if model_version:
             merged.setdefault("model_version", model_version)
         return RebotG1DSkillPolicyCore(RebotG1DSkillPolicyConfig.from_mapping(merged))
+    if backend == "cosmos3_edge_arx_remote":
+        from rollout_runtime.backends.cosmos3_edge_arx_policy import (
+            Cosmos3EdgeArxPolicyConfig,
+            Cosmos3EdgeArxPolicyCore,
+        )
+
+        merged = dict(policy_config or {})
+        merged.setdefault("device", device)
+        merged.setdefault("dtype", dtype)
+        merged.setdefault("policy_family", policy_family)
+        merged.setdefault("action_dim", action_dim)
+        merged.setdefault("actions_per_chunk", actions_per_chunk)
+        if model_version:
+            merged.setdefault("model_version", model_version)
+        return Cosmos3EdgeArxPolicyCore(
+            Cosmos3EdgeArxPolicyConfig.from_mapping(merged)
+        )
     raise ValueError(
         f"unknown policy backend {backend!r}; expected one of {list(POLICY_BACKENDS)}"
     )

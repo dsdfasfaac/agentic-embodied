@@ -1,0 +1,13 @@
+{
+  "repo_root": "/data4/zhengyikai/Agentic-Embodied",
+  "scene": "/data4/zhengyikai/Agentic-Embodied/runs/arx_pickup_test_tube/pickup_test_tube_initial_scene",
+  "client_python": "/data4/dingxin/cosmos3_edge_arx_task7_runtime/client_py310/bin/python",
+  "bundle": "/data4/zhengyikai/cosmos3-edge-arx5-inference",
+  "server_python": "/data4/zhengyikai/cosmos3-edge-arx5-inference/.venv/bin/python",
+  "server_deps": "/data4/dingxin/loop2_stage2_c2_phase_v3/server_deps",
+  "checkpoint": "/data4/zhengyikai/ckpt1/model",
+  "model_config": "/data4/zhengyikai/ckpt1/config/config.yaml",
+  "libstdcpp": "/usr/lib/x86_64-linux-gnu/libstdc++.so.6",
+  "port": 15591,
+  "gpu": 2
+}

@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from zetta.evolution.clustering import cluster_failure_segments
+from zetta.evolution.candidate_artifacts import candidate_kind, resolve_candidate_artifact
 from zetta.evolution.jsonio import atomic_write_json, canonical_sha256, read_json
 from zetta.evolution.models import (
     CampaignPhase,
@@ -31,24 +32,7 @@ def _known_job_ids(queue: SharedHostQueue) -> set[str]:
 
 def resolve_bundle_file(store: CampaignStore, bundle_sha256: str | None) -> str:
     """Resolve one frozen bundle by digest, including an external parent bundle."""
-
-    if bundle_sha256 is None:
-        return "none"
-    configured = store.manifest().runtime.get("bundle_files_by_sha", {})
-    candidates: list[Path] = []
-    if isinstance(configured, dict) and bundle_sha256 in configured:
-        configured_path = Path(str(configured[bundle_sha256]))
-        candidates.append(
-            configured_path
-            if configured_path.is_absolute()
-            else store.root / configured_path
-        )
-    candidates.append(store.root / "candidates" / bundle_sha256 / "bundle.json")
-    candidates.extend(sorted((store.root / "bundles").glob("*.json")))
-    for path in candidates:
-        if path.is_file() and canonical_sha256(read_json(path)) == bundle_sha256:
-            return str(path.resolve())
-    raise ValueError(f"frozen bundle artifact is missing: {bundle_sha256}")
+    return resolve_candidate_artifact(store.root, store.manifest().runtime, bundle_sha256)
 
 
 def build_rollout_jobs(
@@ -66,7 +50,7 @@ def build_rollout_jobs(
     bundle_file = resolve_bundle_file(store, current_bundle)
     if current_bundle is not None:
         joined_command = "\n".join(str(part) for part in command_template)
-        if "{bundle_file}" not in joined_command and "{bundle}" not in joined_command:
+        if not any(token in joined_command for token in ("{bundle_file}", "{bundle}", "{candidate_path}")):
             raise ValueError("rollout command must consume the frozen bundle artifact")
     completed = {row["logical_id"] for row in store.episodes.records()}
     attempts_by_logical: dict[str, list[dict[str, Any]]] = {}
@@ -106,6 +90,8 @@ def build_rollout_jobs(
             "baseline_mode": "active_bundle" if current_bundle else "strict_pure_vla",
             "bundle_file": bundle_file,
             "bundle": bundle_file,
+            "candidate_path": bundle_file,
+            "candidate_kind": candidate_kind(manifest.runtime),
             "generation": manifest.generation,
             "output_dir": str(output_dir),
             "result_file": str(output_dir / "episode_record.json"),
@@ -113,6 +99,7 @@ def build_rollout_jobs(
             "task": manifest.task,
             "environment": manifest.environment,
             "env_endpoint": "__ZETTA_ENV_ENDPOINT__",
+            "gateway_port": int(manifest.runtime.get("gateway_port", 5582)) + index,
         }
         jobs.append(
             RolloutJob(

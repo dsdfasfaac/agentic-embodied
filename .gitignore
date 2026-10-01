@@ -19,3 +19,24 @@ docs/build/
 
 build/
 .claude/settings.json
+
+# Host-local environments and credentials.
+/.venv/
+/.aws/
+/.pytest_cache/
+/.ruff_cache/
+
+# Large scene assets and generated experiment outputs live on shared storage.
+/runs
+/scenes
+/pickup_10_episode_arx_physics
+/pickup_10_episode_scene_bundle
+/pickup_no_scale_arx_refined_10
+/cosmos-arx-cr-independent-session-20260922
+/pickup_10_episode_arx_physics.zip
+/pickup_10_episode_scene_bundle.zip
+/pickup_no_scale_arx_refined_10.zip
+/cosmos-arx-cr-independent-session-20260922.zip
+/MUJOCO_LOG.TXT
+/zeva-arx-*.log
+/integrations/*/runs

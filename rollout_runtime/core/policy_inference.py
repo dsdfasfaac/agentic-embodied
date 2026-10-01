@@ -70,6 +70,7 @@ BATCHABLE_PARAM_KEYS: dict[str, frozenset[str]] = {
     "pi05": frozenset({"noise_seed"}),
     "fake": frozenset(),
     "rebot_g1d_skill": frozenset(),
+    "cosmos3_edge_arx": frozenset(),
 }
 """Per-policy-family declarations of "mixable" parameter keys: requests
 differing only in these keys may still enter the same batch.

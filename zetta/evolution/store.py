@@ -5,12 +5,17 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from pathlib import Path
+import os
+import shutil
+import uuid
 from typing import Any
 
+from zetta.evolution.candidate_artifacts import ARX, candidate_kind, load_artifact, resolve_candidate_artifact
 from zetta.evolution.jsonio import (
     AppendOnlyLedger,
     atomic_write_json,
     canonical_sha256,
+    directory_lock,
     read_json,
 )
 from zetta.evolution.models import (
@@ -255,30 +260,58 @@ class CampaignStore:
         atomic_write_json(canonical, record.as_dict(), overwrite=False)
         return self.episodes.append(record.as_dict())
 
-    def register_candidate(self, candidate: CandidateBundle) -> str:
+    def register_candidate(self, candidate: CandidateBundle | Path) -> str:
         state = self.state()
         if CampaignPhase(state["phase"]) != CampaignPhase.PROPOSE:
             raise ValueError("candidate registration requires propose phase")
-        if candidate.parent_sha256 != state.get("current_bundle_sha256"):
-            raise ValueError("candidate parent is stale")
-        path = self.root / "candidates" / candidate.sha256 / "bundle.json"
-        atomic_write_json(path, candidate.as_dict(), overwrite=False)
+        kind = candidate_kind(self.manifest().runtime)
+        if kind == ARX:
+            if not isinstance(candidate, Path):
+                raise ValueError("ARX candidate must be a package directory")
+            from robots.arx.critics.packages import load_candidate
+
+            package = load_candidate(candidate)
+            ref = load_artifact(candidate, package.sha256, kind)
+            if ref.parent_sha256 != state.get("current_bundle_sha256"):
+                raise ValueError("candidate parent is stale")
+            path = self.root / "candidates" / ref.sha256 / "package"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            with directory_lock(path.parent / ".publish.lock"):
+                if not path.exists():
+                    staging = path.parent / f".package-{uuid.uuid4().hex}.tmp"
+                    try:
+                        shutil.copytree(candidate, staging, symlinks=False)
+                        load_artifact(staging, ref.sha256, kind)
+                        os.replace(staging, path)
+                    finally:
+                        if staging.exists():
+                            shutil.rmtree(staging)
+            load_artifact(path, ref.sha256, kind)
+        else:
+            if not isinstance(candidate, CandidateBundle):
+                raise ValueError("structured candidate requires CandidateBundle")
+            if candidate.parent_sha256 != state.get("current_bundle_sha256"):
+                raise ValueError("candidate parent is stale")
+            path = self.root / "candidates" / candidate.sha256 / "bundle.json"
+            atomic_write_json(path, candidate.as_dict(), overwrite=False)
+            ref = load_artifact(path, candidate.sha256, kind)
         self.candidate_ledger.append(
             {
-                "candidate_sha256": candidate.sha256,
-                "candidate_id": candidate.candidate_id,
-                "generation": candidate.generation,
-                "parent_sha256": candidate.parent_sha256,
-                "diagnosis_sha256": candidate.diagnosis_sha256,
+                "candidate_sha256": ref.sha256,
+                "candidate_id": ref.candidate_id,
+                "generation": ref.generation,
+                "parent_sha256": ref.parent_sha256,
+                "diagnosis_sha256": ref.diagnosis_sha256,
+                **({"candidate_kind": kind} if kind == ARX else {}),
             }
         )
         updated = {
             **state,
-            "candidate_sha256": candidate.sha256,
+            "candidate_sha256": ref.sha256,
             "updated_at": _utc_now(),
         }
         atomic_write_json(self.state_path, updated, overwrite=True)
-        return candidate.sha256
+        return ref.sha256
 
     def recover_registered_candidate(self, candidate_sha256: str) -> dict[str, Any]:
         """Finish the state-pointer step after an interrupted candidate commit."""
@@ -292,12 +325,12 @@ class CampaignStore:
         ]
         if len(matches) != 1 or rows[-1] != matches[0]:
             raise ValueError("candidate recovery requires the latest unique ledger row")
-        bundle_path = self.root / "candidates" / candidate_sha256 / "bundle.json"
-        bundle = read_json(bundle_path)
-        if canonical_sha256(bundle) != candidate_sha256:
-            raise ValueError("candidate recovery bundle digest mismatch")
-        candidate = CandidateBundle.from_dict(bundle)
-        if candidate.parent_sha256 != state.get("current_bundle_sha256"):
+        runtime = self.manifest().runtime
+        ref = load_artifact(
+            Path(resolve_candidate_artifact(self.root, runtime, candidate_sha256)),
+            candidate_sha256, candidate_kind(runtime),
+        )
+        if ref.parent_sha256 != state.get("current_bundle_sha256"):
             raise ValueError("candidate recovery parent is stale")
         active = state.get("candidate_sha256")
         if active not in {None, candidate_sha256}:
@@ -350,12 +383,11 @@ class CampaignStore:
             raise ValueError("heldout-only evaluation campaigns cannot promote")
         if state.get("candidate_sha256") != candidate_sha256:
             raise ValueError("promotion candidate is stale")
-        candidate_path = self.root / "candidates" / candidate_sha256 / "bundle.json"
-        candidate = read_json(candidate_path)
-        if canonical_sha256(candidate) != candidate_sha256:
-            raise ValueError("candidate artifact digest mismatch")
+        kind = candidate_kind(self.manifest().runtime)
+        candidate_path = Path(resolve_candidate_artifact(self.root, self.manifest().runtime, candidate_sha256))
+        candidate = load_artifact(candidate_path, candidate_sha256, kind)
         parent = state.get("current_bundle_sha256")
-        if candidate.get("parent_sha256") != parent:
+        if candidate.parent_sha256 != parent:
             raise ValueError("candidate parent no longer matches current bundle")
         gates = [
             row
@@ -409,11 +441,11 @@ class CampaignStore:
             "updated_at": _utc_now(),
         }
         atomic_write_json(self.state_path, updated, overwrite=True)
-        atomic_write_json(
-            self.root / "bundles" / f"generation-{state['generation']:04d}.json",
-            candidate,
-            overwrite=False,
-        )
+        if kind != ARX:
+            atomic_write_json(
+                self.root / "bundles" / f"generation-{state['generation']:04d}.json",
+                read_json(candidate_path), overwrite=False,
+            )
         return promotion
 
     def status(self) -> dict[str, Any]:
@@ -430,7 +462,7 @@ class CampaignStore:
                 ),
                 "successes": sum(bool(row.get("success")) for row in valid),
             },
-            "candidates": len(list((self.root / "candidates").glob("*/bundle.json"))),
+            "candidates": len(self.candidate_ledger.records()),
             "diagnoses": len(self.diagnoses.records()),
             "candidate_ledger": self.candidate_ledger.records(),
             "gates": self.gates.records(),

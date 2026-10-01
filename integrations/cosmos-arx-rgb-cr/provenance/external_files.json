@@ -1,0 +1,132 @@
+[
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/toolkit.py",
+    "sha256": "5709c8fd6b123dd171cfa86bee088a8e552b60da0d0f406e49f18aab12291154"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/evaluators.py",
+    "sha256": "54e3f68b64c238bce84dc2f8eadac6fafb27ee10020ad2f03c3d54750e69f827"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/mujoco_mapping.py",
+    "sha256": "cae8eb575ff84089f7182969e6e5a328624cc6d89bc0e800aa70064e7a683113"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/__init__.py",
+    "sha256": "98134ab3e1f64dd96336c60986ba502257dc96bd27402e9035ba57555c71560e"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/scene_bundle.py",
+    "sha256": "b78c30f299c03f640b367279da87a2b08f33c886baf2c16ba8c8aa35c154e539"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/prompt_bundle.py",
+    "sha256": "c7f93df9526670af59845372f1ea1a66d2dd8e8c038e3599c5db6dcfc00dcbd4"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/prepare_scene_bundle.py",
+    "sha256": "d350493b51497005ee243b80c43da01676732f4fec7f6cef7b8ffd8caca695af"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/contracts.py",
+    "sha256": "87e04d27ac0e7e6bf9d600f8cf240f92527136387e6e74df5b35e76cd636886c"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/environment.py",
+    "sha256": "86d5fc6ab66370408a00d66e62a1229abefc29496b82c4d6cf188c1d065c554d"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/cosmos_edge_client.py",
+    "sha256": "50046f6622c0dcc2195dc7dc0ad51fa97bb488bf9a4af5158ed659326004ecef"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/control.py",
+    "sha256": "3c37e4d7fba53b2a708f77afcaa1ac9b94109e3ce0cbe5fe1d87ea1422825e8e"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/camera_config.py",
+    "sha256": "5b20dcfab86bf869f24ea14066a623571a7495d8b26d0c303de40619caa19058"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/task_adapter.py",
+    "sha256": "2e013d621c4ac5bd58e8e16a6b227df85c68135d363fa47e47288f81add73708"
+  },
+  {
+    "root": "repo_root",
+    "relative": "robots/arx/manifests/task7_model_a.yaml",
+    "sha256": "964f65193c98c0d764183c1ec0ea1c026243ae266ec42af21f8c80e64bf38530"
+  },
+  {
+    "root": "scene",
+    "relative": "scene.xml",
+    "sha256": "14d24583b1f80f321c88c2e2f7ad3f7bf61cb76ea00857ccef2f6bd5530a7963"
+  },
+  {
+    "root": "scene",
+    "relative": "task.yaml",
+    "sha256": "94a0cda81842259d634a457ae2864ab00e3fbd6efd1e2130430c76ef4964dd55"
+  },
+  {
+    "root": "scene",
+    "relative": "mapping.json",
+    "sha256": "97145caf33706798cf65a52fda5a079b965102e4a665da45c95d62ce1cc78d62"
+  },
+  {
+    "root": "bundle",
+    "relative": "third_party/cosmos-framework/cosmos_framework/scripts/action_policy_server_arx_task7_edge.py",
+    "sha256": "b26441405d36bf2a541ba24944a49be01629d2f3ba84e37f250fb66746efcdef"
+  },
+  {
+    "root": "bundle",
+    "relative": "third_party/cosmos-framework/cosmos_framework/scripts/action_policy_server_libero.py",
+    "sha256": "c5a786bf75080af01924221a285e05d47a36305b072dc44da1b7c3c6d47193b1"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "export_manifest.json",
+    "sha256": "be4b9afa99a3775f3eb20c9e2407bf73c409dec52292472c71e6a8e37549f853"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "config.json",
+    "sha256": "ba461c3cf7b555d3f7cea61dbb08e228e86c28bf912e5e305c1f346fb81f565e"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "model.safetensors.index.json",
+    "sha256": "45e3b8bafd7849c265633c566c8a927a0c3955cc85200cb7804f221b6c00fb67"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "preprocessor_config.json",
+    "sha256": "111a151f82088f4e15cb4d488c5db0e9c481ae46ec8cf146d734ac62d13a57d6"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "processor_config.json",
+    "sha256": "7444d3780a8ed0b11d850292fa54407cfd1f389c101d111090289da354b13333"
+  },
+  {
+    "root": "checkpoint",
+    "relative": "tokenizer_config.json",
+    "sha256": "85577f01be64ea03ee9aacc0536088e47b96971e4aff21e0aa604900b1410386"
+  },
+  {
+    "root": "model_config",
+    "relative": "",
+    "sha256": "b2ec541c41338e34194e81713402ba716c6a7dcce31f84412f0b81fc5976ea3a"
+  }
+]

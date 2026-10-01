@@ -1,0 +1,49 @@
+{
+  "schema_version": "zetta_arx_task_v1",
+  "task_id": 0,
+  "name": "pickup_test_tube",
+  "display_name": "PickUpTestTube",
+  "instruction": "Pick up test tube with the pink label.",
+  "start_state": [0.0322351456, 0.0062942505, 0.0024795532, -0.0402460098, -0.0268936157, -0.0192642212, -2.98, 0.0181198120, -0.0013351440, 0.0032424927, -0.0310897827, -0.0040054321, 0.0700006485, -3.4],
+  "execution_steps": 16,
+  "max_steps": 600,
+  "control": {
+    "lock_left_arm": true,
+    "lock_right_arm": false,
+    "lock_right_gripper": false,
+    "zero_left_model_state": true,
+    "zero_right_model_state": false,
+    "model_left_gripper": null,
+    "model_right_gripper": null,
+    "arm_filter_alpha": 0.35,
+    "gripper_filter_alpha": 0.35,
+    "max_joint_step": 0.035,
+    "max_gripper_step": 0.08,
+    "max_joint_delta": 0.5,
+    "max_gripper_delta": 1.0,
+    "gripper_command_offsets": [0.0, 0.9]
+  },
+  "starting_scenes": {
+    "selection": "explicit",
+    "default_scene_id": "tubes_2_mujoco_modified",
+    "allowed_scene_ids": ["tubes_2_mujoco_modified"]
+  },
+  "success": {
+    "evaluator": "pickup_test_tube_v1",
+    "parameters": {
+      "target_logical_id": "tube_01",
+      "allowed_gripper": "right",
+      "lift_height_m": 0.01,
+      "hold_steps": 5,
+      "require_bilateral_finger_contact": true
+    }
+  },
+  "failure": {
+    "evaluator": "arx_safety_v1",
+    "parameters": {
+      "workspace_min": [-1.5, -1.5, -0.25],
+      "workspace_max": [1.5, 1.5, 2.5],
+      "unrecoverable_drop_z": -0.2
+    }
+  }
+}

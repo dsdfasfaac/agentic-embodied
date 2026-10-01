@@ -1,0 +1,168 @@
+{
+  "date": "2026-09-21",
+  "host": "h20-125",
+  "unit_tests_passed": 37,
+  "skill_validator": "passed",
+  "doctor_external_hash_mismatches": [],
+  "integration_runs": {
+    "smoke_183173": {
+      "closed": {
+        "frame": 723,
+        "failed": false,
+        "explicit_agent_finish": false,
+        "mode": "smoke"
+      },
+      "delivery_audit.json": {
+        "mode": "smoke",
+        "seed": 183173,
+        "frames": 723,
+        "recorded_recovery_replay": true,
+        "prefix_command_max_abs_error": 0,
+        "prefix_measured_state_max_abs_error": 0,
+        "handoff_executed": false,
+        "fresh_cosmos_requests": 0,
+        "post_recovery_cosmos_steps": 0,
+        "full_pickup_window_end_frames": [],
+        "final_physical_pass": false,
+        "formal_stage2_pass": false,
+        "requires_visual_review": true,
+        "note": "Offline only. Exact replay is not an independent Agent recovery trial; handoff is not success."
+      },
+      "smoke_result.json": {
+        "frame": 723,
+        "exact_rgb_checkpoints": true,
+        "gate_eligible": true,
+        "fresh_cosmos_requests": 0,
+        "independent_recovery_trial": false
+      },
+      "exact_rgb_review_frames": [
+        183,
+        231,
+        249,
+        267,
+        285,
+        303,
+        321,
+        339,
+        357,
+        375,
+        393,
+        411,
+        429,
+        447,
+        465,
+        483,
+        501,
+        519,
+        537,
+        555,
+        573,
+        594,
+        612,
+        632,
+        652,
+        673,
+        694,
+        715,
+        723
+      ],
+      "exact_rgb_checkpoint_count": 29
+    },
+    "live_prefix_check_183173": {
+      "closed": {
+        "frame": 183,
+        "failed": false,
+        "explicit_agent_finish": true,
+        "mode": "live"
+      },
+      "delivery_audit.json": {
+        "mode": "live",
+        "seed": 183173,
+        "frames": 183,
+        "recorded_recovery_replay": false,
+        "prefix_command_max_abs_error": 0,
+        "prefix_measured_state_max_abs_error": 0,
+        "handoff_executed": false,
+        "fresh_cosmos_requests": 0,
+        "post_recovery_cosmos_steps": 0,
+        "full_pickup_window_end_frames": [],
+        "final_physical_pass": false,
+        "formal_stage2_pass": false,
+        "requires_visual_review": true,
+        "note": "Offline only. Exact replay is not an independent Agent recovery trial; handoff is not success."
+      },
+      "rejections": [
+        {
+          "frame": 183,
+          "reason": "resume blocked: Agent EEF restaging required after failed acquisition"
+        }
+      ]
+    },
+    "replay_handoff_183173": {
+      "closed": {
+        "frame": 755,
+        "failed": false,
+        "explicit_agent_finish": true,
+        "mode": "replay-pregrasp"
+      },
+      "delivery_audit.json": {
+        "mode": "replay-pregrasp",
+        "seed": 183173,
+        "frames": 755,
+        "recorded_recovery_replay": true,
+        "prefix_command_max_abs_error": 0,
+        "prefix_measured_state_max_abs_error": 0,
+        "handoff_executed": true,
+        "fresh_cosmos_requests": 2,
+        "post_recovery_cosmos_steps": 32,
+        "full_pickup_window_end_frames": [],
+        "final_physical_pass": false,
+        "formal_stage2_pass": false,
+        "requires_visual_review": true,
+        "note": "Offline only. Exact replay is not an independent Agent recovery trial; handoff is not success."
+      },
+      "exact_rgb_review_frames": [
+        183,
+        231,
+        249,
+        267,
+        285,
+        303,
+        321,
+        339,
+        357,
+        375,
+        393,
+        411,
+        429,
+        447,
+        465,
+        483,
+        501,
+        519,
+        537,
+        555,
+        573,
+        594,
+        612,
+        632,
+        652,
+        673,
+        694,
+        715,
+        723
+      ],
+      "exact_rgb_checkpoint_count": 29
+    },
+    "pipe_client_check_183173": {
+      "closed": {
+        "frame": 183,
+        "failed": false,
+        "explicit_agent_finish": true,
+        "mode": "live"
+      }
+    }
+  },
+  "frozen_runtime_10_files_unchanged": true,
+  "interpretation": "Packaging integration checks only; not additional independent C&R success trials. Fresh model inference was tested for32 steps, not a new complete task evaluation."
+}

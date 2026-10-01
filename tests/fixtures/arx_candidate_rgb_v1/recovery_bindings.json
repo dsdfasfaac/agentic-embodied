@@ -1,0 +1,16 @@
+[
+  {
+    "binding_id": "smoke-stop",
+    "failure_modes": [
+      "smoke_red_high"
+    ],
+    "skill_entrypoint": "smoke-stop",
+    "allowed_tools": [
+      "arx.finish"
+    ],
+    "max_recovery_steps": 0,
+    "max_agent_decisions": 1,
+    "monitor_policy": "stop_all_motion",
+    "reentry_policy_id": "smoke-never-resume"
+  }
+]

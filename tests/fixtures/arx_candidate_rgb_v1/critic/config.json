@@ -1,0 +1,23 @@
+{
+  "schema_version": "arx.critic.config.v1",
+  "extractor_config": {},
+  "rule_failure_modes": {
+    "red-high": "smoke_red_high"
+  },
+  "rules": [
+    {
+      "rule_id": "red-high",
+      "title": "Functional RGB threshold trigger",
+      "feature": "visual.mean_red",
+      "operator": "gt",
+      "threshold": 0.5,
+      "dwell_steps": 2,
+      "cooldown_steps": 0,
+      "proposal": "interrupt",
+      "activation_conditions": [],
+      "evidence_ids": [
+        "fixture-red-sequence"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,722 @@
+{
+  "seeds": [
+    43935,
+    183173,
+    344246
+  ],
+  "trial_count": 3,
+  "handoffs": 2,
+  "final_full_pickup_physical_passes": 0,
+  "scope": "first batch of other historical C2 failures; not all remaining seeds",
+  "trials": [
+    {
+      "seed": 43935,
+      "frames": 1400,
+      "prefix_frames": 215,
+      "prefix_reproduction_exact": true,
+      "frozen_source_hashes_match": true,
+      "controller_segments": [
+        {
+          "source": "original_prefix",
+          "start_frame": 1,
+          "end_frame": 215
+        },
+        {
+          "source": "set_gripper",
+          "start_frame": 216,
+          "end_frame": 260
+        },
+        {
+          "source": "move_eef",
+          "start_frame": 261,
+          "end_frame": 1080
+        },
+        {
+          "source": "hold",
+          "start_frame": 1081,
+          "end_frame": 1088
+        },
+        {
+          "source": "cosmos_after_recovery",
+          "start_frame": 1089,
+          "end_frame": 1400
+        }
+      ],
+      "controller_steps": {
+        "original_prefix": 215,
+        "set_gripper": 45,
+        "move_eef": 820,
+        "hold": 8,
+        "cosmos_after_recovery": 312
+      },
+      "agent_tool_calls": {
+        "set_gripper": 1,
+        "move_eef": 45,
+        "hold": 1,
+        "review_pregrasp": 1,
+        "resume_vla": 6,
+        "finish": 1
+      },
+      "critic_proposals": [
+        {
+          "frame": 215,
+          "kind": "attempted_grasp_target_left_behind"
+        },
+        {
+          "frame": 1201,
+          "kind": "grasp_outcome_unknown"
+        }
+      ],
+      "pregrasp_reviews": [
+        {
+          "eligible": true,
+          "reasons": [],
+          "stable_fixed_views": [],
+          "geometry": {
+            "source": "temporal wrist RGB + static calibration + own commands; no measured state",
+            "frame": 1088,
+            "rgb_observations": [
+              {
+                "frame": 946,
+                "pixel_uv": [
+                  148.296875,
+                  213.42708333333334
+                ],
+                "pink_pixels": 576
+              },
+              {
+                "frame": 964,
+                "pixel_uv": [
+                  150.90749601275917,
+                  211.0701754385965
+                ],
+                "pink_pixels": 627
+              },
+              {
+                "frame": 982,
+                "pixel_uv": [
+                  152.50072780203786,
+                  207.9854439592431
+                ],
+                "pink_pixels": 687
+              },
+              {
+                "frame": 1002,
+                "pixel_uv": [
+                  154.7161629434954,
+                  204.41130091984232
+                ],
+                "pink_pixels": 761
+              },
+              {
+                "frame": 1022,
+                "pixel_uv": [
+                  157.04857819905214,
+                  199.63625592417063
+                ],
+                "pink_pixels": 844
+              },
+              {
+                "frame": 1042,
+                "pixel_uv": [
+                  160.83508403361344,
+                  195.68487394957984
+                ],
+                "pink_pixels": 952
+              },
+              {
+                "frame": 1061,
+                "pixel_uv": [
+                  163.99238095238096,
+                  190.79809523809524
+                ],
+                "pink_pixels": 1050
+              },
+              {
+                "frame": 1080,
+                "pixel_uv": [
+                  166.62169086251066,
+                  184.4807856532878
+                ],
+                "pink_pixels": 1171
+              },
+              {
+                "frame": 1088,
+                "pixel_uv": [
+                  166.73791348600508,
+                  184.8897370653096
+                ],
+                "pink_pixels": 1179
+              }
+            ],
+            "baseline_m": 0.06505633290027124,
+            "ray_residual_m": 0.0010029196773030141,
+            "rgb_band_to_commanded_tcp_tool_m": [
+              0.027449152546827338,
+              0.004145748706462737,
+              -0.0055941198007553586
+            ],
+            "rgb_band_to_commanded_tcp_world_m": [
+              0.02772903477590216,
+              0.005608689036279202,
+              0.0012572278681562132
+            ],
+            "proposal_only": true,
+            "limitation": "assumes target stationary between views; ray fit is not a bound on depth error",
+            "measurement_mode": "temporal_rgb",
+            "split_fit_disagreement_m": 0.0011294401905407665,
+            "fresh_window_verified": true
+          },
+          "history_frames": [
+            1083,
+            1084,
+            1085,
+            1086,
+            1087,
+            1088
+          ],
+          "limitation": "development pregrasp envelope, not verified contact/collision safety or guaranteed Cosmos initiation",
+          "frame": 1088,
+          "proposal_only": true,
+          "proposal_id": "6e7f47925b62db8bcd6c",
+          "kind": "resume_vla_pregrasp_candidate"
+        }
+      ],
+      "validated_reentries": [
+        {
+          "frame": 1088,
+          "proposal": {
+            "eligible": true,
+            "reasons": [],
+            "stable_fixed_views": [],
+            "geometry": {
+              "source": "temporal wrist RGB + static calibration + own commands; no measured state",
+              "frame": 1088,
+              "rgb_observations": [
+                {
+                  "frame": 946,
+                  "pixel_uv": [
+                    148.296875,
+                    213.42708333333334
+                  ],
+                  "pink_pixels": 576
+                },
+                {
+                  "frame": 964,
+                  "pixel_uv": [
+                    150.90749601275917,
+                    211.0701754385965
+                  ],
+                  "pink_pixels": 627
+                },
+                {
+                  "frame": 982,
+                  "pixel_uv": [
+                    152.50072780203786,
+                    207.9854439592431
+                  ],
+                  "pink_pixels": 687
+                },
+                {
+                  "frame": 1002,
+                  "pixel_uv": [
+                    154.7161629434954,
+                    204.41130091984232
+                  ],
+                  "pink_pixels": 761
+                },
+                {
+                  "frame": 1022,
+                  "pixel_uv": [
+                    157.04857819905214,
+                    199.63625592417063
+                  ],
+                  "pink_pixels": 844
+                },
+                {
+                  "frame": 1042,
+                  "pixel_uv": [
+                    160.83508403361344,
+                    195.68487394957984
+                  ],
+                  "pink_pixels": 952
+                },
+                {
+                  "frame": 1061,
+                  "pixel_uv": [
+                    163.99238095238096,
+                    190.79809523809524
+                  ],
+                  "pink_pixels": 1050
+                },
+                {
+                  "frame": 1080,
+                  "pixel_uv": [
+                    166.62169086251066,
+                    184.4807856532878
+                  ],
+                  "pink_pixels": 1171
+                },
+                {
+                  "frame": 1088,
+                  "pixel_uv": [
+                    166.73791348600508,
+                    184.8897370653096
+                  ],
+                  "pink_pixels": 1179
+                }
+              ],
+              "baseline_m": 0.06505633290027124,
+              "ray_residual_m": 0.0010029196773030141,
+              "rgb_band_to_commanded_tcp_tool_m": [
+                0.027449152546827338,
+                0.004145748706462737,
+                -0.0055941198007553586
+              ],
+              "rgb_band_to_commanded_tcp_world_m": [
+                0.02772903477590216,
+                0.005608689036279202,
+                0.0012572278681562132
+              ],
+              "proposal_only": true,
+              "limitation": "assumes target stationary between views; ray fit is not a bound on depth error",
+              "measurement_mode": "temporal_rgb",
+              "split_fit_disagreement_m": 0.0011294401905407665,
+              "fresh_window_verified": true
+            },
+            "history_frames": [
+              1083,
+              1084,
+              1085,
+              1086,
+              1087,
+              1088
+            ],
+            "limitation": "development pregrasp envelope, not verified contact/collision safety or guaranteed Cosmos initiation",
+            "frame": 1088,
+            "proposal_only": true,
+            "proposal_id": "6e7f47925b62db8bcd6c",
+            "kind": "resume_vla_pregrasp_candidate"
+          },
+          "approved_by": "43935-handoff-1088",
+          "visual_checks": {
+            "target_identity": "Same upright pink-band tube tracked throughout recovery.",
+            "open_finger_corridor": "Wrist shows open fingers around visible tube corridor.",
+            "approach_clear": "Band above rack with visible unobstructed jaw corridor.",
+            "supported_target": "Tube stays upright at rack during static hold.",
+            "appropriate_policy_phase": "Open aligned pregrasp, not an already acquired object."
+          }
+        }
+      ],
+      "fresh_cosmos_requests": 21,
+      "post_recovery_cosmos_steps": 312,
+      "handoff_executed": true,
+      "post_recovery_bilateral_contact_frames": [
+        1136,
+        1137
+      ],
+      "max_post_recovery_lift_m": 0.0025040152952693767,
+      "terminal_agent_reason": "Frozen1400-step budget exhausted. RGB shows pink tube still supported in rack and empty hand after312 fresh post-recovery Cosmos steps. No complete stable pickup; close trial for independent offline audit.",
+      "legacy_environment_success_ever": false,
+      "full_pickup_passing_window_end_frames": [],
+      "final_full_pickup_physical_pass": false,
+      "max_conservative_clearance_m": -0.07882833088109834,
+      "final_conservative_clearance_m": -0.08245705826547668,
+      "final_evaluation": {
+        "success": false,
+        "failure": false,
+        "reason": null,
+        "progress": 0.0,
+        "hold_steps": 0,
+        "target_height": 0.08996477740427895,
+        "lift": -0.0013636483397115595,
+        "finger_contacts": [
+          false,
+          false
+        ]
+      },
+      "formal_stage2_pass": false,
+      "audit_boundary": "Read only after ALL live batch trials closed; never used in online decisions."
+    },
+    {
+      "seed": 183173,
+      "frames": 867,
+      "prefix_frames": 183,
+      "prefix_reproduction_exact": true,
+      "frozen_source_hashes_match": true,
+      "controller_segments": [
+        {
+          "source": "original_prefix",
+          "start_frame": 1,
+          "end_frame": 183
+        },
+        {
+          "source": "set_gripper",
+          "start_frame": 184,
+          "end_frame": 231
+        },
+        {
+          "source": "move_eef",
+          "start_frame": 232,
+          "end_frame": 715
+        },
+        {
+          "source": "hold",
+          "start_frame": 716,
+          "end_frame": 723
+        },
+        {
+          "source": "cosmos_after_recovery",
+          "start_frame": 724,
+          "end_frame": 867
+        }
+      ],
+      "controller_steps": {
+        "original_prefix": 183,
+        "set_gripper": 48,
+        "move_eef": 484,
+        "hold": 8,
+        "cosmos_after_recovery": 144
+      },
+      "agent_tool_calls": {
+        "set_gripper": 1,
+        "move_eef": 26,
+        "hold": 1,
+        "review_pregrasp": 1,
+        "resume_vla": 3,
+        "finish": 1
+      },
+      "critic_proposals": [
+        {
+          "frame": 183,
+          "kind": "attempted_grasp_target_left_behind"
+        },
+        {
+          "frame": 867,
+          "kind": "attempted_grasp_target_left_behind"
+        }
+      ],
+      "pregrasp_reviews": [
+        {
+          "eligible": true,
+          "reasons": [],
+          "stable_fixed_views": [],
+          "geometry": {
+            "source": "temporal wrist RGB + static calibration + own commands; no measured state",
+            "frame": 723,
+            "rgb_observations": [
+              {
+                "frame": 573,
+                "pixel_uv": [
+                  153.48516949152543,
+                  200.79025423728814
+                ],
+                "pink_pixels": 472
+              },
+              {
+                "frame": 594,
+                "pixel_uv": [
+                  156.78967495219885,
+                  198.17782026768643
+                ],
+                "pink_pixels": 523
+              },
+              {
+                "frame": 612,
+                "pixel_uv": [
+                  150.67777777777778,
+                  200.54444444444445
+                ],
+                "pink_pixels": 540
+              },
+              {
+                "frame": 632,
+                "pixel_uv": [
+                  155.75597269624572,
+                  197.79692832764505
+                ],
+                "pink_pixels": 586
+              },
+              {
+                "frame": 652,
+                "pixel_uv": [
+                  160.64381520119224,
+                  193.4172876304024
+                ],
+                "pink_pixels": 671
+              },
+              {
+                "frame": 673,
+                "pixel_uv": [
+                  161.97300771208225,
+                  188.91131105398458
+                ],
+                "pink_pixels": 778
+              },
+              {
+                "frame": 694,
+                "pixel_uv": [
+                  164.149833518313,
+                  183.2519422863485
+                ],
+                "pink_pixels": 901
+              },
+              {
+                "frame": 715,
+                "pixel_uv": [
+                  167.37026515151516,
+                  178.44886363636363
+                ],
+                "pink_pixels": 1056
+              },
+              {
+                "frame": 723,
+                "pixel_uv": [
+                  167.1444976076555,
+                  178.56267942583733
+                ],
+                "pink_pixels": 1045
+              }
+            ],
+            "baseline_m": 0.05834301033282741,
+            "ray_residual_m": 0.0011467689624253925,
+            "rgb_band_to_commanded_tcp_tool_m": [
+              0.02671469732643648,
+              0.003912505112204324,
+              0.0005695302075124467
+            ],
+            "rgb_band_to_commanded_tcp_world_m": [
+              0.026317993980264465,
+              0.005598864412315135,
+              -0.0023071680261048944
+            ],
+            "proposal_only": true,
+            "limitation": "assumes target stationary between views; ray fit is not a bound on depth error",
+            "measurement_mode": "temporal_rgb",
+            "split_fit_disagreement_m": 0.0003482918916244899,
+            "fresh_window_verified": true
+          },
+          "history_frames": [
+            718,
+            719,
+            720,
+            721,
+            722,
+            723
+          ],
+          "limitation": "development pregrasp envelope, not verified contact/collision safety or guaranteed Cosmos initiation",
+          "frame": 723,
+          "proposal_only": true,
+          "proposal_id": "cb3ec3aa164e3e3977dc",
+          "kind": "resume_vla_pregrasp_candidate"
+        }
+      ],
+      "validated_reentries": [
+        {
+          "frame": 723,
+          "proposal": {
+            "eligible": true,
+            "reasons": [],
+            "stable_fixed_views": [],
+            "geometry": {
+              "source": "temporal wrist RGB + static calibration + own commands; no measured state",
+              "frame": 723,
+              "rgb_observations": [
+                {
+                  "frame": 573,
+                  "pixel_uv": [
+                    153.48516949152543,
+                    200.79025423728814
+                  ],
+                  "pink_pixels": 472
+                },
+                {
+                  "frame": 594,
+                  "pixel_uv": [
+                    156.78967495219885,
+                    198.17782026768643
+                  ],
+                  "pink_pixels": 523
+                },
+                {
+                  "frame": 612,
+                  "pixel_uv": [
+                    150.67777777777778,
+                    200.54444444444445
+                  ],
+                  "pink_pixels": 540
+                },
+                {
+                  "frame": 632,
+                  "pixel_uv": [
+                    155.75597269624572,
+                    197.79692832764505
+                  ],
+                  "pink_pixels": 586
+                },
+                {
+                  "frame": 652,
+                  "pixel_uv": [
+                    160.64381520119224,
+                    193.4172876304024
+                  ],
+                  "pink_pixels": 671
+                },
+                {
+                  "frame": 673,
+                  "pixel_uv": [
+                    161.97300771208225,
+                    188.91131105398458
+                  ],
+                  "pink_pixels": 778
+                },
+                {
+                  "frame": 694,
+                  "pixel_uv": [
+                    164.149833518313,
+                    183.2519422863485
+                  ],
+                  "pink_pixels": 901
+                },
+                {
+                  "frame": 715,
+                  "pixel_uv": [
+                    167.37026515151516,
+                    178.44886363636363
+                  ],
+                  "pink_pixels": 1056
+                },
+                {
+                  "frame": 723,
+                  "pixel_uv": [
+                    167.1444976076555,
+                    178.56267942583733
+                  ],
+                  "pink_pixels": 1045
+                }
+              ],
+              "baseline_m": 0.05834301033282741,
+              "ray_residual_m": 0.0011467689624253925,
+              "rgb_band_to_commanded_tcp_tool_m": [
+                0.02671469732643648,
+                0.003912505112204324,
+                0.0005695302075124467
+              ],
+              "rgb_band_to_commanded_tcp_world_m": [
+                0.026317993980264465,
+                0.005598864412315135,
+                -0.0023071680261048944
+              ],
+              "proposal_only": true,
+              "limitation": "assumes target stationary between views; ray fit is not a bound on depth error",
+              "measurement_mode": "temporal_rgb",
+              "split_fit_disagreement_m": 0.0003482918916244899,
+              "fresh_window_verified": true
+            },
+            "history_frames": [
+              718,
+              719,
+              720,
+              721,
+              722,
+              723
+            ],
+            "limitation": "development pregrasp envelope, not verified contact/collision safety or guaranteed Cosmos initiation",
+            "frame": 723,
+            "proposal_only": true,
+            "proposal_id": "cb3ec3aa164e3e3977dc",
+            "kind": "resume_vla_pregrasp_candidate"
+          },
+          "approved_by": "183173-handoff-723",
+          "visual_checks": {
+            "target_identity": "Same pink-band upright tube tracked continuously.",
+            "open_finger_corridor": "Wrist shows open fingers flanking tube approach.",
+            "approach_clear": "Visible jaw corridor above rack has no intervening object.",
+            "supported_target": "Tube remains upright at unchanged rack through hold.",
+            "appropriate_policy_phase": "Open hand just before band; policy must grasp then lift."
+          }
+        }
+      ],
+      "fresh_cosmos_requests": 9,
+      "post_recovery_cosmos_steps": 144,
+      "handoff_executed": true,
+      "post_recovery_bilateral_contact_frames": [],
+      "max_post_recovery_lift_m": 0.007355631227359133,
+      "terminal_agent_reason": "After approved handoff,144 fresh Cosmos steps left tube visibly upright in rack with empty withdrawn hand. Critic re-reports attempted_grasp_target_left_behind at867. Frozen one-recovery-cycle limit reached; task not completed.",
+      "legacy_environment_success_ever": false,
+      "full_pickup_passing_window_end_frames": [],
+      "final_full_pickup_physical_pass": false,
+      "max_conservative_clearance_m": -0.07472985836518552,
+      "final_conservative_clearance_m": -0.08005963349756454,
+      "final_evaluation": {
+        "success": false,
+        "failure": false,
+        "reason": null,
+        "progress": 0.12268145651688767,
+        "hold_steps": 0,
+        "target_height": 0.09255524030915939,
+        "lift": 0.0012268145651688767,
+        "finger_contacts": [
+          false,
+          false
+        ]
+      },
+      "formal_stage2_pass": false,
+      "audit_boundary": "Read only after ALL live batch trials closed; never used in online decisions."
+    },
+    {
+      "seed": 344246,
+      "frames": 153,
+      "prefix_frames": 153,
+      "prefix_reproduction_exact": true,
+      "frozen_source_hashes_match": true,
+      "controller_segments": [
+        {
+          "source": "original_prefix",
+          "start_frame": 1,
+          "end_frame": 153
+        }
+      ],
+      "controller_steps": {
+        "original_prefix": 153
+      },
+      "agent_tool_calls": {
+        "finish": 1
+      },
+      "critic_proposals": [
+        {
+          "frame": 153,
+          "kind": "grasp_outcome_unknown"
+        }
+      ],
+      "pregrasp_reviews": [],
+      "validated_reentries": [],
+      "fresh_cosmos_requests": 0,
+      "post_recovery_cosmos_steps": 0,
+      "handoff_executed": false,
+      "post_recovery_bilateral_contact_frames": [],
+      "max_post_recovery_lift_m": null,
+      "terminal_agent_reason": "RGB shows rack overturned with side panel facing cameras; target no longer verified upright supported and wrist view empty. Outside frozen supported-pregrasp recovery scope.",
+      "legacy_environment_success_ever": false,
+      "full_pickup_passing_window_end_frames": [],
+      "final_full_pickup_physical_pass": false,
+      "max_conservative_clearance_m": -0.056361852837186595,
+      "final_conservative_clearance_m": -0.08523133109799687,
+      "final_evaluation": {
+        "success": false,
+        "failure": false,
+        "reason": null,
+        "progress": 0.0,
+        "hold_steps": 0,
+        "target_height": 0.024144902086933748,
+        "lift": -0.06718352365705677,
+        "finger_contacts": [
+          false,
+          false
+        ]
+      },
+      "formal_stage2_pass": false,
+      "audit_boundary": "Read only after ALL live batch trials closed; never used in online decisions."
+    }
+  ]
+}

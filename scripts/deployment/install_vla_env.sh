@@ -201,10 +201,11 @@ if [ "$TRACK" = "libero-pro" ]; then
   "$PY" - <<'PYEOF'
 from importlib.metadata import distributions
 names = {str(item.metadata.get("Name", "")).lower() for item in distributions()}
-forbidden = sorted(name for name in names if name.startswith("rlinf-") and name != "rlinf-openpi")
+allowed = {"rlinf-openpi", "rlinf-transformer-openpi"}
+forbidden = sorted(name for name in names if name.startswith("rlinf-") and name not in allowed)
 if "rlinf" in names or forbidden:
     raise SystemExit(f"forbidden RLinf distributions installed: {['rlinf'] if 'rlinf' in names else []}{forbidden}")
-print("RLinf distribution guard OK: only rlinf-openpi is allowed")
+print("RLinf distribution guard OK: only OpenPI and its transformer dependency are allowed")
 PYEOF
 
   log "5.1/9 [libero-pro] Fix: rlinf-openpi's dependency chain silently upgrades mujoco to 3.8.1; restore 3.3.1"
@@ -346,9 +347,18 @@ if [ "$TRACK" = "libero-pro" ]; then
          "points to a directory containing both robosuite's robots/panda/robot.xml and" \
          "liberopro's scenes/*.xml (a composite tree, not raw liberopro assets alone)."
   else
-    "$VENV_ROOT/bin/liberopro-download-assets"
     LIBEROPRO_PKG_ROOT="$("$PY" -c 'import os, liberopro; print(os.path.dirname(liberopro.__file__))')"
     LIBEROPRO_ASSETS="$LIBEROPRO_PKG_ROOT/liberopro/assets"
+    LIBEROPRO_ASSET_DOWNLOADER="$VENV_ROOT/bin/liberopro-download-assets"
+    if [ -x "$LIBEROPRO_ASSET_DOWNLOADER" ]; then
+      "$LIBEROPRO_ASSET_DOWNLOADER"
+    else
+      echo "liberopro-download-assets is unavailable; using assets bundled with the installed LIBERO-Pro package: $LIBEROPRO_ASSETS"
+    fi
+    test -d "$LIBEROPRO_ASSETS" || {
+      echo "LIBERO-Pro assets are unavailable at $LIBEROPRO_ASSETS. Install a LIBERO-Pro distribution with liberopro-download-assets, or provide a source checkout containing liberopro/liberopro/assets." >&2
+      exit 1
+    }
     ROBOSUITE_ASSETS="$("$PY" -c 'import os, robosuite; print(os.path.join(os.path.dirname(robosuite.__file__), "models", "assets"))')"
     COMPOSITE_ASSETS="${LIBERO_COMPOSITE_ASSETS_DIR:-$VENV_ROOT/libero-pro-composite-assets}"
     if [ -d "$COMPOSITE_ASSETS" ]; then

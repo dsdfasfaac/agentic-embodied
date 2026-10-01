@@ -1,0 +1,42 @@
+{
+  "shape": [
+    240,
+    320,
+    3
+  ],
+  "cases": [
+    {
+      "name": "clear",
+      "red": [
+        0,
+        0,
+        0
+      ],
+      "fires": []
+    },
+    {
+      "name": "failure",
+      "red": [
+        0,
+        0,
+        255,
+        255,
+        0
+      ],
+      "fires": [
+        3
+      ]
+    },
+    {
+      "name": "no_dwell",
+      "red": [
+        0,
+        255,
+        0,
+        255
+      ],
+      "fires": []
+    }
+  ],
+  "malformed_frame": "CRITIC_EXECUTION_ERROR"
+}

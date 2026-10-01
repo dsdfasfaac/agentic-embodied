@@ -1,0 +1,5 @@
+{
+  "schema_version": "arx.reentry.manifest.v1",
+  "implementation": "always_ineligible",
+  "policy_id": "smoke-never-resume"
+}

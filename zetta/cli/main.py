@@ -92,8 +92,8 @@ def _build_argparser() -> argparse.ArgumentParser:
         "--env",
         dest="env_name",
         required=True,
-        choices=["libero", "mujoco"],
-        help="Environment backend: libero | mujoco.",
+        choices=["libero", "mujoco", "arx"],
+        help="Environment backend: libero | mujoco | arx.",
     )
 
     # models
@@ -293,7 +293,7 @@ def main() -> int:
 
     # MuJoCo assets are supplied explicitly and hash-pinned by the env plugin;
     # they must never be replaced by an implicit HuggingFace resource sync.
-    if env_name != "mujoco":
+    if env_name not in {"mujoco", "arx"}:
         ensure_resources(env_name)
 
     # --- dashboard state ---------------------------------------------------

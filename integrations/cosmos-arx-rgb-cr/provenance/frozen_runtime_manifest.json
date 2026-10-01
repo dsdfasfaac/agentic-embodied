@@ -1,0 +1,38 @@
+{
+  "version": "frozen_pregrasp_v4.1",
+  "seeds": [
+    43935,
+    183173,
+    344246
+  ],
+  "scope": "first batch of other historical C2 failures; not all remaining seeds",
+  "max_steps": 1400,
+  "prefix_limit": 512,
+  "max_recovery_cycles": 1,
+  "stop_conditions": [
+    "RGB-confirmed drop or gross scene disturbance outside supported-pregrasp playbook",
+    "verified full pickup candidate then 15-frame hold and posthoc audit",
+    "1400-step budget",
+    "pregrasp cannot be verified after bounded attempts"
+  ],
+  "online_inputs": [
+    "RGB",
+    "static calibration",
+    "own commands"
+  ],
+  "privileged_audit": "only after all live batch trials close",
+  "source_sha256": {
+    "loop2_stage2_c2_rgb_v1/rgb_c2_critic.py": "5bcfc55d650580e93bad5ccd11f40a7e760459a246462fe0f72e82357678c310",
+    "loop2_stage2_c2_eef_v2/eef_tools.py": "6323e08ad0275518df306c3346b52b166d9a503f246d1d7d61133142e080078c",
+    "loop2_stage2_c2_eef_v2/early_critic.py": "f3bd1c4216087f02ee66d6481e0f3efb244c66cd8e09de5f7d4ec80aac7f394c",
+    "loop2_stage2_c2_eef_v2/rgb_geometry.py": "ef08c68512f77643b6fda44678f904462145eb53f95049c5a0741a366f066d61",
+    "loop2_stage2_c2_eef_v2/run_agent_session.py": "2c6a49b953943b3176521698163401031f6748a0a71a43faaf70ae63bcd85383",
+    "loop2_stage2_c2_eef_v2/run_full_pickup_eval.py": "fe203ade416c3ff6a9eb3ad590ac0933468d1e2745ef4e616bdda36ac891bcc3",
+    "loop2_stage2_c2_phase_v3/phase_critic.py": "0f58de18cf834797c5696676a86b0b48561220fcae92a4fb3291df318f7c07da",
+    "loop2_stage2_c2_phase_v3/run_closed_loop.py": "e49430652ab692699eb231d26aa205605d4e081e431e8300339a842aed98a276",
+    "loop2_stage2_c2_pregrasp_v4/pregrasp_gate.py": "fde88bc797dad8e6c53889e73d4fece26add411df3e71cb7945d2c8f2d169a8d",
+    "loop2_stage2_c2_pregrasp_v4/run_pregrasp_session.py": "a17455d0c964011f22754abd9fd68a9cc21d1912da6cf370e769a37641eaac85"
+  },
+  "no_rule_or_threshold_changes_during_batch": true,
+  "not_independent_of_development": "historical seeds; previously inspected offline, not unseen held-out evaluation"
+}
