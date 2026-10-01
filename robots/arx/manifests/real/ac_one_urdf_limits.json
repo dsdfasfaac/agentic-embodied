@@ -1,0 +1,114 @@
+{
+  "schema_version": "arx.real.ac_one_urdf_limits.v1",
+  "source": {
+    "repository": "https://github.com/ARXroboticsX/ARX_Model",
+    "commit": "1857d3b5796f3a8b11a5d86d66be6762963d8d12",
+    "archive_path": "AC one/URDF/AC one.7z",
+    "archive_sha256": "d238e12107afbef5d0eca4cc36d1bf37ffdcef27e27a28a5fd30f35265e53ea0",
+    "member_path": "acone/urdf/acone.urdf",
+    "member_sha256": "779204e9f4f7ed81deacaf9d81414978d110786debbaaba50119112ebe6068a4"
+  },
+  "left_arm_rad": [
+    {
+      "name": "left_joint1",
+      "type": "revolute",
+      "lower": -2.094,
+      "upper": 3.1416
+    },
+    {
+      "name": "left_joint2",
+      "type": "revolute",
+      "lower": 0.0,
+      "upper": 3.665
+    },
+    {
+      "name": "left_joint3",
+      "type": "revolute",
+      "lower": 0.0,
+      "upper": 3.24
+    },
+    {
+      "name": "left_joint4",
+      "type": "revolute",
+      "lower": -1.671,
+      "upper": 1.671
+    },
+    {
+      "name": "left_joint5",
+      "type": "revolute",
+      "lower": -1.671,
+      "upper": 1.671
+    },
+    {
+      "name": "left_joint6",
+      "type": "revolute",
+      "lower": -2.094,
+      "upper": 2.094
+    }
+  ],
+  "right_arm_rad": [
+    {
+      "name": "right_joint11",
+      "type": "revolute",
+      "lower": -2.094,
+      "upper": 3.1416
+    },
+    {
+      "name": "right_joint12",
+      "type": "revolute",
+      "lower": 0.0,
+      "upper": 3.665
+    },
+    {
+      "name": "right_joint13",
+      "type": "revolute",
+      "lower": 0.0,
+      "upper": 3.24
+    },
+    {
+      "name": "right_joint14",
+      "type": "revolute",
+      "lower": -1.671,
+      "upper": 1.671
+    },
+    {
+      "name": "right_joint15",
+      "type": "revolute",
+      "lower": -1.671,
+      "upper": 1.671
+    },
+    {
+      "name": "right_joint16",
+      "type": "revolute",
+      "lower": -2.094,
+      "upper": 2.094
+    }
+  ],
+  "gripper_finger_m": [
+    {
+      "name": "left_joint7",
+      "type": "prismatic",
+      "lower": 0.0,
+      "upper": 0.044
+    },
+    {
+      "name": "left_joint8",
+      "type": "prismatic",
+      "lower": 0.0,
+      "upper": 0.044
+    },
+    {
+      "name": "right_joint17",
+      "type": "prismatic",
+      "lower": 0.0,
+      "upper": 0.044
+    },
+    {
+      "name": "right_joint18",
+      "type": "prismatic",
+      "lower": 0.0,
+      "upper": 0.044
+    }
+  ],
+  "sdk_joint_coordinate_match": "not yet verified on dodo; do not substitute these CAD limits into controller command bounds without mapping"
+}

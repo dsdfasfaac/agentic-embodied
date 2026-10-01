@@ -6,7 +6,22 @@
 
 2026-10-01 只读检查显示 can1、can3 在线，两个 ARX ROS2 控制器分别作为 /arm_slave_l、/arm_slave_r 运行，状态话题是 /arm_slave_l_status、/arm_slave_r_status，命令话题是 /arm_master_l_status、/arm_master_r_status。因此 dodo 应使用 arm_transport=arx_ros2。arx_sdk 适配器供独占 CAN、没有 ROS 控制器的场景使用；两个控制栈不能同时控制同一 CAN 设备。官方 SingleArm 在该机的 /home/dodo/chenfu/ARX_X5/py/arx_x5_python/bimanual 中。
 
-dodo 的 pyrealsense2 实时枚举确认了手册映射：front=260422272500、left=260422271945、right=260422275847。/dev/v4l/by-id 还列出另一组三台 261123… 设备，不能据此替换 RealSense SDK 使用的映射。仓库保存了从上述三台设备的 640x480@15 RGB stream profile 只读获取的三份内参快照（robots/arx/manifests/real/）；它们只含 RGB 内参，不含到机器人基座的外参，不能据此计算真机目标与夹爪距离。启动会核对标定文件 SHA、内部 camera.logical_name、camera.serial、camera.width/height 和运行时内参；不匹配直接拒绝。模型契约中的 calibration_id 是训练接口标签，真实内参的身份由这份文件的 SHA 与物理序列号共同确定。
+dodo 的 pyrealsense2 实时枚举确认了手册映射：front=260422272500、left=260422271945、right=260422275847。/dev/v4l/by-id 还列出另一组三台 261123… 设备，不能据此替换 RealSense SDK 使用的映射。仓库保存了从上述三台设备的 640x480@15 RGB stream profile 只读获取的三份内参快照（robots/arx/manifests/real/）。相机外参另见本仓库 docs/arx_camera.md：主相机到左臂局部基座的矩阵为实测、左腕手眼外参为实测，右腕手眼外参是由左腕同构推导、尚未经右腕独立验收。已把 dodo 运行时 front 原始标定复制为 dodo_front_d405_rgbd_calibration_BL_source.json，保留原文件 SHA 854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10。原文件的 T_B_from_C 实际指向左臂局部基座 BL，不能当成整机基座 BA；如需在整机坐标计算，须采用 docs/arx_camera.md 中已验收的 BL→BA 迁移。当前后端只消费 RGB 内参和 14D 状态，不消费外参；不能仅凭这些数据声称真机目标到夹爪距离已经可用。启动会核对标定文件 SHA、内部 camera.logical_name、camera.serial、camera.width/height 和运行时内参；不匹配直接拒绝。模型契约中的 calibration_id 是训练接口标签，真实内参的身份由这份文件的 SHA 与物理序列号共同确定。
+
+## 官方 AC one URDF 关节范围
+
+从 [ARX_Model 官方 AC one URDF 压缩包](https://github.com/ARXroboticsX/ARX_Model/blob/1857d3b5796f3a8b11a5d86d66be6762963d8d12/AC%20one/URDF/AC%20one.7z) 中的 acone.urdf 读取了 6 个转动关节的范围，并把来源 commit、压缩包及 URDF SHA 连同数值存入 robots/arx/manifests/real/ac_one_urdf_limits.json。左右臂相同，按关节 1～6 顺序，单位 rad：
+
+| 关节 | 下界 | 上界 |
+| --- | ---: | ---: |
+| 1 | -2.094 | 3.1416 |
+| 2 | 0 | 3.665 |
+| 3 | 0 | 3.24 |
+| 4 | -1.671 | 1.671 |
+| 5 | -1.671 | 1.671 |
+| 6 | -2.094 | 2.094 |
+
+URDF 的左右夹爪各有两个直动手指关节，范围均为 0～0.044 m。这不是 ROS2 RobotStatus.joint_pos 中夹爪原生坐标的范围；当前没有经验证的二者转换。dodo 控制器自带的 x5_2025.urdf 对六关节写的是宽泛的 -10～10 rad，不能据此覆盖 AC one CAD 范围。AC one URDF 与当前 SDK/ROS2 的关节零位和符号尚未在真机逐轴核对，所以这些值是配置参考，不自动写入命令界限；部署配置仍需明确冻结控制器坐标下的边界。
 
 ## 硬件契约
 
