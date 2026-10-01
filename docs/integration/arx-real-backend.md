@@ -60,3 +60,5 @@ reset 只读取同步观测，不回零或移动。每个 step 先经过现有 A
 `robots/arx/deployment/picktube_rgbd_provider.py` 锁定 front 相机 `260422272500` 的 640×480 内参和 `T_BL_from_C0` 源文件 SHA。`front_rgb` 必须配置 `depth_enabled=true`；RealSense SDK 把原始 z16 深度对齐到 RGB、按设备比例尺转成毫米，再以最近邻缩放到 320×240。私有特征帧保存深度，公开 RGB 观测和日志不保存深度图。provider 从粉色标签区域取有效深度中位数，以实测外参转换到左臂局部基座，再把右臂控制器的 TCP 正运动学结果用 `T_BL_from_BR=translation([0,-0.5,0])` 转入同一坐标系，计算欧氏距离。标签中心是试管抓取点的近似量；不可见或被遮挡时不会捏造距离。
 
 2026-10-01 只读联调：三台 D405 单独均可打开；三台同时 640×480@30 出现 `VIDIOC_S_FMT` I/O 错误，改成 640×480@15 后成功采到 front RGB+depth、left/right RGB，一组帧的主机时间差为 24.3 ms。硬件配置应使用 15 fps；此结果不是长时稳定性测试。当前现场 front 图像没有可见粉色试管，因此尚未取得真实试管距离。
+
+现场可在相机空闲、粉色试管放入 front 视野后执行只读探针：先 source `/opt/ros/jazzy/setup.bash` 和 `/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/install/setup.bash`，再运行 `/home/dodo/chenfu/.venv_data_collect_py312/bin/python scripts/deployment/probe_picktube_distance.py`。探针只订阅 `/arm_slave_r_status`，不会发布运动命令；它输出距离、前相机序列号和 RGB-D/TCP 时间差。若设备被其他进程占用、目标不可见或深度无效，则返回 `status=unavailable`，退出码 2。2026-10-01 后续尝试时，`act_pilot.live` 已占用三台相机，故没有强行重启或释放设备。

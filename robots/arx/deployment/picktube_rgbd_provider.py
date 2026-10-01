@@ -123,19 +123,12 @@ class PickTubeRgbdProvider:
         intrinsic.coeffs = source["coeffs"]
         return np.asarray(rs.rs2_deproject_pixel_to_point(intrinsic, [x, y], depth_m), dtype=np.float64)
 
-    def observe(self, observation, images):
-        if self.closed_policy is None or self.open_policy is None:
-            raise ValueError("PickTube provider hardware was not validated")
-        hardware = observation["hardware"]
-        if hardware.get("right_tcp_monotonic_ns") != hardware.get("state_monotonic_ns"):
-            raise ValueError("controller FK TCP must share the fresh joint feedback timestamp")
-        state = np.asarray(hardware["measured_state"], dtype=np.float64)
-        if state.shape != (14,) or not np.isfinite(state).all():
-            raise ValueError("fresh 14D feedback required")
-        depth = np.asarray(images.get("front_depth_mm"))
+    def measure_distance(self, rgb: np.ndarray, depth_mm: np.ndarray,
+                         right_tcp_xyz_m: np.ndarray) -> float:
+        depth = np.asarray(depth_mm)
         if depth.dtype != np.uint16 or depth.shape != (240, 320):
             raise ValueError("aligned front D405 millimetre depth required")
-        component = self._pink_component(np.asarray(images["front_rgb"]))
+        component = self._pink_component(np.asarray(rgb))
         support = depth[component]
         support = support[(support >= 80) & (support <= 1500)]
         if support.size < 12:
@@ -147,12 +140,29 @@ class PickTubeRgbdProvider:
         x, y = float(np.median(xx)), float(np.median(yy))
         camera_xyz = self._deproject(x, y, median_mm / 1000)
         target_left = (self.transform @ np.r_[camera_xyz, 1.0])[:3]
+        tcp_right = np.asarray(right_tcp_xyz_m, dtype=np.float64)
+        if tcp_right.shape != (3,) or not np.isfinite(tcp_right).all():
+            raise ValueError("controller FK right TCP must be finite XYZ metres")
+        tcp_left = tcp_right + np.array([0.0, -0.5, 0.0])
+        return float(np.linalg.norm(target_left - tcp_left))
+
+    def observe(self, observation, images):
+        if self.closed_policy is None or self.open_policy is None:
+            raise ValueError("PickTube provider hardware was not validated")
+        hardware = observation["hardware"]
+        if hardware.get("right_tcp_monotonic_ns") != hardware.get("state_monotonic_ns"):
+            raise ValueError("controller FK TCP must share the fresh joint feedback timestamp")
+        state = np.asarray(hardware["measured_state"], dtype=np.float64)
+        if state.shape != (14,) or not np.isfinite(state).all():
+            raise ValueError("fresh 14D feedback required")
         tcp_right = np.asarray(hardware.get("right_tcp_xyz_m"), dtype=np.float64)
         if (tcp_right.shape != (3,) or not np.isfinite(tcp_right).all()
                 or hardware.get("right_tcp_frame") != "right_arm_local_base"):
             raise ValueError("controller FK right TCP in local base is required")
-        tcp_left = tcp_right + np.array([0.0, -0.5, 0.0])
-        distance = float(np.linalg.norm(target_left - tcp_left))
+        distance = self.measure_distance(
+            np.asarray(images["front_rgb"]),
+            np.asarray(images.get("front_depth_mm")), tcp_right,
+        )
         gripper_span = self.open_policy - self.closed_policy
         gripper_fraction = (float(state[13]) - self.closed_policy) / gripper_span
         return {
