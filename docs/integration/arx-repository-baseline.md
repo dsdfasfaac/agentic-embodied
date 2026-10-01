@@ -33,3 +33,10 @@ SHA-256 matched for 135 selected files across those directories, including the
 checksum comparison. The source paths are now symlinks into shared storage.
 Git metadata (`.git/`) and the local Python environment (`.venv/`) remain in
 the checkout.
+
+Before pruning unreachable Git objects, the complete `.git/` directory was
+archived at
+`/mnt/100T/users/dingxin/Agentic-Embodied-data/git-recovery/git-metadata-before-prune-20261001.tar`.
+Its adjacent `.sha256` file records the archive digest; the archive is private
+to the repository owner. After pruning, `git fsck --full --no-reflogs
+--connectivity-only` passed and the active `.git/` directory uses about 25 MB.
