@@ -77,6 +77,7 @@ class CoreFactory:
         bindings = ()
         package_sha256 = "baseline"
         reentry = None
+        programs = {}
         if self.package:
             from robots.arx.critics import ArxCriticRegistry, WorkerLimits
             from robots.arx.critics.registry import AlwaysIneligibleReentry, RgbFeatureReentry
@@ -84,31 +85,14 @@ class CoreFactory:
             if str(self.package).endswith(".json"):
                 from zetta.evolution.jsonio import read_json, canonical_sha256
                 from zetta.evolution.models import CandidateBundle
-                from zetta.evolution.critic import TemporalCritic
-                from robots.arx.gateway.contracts import Assessment, Proposal, RecoveryBinding
+                from robots.arx.deployment.bundle_program import compile_programs
+                from robots.arx.gateway.bundle_runtime import BundleMonitor, RealBundleReentry
                 bundle = CandidateBundle.from_dict(read_json(Path(self.package)))
-                class BundleCritic:
-                    sha256 = bundle.sha256
-                    def __init__(self): self.temporal = TemporalCritic(bundle.critic_rules)
-                    def reset(self, observation, images): self.temporal.reset()
-                    def lifecycle(self, event): pass
-                    def observe(self, observation, images):
-                        events = []
-                        for item in self.temporal.evaluate(observation, step_index=observation["step_index"]):
-                            rule = next(r for r in bundle.critic_rules if r.rule_id == item["rule_id"])
-                            events.append(Proposal(detector_id="bundle", failure_mode=rule.rule_id, rule_id=rule.rule_id, evidence_observation_ids=[observation["observation_id"]], reason_code=rule.rule_id, summary=rule.proposal))
-                        return Assessment(critic_id="bundle", observation_id=observation["observation_id"], step_index=observation["step_index"], status="failure" if events else "clear", events=events)
-                critic = BundleCritic()
-                bindings = tuple(RecoveryBinding(binding_id=r.recovery_id, failure_modes=list(r.trigger_rule_ids), skill_entrypoint="bundle", allowed_tools=[s.tool for s in r.steps], max_recovery_steps=len(r.steps), max_agent_decisions=8, monitor_policy="recovery_local", reentry_policy_id=r.recovery_id) for r in bundle.recovery_rules)
+                programs = compile_programs(bundle, max_physical_steps=limits.max_steps)
+                critic = BundleMonitor(bundle)
+                bindings = tuple(program.binding for program in programs.values())
                 package_sha256 = bundle.sha256
-                class BundleReentry:
-                    def inspect(self, args, context):
-                        obs = context["observations"][-1]
-                        privileged = obs.get("privileged", {})
-                        interaction = privileged.get("interaction", {})
-                        eligible = "privileged" in obs and not interaction.get("failure", False)
-                        return {"schema_version":"arx.reentry.assessment.v1", "recovery_id":context["recovery_id"], "observation_id":args.observation_ids[-1], "policy_id":context["policy_id"], "status":"eligible" if eligible else "ineligible", "checks":[{"check_id":"privileged-clearance", "status":"pass" if eligible else "fail", "evidence_ids":args.observation_ids, "reason_code":"privileged_clear" if eligible else "privileged_failure"}]}
-                reentry = BundleReentry()
+                reentry = RealBundleReentry(bundle, require_hardware=False)
             else:
                 critics = ArxCriticRegistry(
                     limits=WorkerLimits.model_validate(self.critic_limits)
@@ -153,6 +137,7 @@ class CoreFactory:
             cancel_requested=cancelled,
             phase_changed=phase_changed,
             privileged=self.privileged,
+            programs=programs,
         )
         return core
 

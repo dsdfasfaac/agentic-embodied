@@ -1,0 +1,122 @@
+"""Compile frozen CandidateBundle recovery steps into bounded gateway calls."""
+
+from __future__ import annotations
+
+import math
+from copy import deepcopy
+from dataclasses import dataclass
+
+from robots.arx.gateway.contracts import RecoveryBinding
+from .real_input import _TOOL_MODELS
+
+
+@dataclass(frozen=True)
+class ProgramCall:
+    step_index: int
+    call_index: int
+    tool: str
+    arguments: dict
+    stop_when: str
+
+
+@dataclass(frozen=True)
+class RecoveryProgram:
+    binding: RecoveryBinding
+    calls: tuple[ProgramCall, ...]
+
+
+def _eef_budget(args):
+    distance = math.sqrt(sum(x * x for x in args["delta_xyz_m"]))
+    rotation = math.sqrt(sum(x * x for x in args.get("delta_rotvec_rad", (0, 0, 0))))
+    actions = max(1, math.ceil(distance / min(.001, args.get("speed_m_s", .01) / 15)),
+                  math.ceil(rotation / .01)) + 15
+    if actions > 60:
+        raise ValueError("EEF call exceeds planner's 60-action horizon")
+    return actions
+
+
+def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None):
+    """Symbolic values are resolved only against live review/observation results."""
+    programs = {}
+    for rule in bundle.recovery_rules:
+        if rule.fallback != "stop_all_motion":
+            raise ValueError(f"unsafe recovery fallback: {rule.recovery_id}")
+        calls, physical = [], 0
+        reviewed = False
+        resumed = False
+        for step_index, step in enumerate(rule.steps):
+            if resumed:
+                raise ValueError("no recovery step may follow VLA reentry")
+            if step.tool not in _TOOL_MODELS or step.tool == "arx.finish":
+                raise ValueError(f"unsupported recovery tool: {step.tool}")
+            args = deepcopy(step.parameters)
+            count = 1
+            if step.tool == "arx.move_eef":
+                vector = args.get("delta_xyz_m")
+                rotation = args.get("delta_rotvec_rad", [0., 0., 0.])
+                if not isinstance(vector, list) or len(vector) != 3 or not all(
+                    type(v) in (int, float) and math.isfinite(v) for v in vector + rotation
+                ):
+                    raise ValueError("invalid EEF displacement")
+                count = max(1, math.ceil((math.sqrt(sum(v*v for v in vector)) - 1e-12) / .01),
+                            math.ceil((math.sqrt(sum(v*v for v in rotation)) - 1e-12) / .1))
+                args["delta_xyz_m"] = [v / count for v in vector]
+                args["delta_rotvec_rad"] = [v / count for v in rotation]
+                physical += count * _eef_budget(args)
+            elif step.tool == "arx.set_gripper":
+                physical += args.get("max_steps", 0)
+            elif step.tool == "arx.hold":
+                physical += args.get("steps", 0)
+            elif step.tool == "arx.review_reentry":
+                if args.get("observation_ids") != ["post-recovery"]:
+                    raise ValueError("review must bind the fresh post-recovery observation")
+                reviewed = True
+                args["observation_ids"] = ["obs-preflight"]
+            elif step.tool == "arx.zeva":
+                if not reviewed or args.get("reentry_token") != "token-from-review":
+                    raise ValueError("VLA reentry requires the preceding review token")
+                args["reentry_token"] = "token-preflight"
+                resumed = True
+            _TOOL_MODELS[step.tool].model_validate(args)
+            for call_index in range(count):
+                calls.append(ProgramCall(step_index, call_index, step.tool, deepcopy(args), step.stop_when))
+        if not reviewed or not resumed:
+            raise ValueError("recovery must review real evidence before VLA reentry")
+        if len(calls) > max_tool_calls or (max_physical_steps is not None and physical > max_physical_steps):
+            raise ValueError(f"recovery exceeds frozen budget: {rule.recovery_id}")
+        binding = RecoveryBinding(
+            binding_id=rule.recovery_id, failure_modes=list(rule.trigger_rule_ids),
+            skill_entrypoint="bundle:" + rule.recovery_id,
+            allowed_tools=list(dict.fromkeys(call.tool for call in calls)),
+            max_recovery_steps=physical, max_agent_decisions=len(calls),
+            monitor_policy="recovery_local", reentry_policy_id=rule.recovery_id,
+        )
+        programs[rule.recovery_id] = RecoveryProgram(binding, tuple(calls))
+    return programs
+
+
+def resolve_call(call, observation_id, review_token):
+    args = deepcopy(call.arguments)
+    if call.tool == "arx.review_reentry":
+        args["observation_ids"] = [observation_id]
+    elif call.tool == "arx.zeva":
+        if not review_token:
+            raise ValueError("reentry review did not grant a token")
+        args["reentry_token"] = review_token
+    return args
+
+
+def verify_call_result(call, result, *, real):
+    if result["status"] != "completed":
+        raise ValueError(f"recovery call did not complete: {call.tool}")
+    output = result.get("result") or {}
+    if call.tool in ("arx.move_eef", "arx.set_gripper"):
+        if output.get("command_target_reached") is not True:
+            raise ValueError(f"recovery target not reached: {call.tool}")
+    if call.tool in ("arx.move_eef", "arx.hold", "arx.set_gripper", "arx.zeva"):
+        if real and output.get("physical_arrival_verified") is not True:
+            raise ValueError(f"physical arrival unverified: {call.tool}")
+    if call.tool == "arx.review_reentry":
+        if output.get("assessment", {}).get("status") != "eligible" or not output.get("reentry_token"):
+            raise ValueError("real reentry conditions are not satisfied")
+    return output.get("reentry_token") if call.tool == "arx.review_reentry" else None

@@ -86,6 +86,8 @@ class RolloutRunner:
         self.observations = set()
         self.history = deque(maxlen=16)
         self.recovery_calls = {}
+        self.bundle_cursors = {}
+        self.bundle_tokens = {}
         self.skill = ""
         self.stop_event = threading.Event()
         self.heartbeat_thread = None
@@ -130,17 +132,16 @@ class RolloutRunner:
             c = t.candidate
             if Path(c.package).is_file():
                 from zetta.evolution.jsonio import canonical_sha256, read_json
+                from .bundle_program import compile_programs
+                from .real_input import _load_bundle
                 if canonical_sha256(read_json(Path(c.package))) != c.package_sha256:
                     raise ValueError("structured bundle identity mismatch")
-                if not os.environ.get(t.agent.credential_env):
-                    raise ValueError("configured provider credential reference is unavailable")
-                self.package_path = Path(c.package).resolve()
-                self.skill = (
-                    "Structured privileged recovery bundle. On the critic interruption, execute "
-                    "the recovery steps in order using the exact permitted tools. "
-                    "Open the gripper, move the EEF by 2cm, call arx.review_reentry with "
-                    "the current observation ID, then call arx.zeva with the returned reentry token."
+                bundle, _ = _load_bundle(Path(c.package))
+                self.bundle_programs = compile_programs(
+                    bundle, max_physical_steps=limits.max_steps,
                 )
+                self.package_path = Path(c.package).resolve()
+                self.skill = ""
                 self._structured_bundle = True
                 self._candidate_sha256 = c.package_sha256
                 self._save("private/trial.json", t.model_dump())
@@ -262,6 +263,10 @@ class RolloutRunner:
             start_new_session=True,
         )
         log.close()
+        self._connect_gateway()
+
+    def _connect_gateway(self):
+        t = self.trial
         deadline = min(
             self.deadline, time.monotonic() + t.runner_limits.startup_timeout_s
         )
@@ -605,7 +610,9 @@ class RolloutRunner:
 
     def loop(self):
         limits = self.trial.runner_limits
-        adapter = self.adapter_factory(self.trial.agent) if self.trial.agent else None
+        adapter = (self.adapter_factory(self.trial.agent)
+                   if self.trial.agent and not getattr(self, "_structured_bundle", False)
+                   else None)
         failures = 0
         feedback = None
         while True:
@@ -643,6 +650,49 @@ class RolloutRunner:
                     "runner",
                     {},
                 )
+            elif state in ("INTERRUPTED", "RECOVERING") and getattr(self, "_structured_bundle", False):
+                from .bundle_program import resolve_call, verify_call_result
+                rid = recovery["recovery_id"]
+                program = self.bundle_programs.get(recovery["binding_id"])
+                if program is None:
+                    raise RunnerError("configuration_error", "unknown_bundle_binding")
+                if recovery["permitted_tools"] != program.binding.allowed_tools:
+                    raise RunnerError("configuration_error", "bundle_tool_allowlist_mismatch")
+                cursor = self.bundle_cursors.get(rid, 0)
+                if cursor >= len(program.calls) or recovery["remaining_decisions"] <= 0:
+                    return "recovery_budget"
+                if cursor == 0:
+                    self._count("recoveries")
+                    self.outcome = self.outcome.model_copy(update={"recovery_attempted": True})
+                call = program.calls[cursor]
+                before = self.snapshot["observation"]
+                try:
+                    arguments = resolve_call(
+                        call, before["observation_id"], self.bundle_tokens.get(rid)
+                    )
+                    result = self.dispatch(call.tool, arguments, "runner", {
+                        "rationale": f"Frozen bundle {recovery['binding_id']} step {call.step_index}",
+                    })
+                    token = verify_call_result(call, result, real=getattr(self, "_real_bundle", False))
+                    if token:
+                        self.bundle_tokens[rid] = token
+                    self.bundle_cursors[rid] = cursor + 1
+                    after = self.client.observation()["observation"]
+                    self._save(f"recovery/{rid}-{cursor:03d}.json", {
+                        "bundle_sha256": self.trial.candidate.package_sha256,
+                        "binding_id": recovery["binding_id"],
+                        "step_index": call.step_index, "call_index": call.call_index,
+                        "stop_when": call.stop_when, "tool": call.tool,
+                        "arguments": arguments, "observation_before": before,
+                        "tool_result": result, "observation_after": after,
+                    })
+                except ValueError as exc:
+                    self._save(f"recovery/{rid}-{cursor:03d}-failure.json", {
+                        "reason": str(exc), "observation_before": before,
+                        "tool_result": locals().get("result"),
+                    })
+                    raise RunnerError("infrastructure_error", "recovery_step_failed") from exc
+                continue
             elif state in ("INTERRUPTED", "RECOVERING") and adapter:
                 event = self.event(records, feedback)
                 if (

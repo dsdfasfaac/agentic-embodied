@@ -57,6 +57,7 @@ class ArxSessionCore:
         cancel_requested=lambda: False,
         phase_changed=lambda phase: None,
         privileged=False,
+        programs=None,
     ):
         self.episode_id, self.backend, self.registry = episode_id, backend, registry
         self.journal, self.limits = journal, limits
@@ -68,6 +69,9 @@ class ArxSessionCore:
         )
         self.cancel_requested, self.phase_changed = cancel_requested, phase_changed
         self.privileged = bool(privileged)
+        self.programs = programs or {}
+        self.program_cursor = 0
+        self.program_token = None
         self.state, self.epoch, self.step_index = "READY", 0, 0
         self.decisions, self.incidents = 0, 0
         self.recovery, self.binding, self.token = None, None, None
@@ -148,6 +152,8 @@ class ArxSessionCore:
         if commit.hardware is not None:
             self.current["clock_domain"] = "host_monotonic_ns"
             self.current["hardware"] = deepcopy(commit.hardware.observation)
+            self.current["hardware"]["arrival_verified"] = commit.hardware.arrival_verified
+            self.current["hardware"]["command_receipt"] = deepcopy(commit.hardware.command_receipt)
         if self.privileged and commit.privileged is not None:
             privileged = deepcopy(dataclasses.asdict(commit.privileged))
             self.current["privileged"] = privileged
@@ -244,6 +250,16 @@ class ArxSessionCore:
         if self.state not in entry.spec.allowed_states:
             raise GatewayError("TOOL_NOT_AUTHORIZED")
         args = entry.spec.input_model.model_validate(request.arguments)
+        if self.recovery and self.programs and request.tool != "arx.finish":
+            from robots.arx.deployment.bundle_program import resolve_call
+
+            program = self.programs.get(self.recovery["binding_id"])
+            if program is None or self.program_cursor >= len(program.calls):
+                raise GatewayError("BUNDLE_PLAN_EXHAUSTED")
+            expected = program.calls[self.program_cursor]
+            values = resolve_call(expected, self.current["observation_id"], self.program_token)
+            if request.tool != expected.tool or args.model_dump() != entry.spec.input_model.model_validate(values).model_dump():
+                raise GatewayError("BUNDLE_STEP_MISMATCH")
         known = set(self.observations)
         known.update(
             ref["content_id"]
@@ -316,6 +332,9 @@ class ArxSessionCore:
         )
         self.active = True
         self.decisions += 1
+        bundle_call = (self.programs[self.recovery["binding_id"]].calls[self.program_cursor]
+                       if self.recovery and self.programs and request.tool != "arx.finish"
+                       else None)
         result["status"] = "running"
         self.journal.update(result)
         try:
@@ -334,6 +353,19 @@ class ArxSessionCore:
                 self.execute_targets(prepared, request, result)
             if result["result"] is not None:
                 entry.spec.output_model.model_validate(result["result"])
+            if bundle_call is not None and result["status"] == "completed":
+                from robots.arx.deployment.bundle_program import verify_call_result
+
+                try:
+                    next_token = verify_call_result(
+                        bundle_call, result, real=self.commit.hardware is not None
+                    )
+                except ValueError as exc:
+                    self.close()
+                    raise GatewayError("BUNDLE_STEP_FAILED") from exc
+                if next_token:
+                    self.program_token = next_token
+                self.program_cursor += 1
         except Exception as exc:
             import traceback
 
@@ -631,6 +663,8 @@ class ArxSessionCore:
             self.close()
             return
         self.binding = matches[0]
+        self.program_cursor = 0
+        self.program_token = None
         self.incidents += 1
         self.state = "INTERRUPTED"
         self.recovery = {

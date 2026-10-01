@@ -44,6 +44,11 @@ class ArmCalibration:
             raise ValueError("ARX unit calibration must be finite")
         if any(low >= high for low, high in zip(self.joint_min_rad, self.joint_max_rad)):
             raise ValueError("invalid ARX joint bounds")
+        if self.arm_type == 2 and any(
+            low < -10 or high > 10
+            for low, high in zip(self.joint_min_rad, self.joint_max_rad)
+        ):
+            raise ValueError("configured joint bounds exceed X5-2025 SDK URDF placeholder bounds")
         if self.gripper_native_min >= self.gripper_native_max or not self.gripper_policy_scale:
             raise ValueError("invalid ARX gripper calibration")
 
@@ -114,6 +119,10 @@ class ArxX5Device:
             <= calibration.gripper_native_max + 1e-3
         ):
             raise ValueError("ARX gripper feedback outside calibrated range")
+        if np.any(native[:6] < np.asarray(calibration.joint_min_rad) - 1e-3) or np.any(
+            native[:6] > np.asarray(calibration.joint_max_rad) + 1e-3
+        ):
+            raise ValueError("ARX joint feedback outside configured controller-coordinate bounds")
         result = native.copy()
         result[6] = calibration.to_policy(float(native[6]))
         return result.astype(np.float32)

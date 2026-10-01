@@ -117,6 +117,10 @@ class ArxRos2Device:
                 <= calibration.gripper_native_max + 1e-3
             ):
                 raise ValueError("ROS2 gripper feedback outside calibrated range")
+            if np.any(native[:6] < np.asarray(calibration.joint_min_rad) - 1e-3) or np.any(
+                native[:6] > np.asarray(calibration.joint_max_rad) + 1e-3
+            ):
+                raise ValueError("ROS2 joint feedback outside configured controller-coordinate bounds")
             native[6] = calibration.to_policy(float(native[6]))
         except Exception as exc:
             with self._lock:

@@ -19,6 +19,11 @@ from .contracts import StrictModel
 from .real_backend import CameraIdentity, RealBackend, RealBackendConfig
 from .real_camera import RealSenseCameraSource, RealSenseCameraSpec
 
+REAL_JOINT_CHANNELS = tuple(
+    [f"left_joint_{i}" for i in range(1, 7)] + ["left_gripper_policy"]
+    + [f"right_joint_{i}" for i in range(1, 7)] + ["right_gripper_policy"]
+)
+
 
 class ArmSettings(StrictModel):
     can_port: str = Field(min_length=1)

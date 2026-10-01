@@ -215,6 +215,7 @@ class RealBackend:
                 self._last_state_ns = sample.monotonic_ns
                 evidence = {
                     "clock_domain": "host_monotonic_ns",
+                    "measured_state": state.tolist(),
                     "state_monotonic_ns": sample.monotonic_ns,
                     "state_acquisition_started_ns": sample.acquisition_started_ns,
                     "camera_monotonic_ns": camera_times,
