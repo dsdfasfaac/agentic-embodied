@@ -140,6 +140,7 @@ class RealSenseCameraSpec:
     capture_width: int
     capture_height: int
     capture_fps: int
+    depth_enabled: bool = False
 
 
 class RealSenseCameraSource:
@@ -162,6 +163,8 @@ class RealSenseCameraSource:
         self._buffers = {name: deque(maxlen=8) for name in CAMERAS}
         self._errors = {}
         self._pipelines = {}
+        self._aligners = {}
+        self._depth_scales = {}
         self._threads = []
         try:
             for spec in specs:
@@ -177,8 +180,19 @@ class RealSenseCameraSource:
                     rs.stream.color, spec.capture_width, spec.capture_height,
                     rs.format.rgb8, spec.capture_fps,
                 )
+                if spec.depth_enabled:
+                    config.enable_stream(
+                        rs.stream.depth, spec.capture_width, spec.capture_height,
+                        rs.format.z16, spec.capture_fps,
+                    )
                 profile = pipeline.start(config)
                 self._pipelines[spec.identity.name] = pipeline
+                if spec.depth_enabled:
+                    self._aligners[spec.identity.name] = rs.align(rs.stream.color)
+                    scale = profile.get_device().first_depth_sensor().get_depth_scale()
+                    if not math.isfinite(scale) or scale <= 0:
+                        raise ValueError(f"RealSense depth scale invalid: {spec.identity.name}")
+                    self._depth_scales[spec.identity.name] = scale
                 calibration = json.loads(Path(spec.calibration_file).read_text())
                 expected = calibration.get("camera", {}).get("intrinsics")
                 if not isinstance(expected, dict):
@@ -219,6 +233,8 @@ class RealSenseCameraSource:
         while not self._closed.is_set():
             try:
                 frames = pipeline.wait_for_frames(1000)
+                if spec.depth_enabled:
+                    frames = self._aligners[name].process(frames)
                 color = frames.get_color_frame()
                 stamp = time.monotonic_ns()
                 if not color:
@@ -236,9 +252,27 @@ class RealSenseCameraSource:
                     )
                 if rgb.dtype != np.uint8:
                     raise ValueError("RealSense returned non-uint8 RGB")
+                depth_mm = None
+                if spec.depth_enabled:
+                    depth_frame = frames.get_depth_frame()
+                    if not depth_frame:
+                        raise RuntimeError("missing aligned metric depth frame")
+                    raw = np.asarray(depth_frame.get_data())
+                    if raw.dtype != np.uint16 or raw.shape != (spec.capture_height, spec.capture_width):
+                        raise ValueError("RealSense depth has unexpected format or geometry")
+                    scaled = np.rint(raw.astype(np.float32) * (1000 * self._depth_scales[name]))
+                    if np.any(scaled > 65535):
+                        raise ValueError("RealSense depth exceeds uint16 millimetres")
+                    depth_mm = scaled.astype(np.uint16)
+                    if (spec.capture_width, spec.capture_height) != (spec.identity.width, spec.identity.height):
+                        depth_mm = self._cv2.resize(
+                            depth_mm, (spec.identity.width, spec.identity.height),
+                            interpolation=self._cv2.INTER_NEAREST,
+                        )
                 with self._lock:
                     self._buffers[name].append(
-                        CameraFrame(np.ascontiguousarray(rgb).copy(), stamp, spec.identity)
+                        CameraFrame(np.ascontiguousarray(rgb).copy(), stamp, spec.identity,
+                                    None if depth_mm is None else np.ascontiguousarray(depth_mm).copy())
                     )
             except Exception as exc:
                 if not self._closed.is_set():

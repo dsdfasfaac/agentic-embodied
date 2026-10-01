@@ -95,6 +95,8 @@ class RealCoreFactory:
                 provider = RealFeatureProvider(
                     Path(self.feature_provider), self.expected_feature_provider_sha256
                 )
+                if hasattr(provider.impl, "validate_hardware"):
+                    provider.impl.validate_hardware(config)
                 bundle, _ = _load_bundle(Path(self.bundle))
                 contract = RealInputContract.model_validate_json(Path(self.real_input_contract).read_text())
                 programs = compile_programs(
@@ -130,6 +132,8 @@ class RealCoreFactory:
                         "width": c.width, "height": c.height,
                         "channels": 3, "dtype": "uint8", "color_order": "RGB",
                     } for c in config.cameras],
+                    depth_cameras=[c.name.removesuffix("_rgb") + "_depth_mm"
+                                   for c in config.cameras if c.depth_enabled],
                     joint_channels=list(REAL_JOINT_CHANNELS),
                     feature_sources=provider.sources,
                     tool_catalog_sha256=catalog["catalog_sha256"],

@@ -6,7 +6,7 @@
 
 2026-10-01 只读检查显示 can1、can3 在线，两个 ARX ROS2 控制器分别作为 /arm_slave_l、/arm_slave_r 运行，状态话题是 /arm_slave_l_status、/arm_slave_r_status，命令话题是 /arm_master_l_status、/arm_master_r_status。因此 dodo 应使用 arm_transport=arx_ros2。arx_sdk 适配器供独占 CAN、没有 ROS 控制器的场景使用；两个控制栈不能同时控制同一 CAN 设备。官方 SingleArm 在该机的 /home/dodo/chenfu/ARX_X5/py/arx_x5_python/bimanual 中。
 
-dodo 的 pyrealsense2 实时枚举确认了手册映射：front=260422272500、left=260422271945、right=260422275847。/dev/v4l/by-id 还列出另一组三台 261123… 设备，不能据此替换 RealSense SDK 使用的映射。仓库保存了从上述三台设备的 640x480@15 RGB stream profile 只读获取的三份内参快照（robots/arx/manifests/real/）。相机外参另见本仓库 docs/arx_camera.md：主相机到左臂局部基座的矩阵为实测、左腕手眼外参为实测，右腕手眼外参是由左腕同构推导、尚未经右腕独立验收。已把 dodo 运行时 front 原始标定复制为 dodo_front_d405_rgbd_calibration_BL_source.json，保留原文件 SHA 854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10。原文件的 T_B_from_C 实际指向左臂局部基座 BL，不能当成整机基座 BA；如需在整机坐标计算，须采用 docs/arx_camera.md 中已验收的 BL→BA 迁移。当前后端只消费 RGB 内参和 14D 状态，不消费外参；不能仅凭这些数据声称真机目标到夹爪距离已经可用。启动会核对标定文件 SHA、内部 camera.logical_name、camera.serial、camera.width/height 和运行时内参；不匹配直接拒绝。模型契约中的 calibration_id 是训练接口标签，真实内参的身份由这份文件的 SHA 与物理序列号共同确定。
+dodo 的 pyrealsense2 实时枚举确认了手册映射：front=260422272500、left=260422271945、right=260422275847。/dev/v4l/by-id 还列出另一组三台 261123… 设备，不能据此替换 RealSense SDK 使用的映射。仓库保存了从上述三台设备的 640x480@15 RGB stream profile 只读获取的三份内参快照（robots/arx/manifests/real/）。相机外参另见本仓库 docs/arx_camera.md：主相机到左臂局部基座的矩阵为实测、左腕手眼外参为实测，右腕手眼外参是由左腕同构推导、尚未经右腕独立验收。已把 dodo 运行时 front 原始标定复制为 dodo_front_d405_rgbd_calibration_BL_source.json，保留原文件 SHA 854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10。原文件的 T_B_from_C 实际指向左臂局部基座 BL，不能当成整机基座 BA；如需在整机坐标计算，须采用 docs/arx_camera.md 中已验收的 BL→BA 迁移。真机后端可选择把 front 对齐深度和控制器 TCP 正运动学交给 PickTube provider 计算目标距离。启动会核对标定文件 SHA、内部 camera.logical_name、camera.serial、camera.width/height 和运行时内参；不匹配直接拒绝。模型契约中的 calibration_id 是训练接口标签，真实内参的身份由这份文件的 SHA 与物理序列号共同确定。
 
 ## 官方 AC one URDF 关节范围
 
@@ -51,6 +51,12 @@ reset 只读取同步观测，不回零或移动。每个 step 先经过现有 A
 
 ## 启动范围
 
-服务入口复用现有 EpisodeWorker、HTTP gateway、CosmosPredictor 和工具目录；当前只启用纯 VLA baseline。带 CandidateBundle 的真机 critic provider 和 reentry evaluator 尚未实现，不能通过这个入口启用示例 privileged bundle。实现这些 provider 后须先通过 real_input.py 的 bundle 输入预检。
+服务入口复用现有 EpisodeWorker、HTTP gateway、CosmosPredictor 和工具目录。示例 CandidateBundle 现可通过 SHA 固定的 `picktube_rgbd_provider.py` 提供两个真机 critic 特征，仍须先通过 `real_input.py` 输入预检；该 provider 专用于 dodo 的 AC one 与 front D405 标定。
 
 先填写硬件配置中的实际关节上下界、夹爪原生范围和模型坐标变换，再计算配置文件 SHA。用 --check-config 校验冻结配置；此模式不打开 CAN、ROS2 或相机，也不需要 runtime-config/output。真正运行前还需在 dodo 的 Python 3.12 环境中加载 ARX ROS2 工作空间，并把此 Git 分支的代码部署到 dodo。当前没有向真机发送过运动指令；测试使用假机械臂、假相机和假 ROS2 话题。
+
+## PickTube 实时测距
+
+`robots/arx/deployment/picktube_rgbd_provider.py` 锁定 front 相机 `260422272500` 的 640×480 内参和 `T_BL_from_C0` 源文件 SHA。`front_rgb` 必须配置 `depth_enabled=true`；RealSense SDK 把原始 z16 深度对齐到 RGB、按设备比例尺转成毫米，再以最近邻缩放到 320×240。私有特征帧保存深度，公开 RGB 观测和日志不保存深度图。provider 从粉色标签区域取有效深度中位数，以实测外参转换到左臂局部基座，再把右臂控制器的 TCP 正运动学结果用 `T_BL_from_BR=translation([0,-0.5,0])` 转入同一坐标系，计算欧氏距离。标签中心是试管抓取点的近似量；不可见或被遮挡时不会捏造距离。
+
+2026-10-01 只读联调：三台 D405 单独均可打开；三台同时 640×480@30 出现 `VIDIOC_S_FMT` I/O 错误，改成 640×480@15 后成功采到 front RGB+depth、left/right RGB，一组帧的主机时间差为 24.3 ms。硬件配置应使用 15 fps；此结果不是长时稳定性测试。当前现场 front 图像没有可见粉色试管，因此尚未取得真实试管距离。

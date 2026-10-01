@@ -121,13 +121,16 @@ class ArxRos2Device:
                 native[:6] > np.asarray(calibration.joint_max_rad) + 1e-3
             ):
                 raise ValueError("ROS2 joint feedback outside configured controller-coordinate bounds")
+            end_pose = np.asarray(message.end_pos, dtype=np.float64)
+            if end_pose.shape != (6,) or not np.isfinite(end_pose).all():
+                raise ValueError("ROS2 controller FK end_pos must be finite 6D")
             native[6] = calibration.to_policy(float(native[6]))
         except Exception as exc:
             with self._lock:
                 self._fault = f"{side} status invalid: {exc}"
             return
         with self._lock:
-            self._latest[side] = (native.astype(np.float32), stamp)
+            self._latest[side] = (native.astype(np.float32), stamp, end_pose[:3].copy())
 
     def read(self) -> JointSample:
         if self._closed.is_set():
@@ -151,6 +154,7 @@ class ArxRos2Device:
                 transport_responsive=True, diagnostics_available=False,
                 detail="fresh ROS2 RobotStatus; no CAN ACK or motor fault bits",
             ),
+            right_tcp_xyz_m=right[2],
         )
 
     def _message(self, positions: np.ndarray):

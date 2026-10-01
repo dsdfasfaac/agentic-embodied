@@ -59,7 +59,7 @@ class RealFeatureSource(StrictModel):
     name: str = Field(min_length=1, max_length=128)
     provider_id: str = Field(min_length=1, max_length=128)
     provider_sha256: SHA
-    source_kind: Literal["camera_rgb", "joint_feedback", "fused"]
+    source_kind: Literal["camera_rgb", "joint_feedback", "fused", "rgbd_fused"]
     source_ids: list[str] = Field(min_length=1, max_length=17)
     scalar_type: Literal["number", "integer", "boolean", "string"]
     units: str = Field(min_length=1, max_length=64)
@@ -82,6 +82,7 @@ class RealInputContract(StrictModel):
     model_contract_sha256: SHA
     tool_catalog_sha256: SHA
     cameras: list[RealCamera] = Field(min_length=3, max_length=3)
+    depth_cameras: list[str] = Field(default_factory=list)
     joint_channels: list[str] = Field(min_length=ARX_ACTION_DIM, max_length=ARX_ACTION_DIM)
     feature_sources: list[RealFeatureSource] = Field(min_length=1, max_length=128)
     max_critic_history_steps: int = Field(ge=1, le=1024)
@@ -98,6 +99,10 @@ class RealInputContract(StrictModel):
             raise ValueError("14 distinct joint feedback channels are required")
         if len({feature.name for feature in self.feature_sources}) != len(self.feature_sources):
             raise ValueError("duplicate feature source")
+        if len(set(self.depth_cameras)) != len(self.depth_cameras) or not set(self.depth_cameras) <= {
+            camera.name.removesuffix("_rgb") + "_depth_mm" for camera in self.cameras
+        }:
+            raise ValueError("depth cameras must correspond to declared RGB streams")
         return self
 
 
@@ -107,6 +112,7 @@ class LiveCapabilities(StrictModel):
     schema_version: Literal["arx.real.capabilities.v1"]
     robot_id: str = Field(min_length=1, max_length=128)
     cameras: list[RealCamera] = Field(min_length=3, max_length=3)
+    depth_cameras: list[str] = Field(default_factory=list)
     joint_channels: list[str] = Field(min_length=ARX_ACTION_DIM, max_length=ARX_ACTION_DIM)
     feature_sources: list[RealFeatureSource] = Field(max_length=128)
     tool_catalog_sha256: SHA
@@ -179,6 +185,8 @@ def _load_bundle(path: Path) -> tuple[CandidateBundle, dict[str, Any]]:
 def _check_sources(contract: RealInputContract, live: LiveCapabilities) -> None:
     if contract.cameras != live.cameras:
         raise ValueError("live camera geometry, device, or calibration differs")
+    if contract.depth_cameras != live.depth_cameras:
+        raise ValueError("live aligned metric depth streams differ")
     if contract.joint_channels != live.joint_channels:
         raise ValueError("live 14D joint feedback mapping differs")
     if contract.tool_catalog_sha256 != live.tool_catalog_sha256:
@@ -186,6 +194,7 @@ def _check_sources(contract: RealInputContract, live: LiveCapabilities) -> None:
     available = {feature.name: feature for feature in live.feature_sources}
     cameras = {camera.name for camera in contract.cameras}
     joints = set(contract.joint_channels)
+    depth = set(contract.depth_cameras)
     for feature in contract.feature_sources:
         if available.get(feature.name) != feature:
             raise ValueError(f"real provider does not attest feature: {feature.name}")
@@ -198,6 +207,10 @@ def _check_sources(contract: RealInputContract, live: LiveCapabilities) -> None:
             ids <= cameras | joints and ids & cameras and ids & joints
         ):
             raise ValueError(f"fused feature needs camera and joint sources: {feature.name}")
+        if feature.source_kind == "rgbd_fused" and not (
+            ids <= cameras | depth | joints and ids & cameras and ids & depth and ids & joints
+        ):
+            raise ValueError(f"RGBD feature needs RGB, metric depth and joint sources: {feature.name}")
 
 
 def _check_threshold(feature: RealFeatureSource, operator: str, value: Any) -> None:

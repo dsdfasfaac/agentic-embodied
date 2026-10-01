@@ -133,6 +133,9 @@ class ArxX5Device:
         started = time.monotonic_ns()
         left = self._read_one(self.left, self.left_calibration)
         right = self._read_one(self.right, self.right_calibration)
+        right_pose = np.asarray(self.right.get_ee_pose(), dtype=np.float64)
+        if right_pose.shape != (7,) or not np.isfinite(right_pose).all():
+            raise ValueError("ARX SDK controller FK pose must be finite XYZ/quaternion")
         finished = time.monotonic_ns()
         return JointSample(
             np.concatenate((left, right)), finished, started,
@@ -141,6 +144,7 @@ class ArxX5Device:
                 diagnostics_available=False,
                 detail="fresh SDK read; motor fault bits and CAN ACK unavailable",
             ),
+            right_tcp_xyz_m=right_pose[:3].copy(),
         )
 
     @staticmethod

@@ -140,6 +140,25 @@ def test_privileged_feature_without_real_source_is_rejected(frozen_input):
         )
 
 
+def test_rgbd_critic_source_requires_live_metric_depth(frozen_input):
+    def rgbd_feature(value):
+        value["feature_sources"][1].update(
+            source_kind="rgbd_fused",
+            source_ids=["front_rgb", "front_depth_mm", "joint_13"],
+        )
+
+    with pytest.raises(ValueError, match="RGBD feature needs RGB, metric depth"):
+        frozen_input(contract_update=rgbd_feature, live_update=rgbd_feature)
+
+    def declare_depth(value):
+        rgbd_feature(value)
+        value["depth_cameras"] = ["front_depth_mm"]
+
+    assert frozen_input(contract_update=declare_depth, live_update=declare_depth)["eligible"]
+    with pytest.raises(ValueError, match="live aligned metric depth"):
+        frozen_input(contract_update=declare_depth, live_update=rgbd_feature)
+
+
 def test_camera_calibration_mismatch_is_rejected(frozen_input):
     with pytest.raises(ValueError, match="live camera"):
         frozen_input(

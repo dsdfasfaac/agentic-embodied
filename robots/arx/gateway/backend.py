@@ -34,6 +34,7 @@ class HardwareEvidence:
     observation: dict[str, Any]
     command_receipt: dict[str, Any] | None
     arrival_verified: bool | None
+    feature_frames: dict[str, np.ndarray] | None = None
 
 
 @dataclass(frozen=True)

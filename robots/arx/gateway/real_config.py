@@ -50,6 +50,7 @@ class CameraSettings(StrictModel):
     capture_width: int = Field(gt=0)
     capture_height: int = Field(gt=0)
     capture_fps: int = Field(gt=0)
+    depth_enabled: bool = False
 
     def identity(self) -> CameraIdentity:
         return CameraIdentity(
@@ -182,6 +183,7 @@ def build_real_backend(
         arrival_timeout_s=timing.arrival_timeout_s,
         feedback_poll_s=timing.feedback_poll_s,
         position_tolerance=timing.position_tolerance,
+        depth_cameras=tuple(camera.name for camera in config.cameras if camera.depth_enabled),
     )
     if config.arm_transport == "arx_ros2":
         arms = ArxRos2Device.from_ros2(
@@ -204,6 +206,7 @@ def build_real_backend(
                 RealSenseCameraSpec(
                     camera.identity(), camera.serial, camera.calibration_file,
                     camera.capture_width, camera.capture_height, camera.capture_fps,
+                    camera.depth_enabled,
                 )
                 for camera in config.cameras
             ),

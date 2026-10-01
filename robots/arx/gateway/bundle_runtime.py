@@ -48,9 +48,12 @@ class RealFeatureProvider:
                 raise ValueError(f"invalid real feature value: {source.name}")
             stamps = []
             for source_id in source.source_ids:
-                stamp = (hardware.get("camera_monotonic_ns", {}).get(source_id)
-                         if source_id in hardware.get("camera_monotonic_ns", {})
-                         else hardware.get("state_monotonic_ns"))
+                if source_id in hardware.get("camera_monotonic_ns", {}):
+                    stamp = hardware["camera_monotonic_ns"][source_id]
+                elif source_id in hardware.get("depth_monotonic_ns", {}):
+                    stamp = hardware["depth_monotonic_ns"][source_id]
+                else:
+                    stamp = hardware.get("state_monotonic_ns")
                 if not isinstance(stamp, int) or stamp <= 0 or stamp > now:
                     raise ValueError(f"invalid source timestamp: {source.name}")
                 stamps.append(stamp)

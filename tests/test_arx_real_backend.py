@@ -1,6 +1,7 @@
 """Hardware-neutral real backend and official ARX SingleArm adapter tests."""
 
 import time
+from dataclasses import replace
 from pathlib import Path
 
 import numpy as np
@@ -144,6 +145,27 @@ def test_stale_camera_prevents_motion_observation():
     assert len(arm.sent) == 1
 
 
+def test_real_backend_rejects_missing_aligned_depth_and_keeps_metric_frame_private():
+    backend, _, cameras = make_backend()
+    backend.config = replace(backend.config, depth_cameras=("front_rgb",))
+    with pytest.raises(ValueError, match="aligned metric depth missing"):
+        backend.reset()
+    original = cameras.capture
+
+    def capture_with_depth(timeout_s):
+        frames = original(timeout_s)
+        frames["front_rgb"] = replace(
+            frames["front_rgb"], depth_mm=np.full((2, 2), 500, np.uint16)
+        )
+        return frames
+
+    cameras.capture = capture_with_depth
+    commit = backend.reset()
+    assert commit.hardware.feature_frames["front_depth_mm"].dtype == np.uint16
+    assert commit.hardware.observation["depth_monotonic_ns"]["front_depth_mm"] > 0
+    assert "front_depth_mm" not in commit.policy.images
+
+
 class FakeSingleArm:
     def __init__(self, grip=-3.0):
         self.positions = np.array([0.0] * 6 + [grip])
@@ -151,6 +173,9 @@ class FakeSingleArm:
 
     def get_joint_positions(self):
         return self.positions.copy()
+
+    def get_ee_pose(self):
+        return np.array([0.2, -0.1, 0.3, 1.0, 0.0, 0.0, 0.0])
 
     def set_joint_positions(self, *, positions):
         self.commands.append(("joints", positions))
@@ -177,8 +202,10 @@ def test_arx_adapter_converts_gripper_and_respects_locked_arm():
         left_calibration=calibration, right_calibration=calibration,
         command_left=False, command_right=True,
     )
-    state = device.read().positions
+    sample = device.read()
+    state = sample.positions
     assert state.shape == (14,) and state[6] == state[13] == -5.0
+    assert sample.right_tcp_xyz_m.tolist() == [0.2, -0.1, 0.3]
     target = state.copy()
     target[7] = 0.1
     target[13] = -3.0
@@ -224,6 +251,7 @@ class FakeRobotStatus:
     def __init__(self):
         self.header = type("Header", (), {})()
         self.joint_pos = [0.0] * 7
+        self.end_pos = [0.2, -0.1, 0.3, 0.0, 0.0, 0.0]
 
 
 def test_dodo_ros2_topics_use_status_feedback_and_publish_receipt():
@@ -247,8 +275,10 @@ def test_dodo_ros2_topics_use_status_feedback_and_publish_receipt():
             msg = FakeRobotStatus()
             msg.joint_pos[6] = -3.0
             node.subscribers[topic](msg)
-        state = device.read().positions
+        sample = device.read()
+        state = sample.positions
         assert state.shape == (14,)
+        assert sample.right_tcp_xyz_m.tolist() == [0.2, -0.1, 0.3]
         target = state.copy()
         target[7] = 0.1
         receipt = device.send(target, "ros-cmd")

@@ -42,10 +42,12 @@ feature names to scalar values). Each source declares its camera and/or 14D
 joint feedback channels, scalar type, unit, maximum age, and the module's
 SHA-256. The runner and gateway compare these declarations with the real input
 contract. Runtime values must be finite, correctly typed, and computed from
-fresh timestamped sources. A provider for the sample's
-`privileged.selected.target_gripper_distance_m` must measure that distance
-from real camera data and joint feedback. The simulation value is never used
-as a substitute. Without that provider, the sample bundle cannot start.
+fresh timestamped sources. The sample's real provider is `robots/arx/deployment/picktube_rgbd_provider.py`.
+It uses aligned front D405 metric depth, the pinned front-to-left-base extrinsic,
+and right-arm controller forward kinematics to estimate the pink-label-centre
+to TCP distance. `front_rgb` must enable depth in the frozen hardware config,
+and the input contract must list `front_depth_mm`. Missing or inconsistent
+depth, target visibility, or TCP feedback stops feature evaluation.
 
 The 14 real input channel names, in order, are `left_joint_1` through
 `left_joint_6`, `left_gripper_policy`, `right_joint_1` through `right_joint_6`,
@@ -104,6 +106,19 @@ metres. Direct substitution of CAD bounds would reject observed idle feedback;
 a measured coordinate and gripper calibration is required.
 The active dodo controllers use `remote_slave`, CAN `can1`/`can3`, end type 2,
 and the default status/command topics used by this backend.
+
+## PickTube RGB-D evidence
+
+`scripts/deployment/evaluate_picktube_rgbd.py /home/dodo/chenfu/data/raw/PickTube`
+checks the saved front RGB frames without moving hardware. On 2026-10-01 it
+located the label in the initial frame of all 50 valid episodes; sampling one
+frame in ten across the trajectories found it in 1251/1595 frames. The saved
+front depth JPEGs are 480×640×3 color previews, so they cannot validate a
+metre distance. Synthetic aligned uint16 depth plus a known right TCP gives
+the expected 0.20 m in the full provider wrapper. A read-only live front
+D405 sample had no visible pink tube; real object-distance accuracy is still
+unmeasured. Three cameras plus front depth worked at 640×480@15, while
+simultaneous 30 fps startup failed with a USB I/O error.
 
 This path has been tested with fake hardware and the frozen sample bundle.
 It has not commanded dodo's motors. A real trial requires the operator's

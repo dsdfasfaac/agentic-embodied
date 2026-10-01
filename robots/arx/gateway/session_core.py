@@ -166,7 +166,10 @@ class ArxSessionCore:
             "ObservationPublished", deepcopy(self.current), public=True
         )
         self.observations[self.current["observation_id"]] = deepcopy(self.current)
-        self.frame_history[self.current["observation_id"]] = images
+        self.frame_history[self.current["observation_id"]] = {
+            **images,
+            **(commit.hardware.feature_frames or {} if commit.hardware is not None else {}),
+        }
 
     def snapshot(self):
         return {

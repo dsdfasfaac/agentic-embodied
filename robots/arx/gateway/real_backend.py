@@ -43,6 +43,7 @@ class CameraFrame:
     pixels: np.ndarray
     monotonic_ns: int
     identity: CameraIdentity
+    depth_mm: np.ndarray | None = None
 
 
 @dataclass(frozen=True)
@@ -59,6 +60,7 @@ class JointSample:
     monotonic_ns: int
     acquisition_started_ns: int
     health: DeviceHealth
+    right_tcp_xyz_m: np.ndarray | None = None
 
 
 @dataclass(frozen=True)
@@ -95,10 +97,13 @@ class RealBackendConfig:
     arrival_timeout_s: float
     feedback_poll_s: float
     position_tolerance: tuple[float, ...]
+    depth_cameras: tuple[str, ...] = ()
 
     def __post_init__(self):
         if tuple(camera.name for camera in self.cameras) != CAMERAS:
             raise ValueError("camera names/order must match the VLA model")
+        if len(set(self.depth_cameras)) != len(self.depth_cameras) or not set(self.depth_cameras) <= set(CAMERAS):
+            raise ValueError("depth cameras must be named RGB cameras")
         if len(self.state_units) != 14 or tuple(
             unit for i, unit in enumerate(self.state_units) if i not in (6, 13)
         ) != ("rad",) * 12:
@@ -147,7 +152,7 @@ class RealBackend:
         if self._event_sink is not None:
             self._event_sink(kind, payload)
 
-    def _observe(self, *, after_ns: int | None = None) -> tuple[PolicyObservation, dict, int]:
+    def _observe(self, *, after_ns: int | None = None) -> tuple[PolicyObservation, dict, dict, int]:
         expected = {camera.name: camera for camera in self.config.cameras}
         deadline = time.monotonic() + self.config.observation_timeout_s
         last_error = "no synchronized frame set"
@@ -170,7 +175,9 @@ class RealBackend:
                 raise ValueError("arm feedback must be finite 14D positions")
             times = [sample.acquisition_started_ns, sample.monotonic_ns]
             images = {}
+            feature_frames = {}
             camera_times = {}
+            depth_times = {}
             for name in CAMERAS:
                 frame = frames[name]
                 if frame.identity != expected[name]:
@@ -188,6 +195,12 @@ class RealBackend:
                 images[name] = pixels.copy()
                 camera_times[name] = frame.monotonic_ns
                 times.append(frame.monotonic_ns)
+                if name in self.config.depth_cameras:
+                    depth = np.asarray(frame.depth_mm)
+                    if depth.dtype != np.uint16 or depth.shape != pixels.shape[:2]:
+                        raise ValueError(f"aligned metric depth missing or invalid: {name}")
+                    feature_frames[name.removesuffix("_rgb") + "_depth_mm"] = depth.copy()
+                    depth_times[name.removesuffix("_rgb") + "_depth_mm"] = frame.monotonic_ns
             else:
                 if sample.monotonic_ns <= self._last_state_ns:
                     last_error = "stale joint feedback"
@@ -219,6 +232,7 @@ class RealBackend:
                     "state_monotonic_ns": sample.monotonic_ns,
                     "state_acquisition_started_ns": sample.acquisition_started_ns,
                     "camera_monotonic_ns": camera_times,
+                    "depth_monotonic_ns": depth_times,
                     "camera_calibration_sha256": {
                         name: expected[name].calibration_sha256 for name in CAMERAS
                     },
@@ -230,13 +244,20 @@ class RealBackend:
                         for name in CAMERAS
                     },
                 }
-                return PolicyObservation(images, state.copy()), evidence, now
+                if sample.right_tcp_xyz_m is not None:
+                    tcp = np.asarray(sample.right_tcp_xyz_m, dtype=np.float64)
+                    if tcp.shape != (3,) or not np.isfinite(tcp).all():
+                        raise ValueError("right controller FK TCP must be finite XYZ metres")
+                    evidence["right_tcp_xyz_m"] = tcp.tolist()
+                    evidence["right_tcp_frame"] = "right_arm_local_base"
+                    evidence["right_tcp_monotonic_ns"] = sample.monotonic_ns
+                return PolicyObservation(images, state.copy()), evidence, feature_frames, now
         raise TimeoutError(last_error)
 
     def reset(self) -> StepCommit:
         if self._started_ns is not None or self._closed:
             raise RuntimeError("real backend cannot reset an existing episode")
-        policy, observed, now = self._observe()
+        policy, observed, feature_frames, now = self._observe()
         start = np.asarray(self.task.start_state, dtype=np.float32)
         tolerance = np.asarray(self.config.position_tolerance, dtype=np.float32)
         for locked, region in (
@@ -249,7 +270,8 @@ class RealBackend:
         self._started_ns = now
         self._next_send_ns = now
         hardware = HardwareEvidence(
-            observation=observed, command_receipt=None, arrival_verified=None
+            observation=observed, command_receipt=None, arrival_verified=None,
+            feature_frames=feature_frames,
         )
         return StepCommit(policy, policy.state.copy(), 0.0, False, {}, hardware=hardware)
 
@@ -282,14 +304,14 @@ class RealBackend:
         deadline = time.monotonic() + self.config.arrival_timeout_s
         tolerances = np.asarray(self.config.position_tolerance, dtype=np.float32)
         # The final synchronized feedback, rather than SDK return, decides arrival.
-        policy, observed, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
+        policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
         arrived = (
             observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
             and bool(np.all(np.abs(policy.state - target) <= tolerances))
         )
         while not arrived and time.monotonic() < deadline:
             time.sleep(min(self.config.feedback_poll_s, max(0, deadline - time.monotonic())))
-            policy, observed, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
+            policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
             arrived = (
                 observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
                 and bool(np.all(np.abs(policy.state - target) <= tolerances))
@@ -306,6 +328,7 @@ class RealBackend:
             observation=observed,
             command_receipt=asdict(receipt),
             arrival_verified=arrived,
+            feature_frames=feature_frames,
         )
         return StepCommit(
             policy, target.copy(), (observation_ns - self._started_ns) / 1e9,
