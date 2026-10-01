@@ -71,6 +71,18 @@ runtime with robot drivers, `--output` for a new attempt directory, and
 `--runner-limits` for the separate runner budget. The CLI also accepts
 `--zeva-host`, `--zeva-port`, `--listen-host`, and `--listen-port`.
 
+On dodo, the checkout is `/home/dodo/chenfu/Agentic-Embodied` at Git commit
+`3d842e2` (or a later commit from the same branch). An isolated Python 3.12
+environment is at `/home/dodo/chenfu/.venv_arx_real`; the existing collection
+environment provides NumPy, Pydantic, HTTPX, and RealSense bindings. In the
+shell that launches the runner, source `/opt/ros/jazzy/setup.bash` and
+`/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/install/setup.bash`, then prepend
+`/home/dodo/chenfu/.venv_data_collect_py312/lib/python3.12/site-packages` to
+`PYTHONPATH`. Set `--python` to
+`/home/dodo/chenfu/.venv_arx_real/bin/python`. Import checks for ROS2
+`RobotStatus`, RealSense, FastAPI, Uvicorn, NumPy, Pydantic, and HTTPX passed;
+this is an environment check, not a hardware motion test.
+
 ## Joint bounds checked against the SDK
 
 On dodo, `SingleArm(type=2)` loads `x5_2025.urdf`. Its six joint limits are
