@@ -666,6 +666,7 @@ class RolloutRunner:
                     self.outcome = self.outcome.model_copy(update={"recovery_attempted": True})
                 call = program.calls[cursor]
                 before = self.snapshot["observation"]
+                result = None
                 try:
                     arguments = resolve_call(
                         call, before["observation_id"], self.bundle_tokens.get(rid)
@@ -686,11 +687,17 @@ class RolloutRunner:
                         "arguments": arguments, "observation_before": before,
                         "tool_result": result, "observation_after": after,
                     })
-                except ValueError as exc:
+                except Exception as exc:
+                    try:
+                        after = self.client.observation()["observation"]
+                    except Exception:
+                        after = None
                     self._save(f"recovery/{rid}-{cursor:03d}-failure.json", {
                         "reason": str(exc), "observation_before": before,
-                        "tool_result": locals().get("result"),
+                        "tool_result": result, "observation_after": after,
                     })
+                    if isinstance(exc, RunnerError):
+                        raise
                     raise RunnerError("infrastructure_error", "recovery_step_failed") from exc
                 continue
             elif state in ("INTERRUPTED", "RECOVERING") and adapter:

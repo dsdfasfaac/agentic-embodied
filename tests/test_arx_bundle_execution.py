@@ -7,7 +7,9 @@ from dataclasses import replace
 import pytest
 
 from robots.arx.deployment.bundle_program import compile_programs, verify_call_result
+from robots.arx.deployment.runner import RunnerError
 from robots.arx.gateway.bundle_runtime import RealBundleReentry, RealFeatureProvider
+from robots.arx.gateway.tools import RegisteredTool
 from tests.test_arx_deployment import runner
 from tests.test_arx_gateway import ScriptCritic, call, limits, make_core
 from zetta.evolution.models import CandidateBundle, CriticRule, RecoveryRule, RecoveryStep
@@ -99,6 +101,39 @@ def test_review_denial_does_not_grant_reentry_token():
                 "assessment": {"status": "ineligible"}, "reentry_token": None,
             },
         }, real=True)
+
+
+def test_denied_reentry_stops_runner_and_records_failure_observation(tmp_path):
+    class Denied:
+        def inspect(self, args, context):
+            return {
+                "recovery_id": context["recovery_id"],
+                "observation_id": args.observation_ids[-1],
+                "policy_id": context["policy_id"], "status": "ineligible",
+                "checks": [{"check_id": "real-clearance", "status": "fail",
+                            "evidence_ids": args.observation_ids,
+                            "reason_code": "not_clear"}],
+            }
+
+    program = compile_programs(bundle())["recover"]
+    core, backend, _ = make_core(tmp_path / "core", ScriptCritic({1: "a"}), config=limits(max_steps=8))
+    core.bindings = (program.binding,)
+    core.programs = {"recover": program}
+    old = core.registry._tools["arx.review_reentry"]
+    core.registry._tools["arx.review_reentry"] = RegisteredTool(old.spec, Denied())
+    r = runner(tmp_path / "run", core)
+    r.trial.candidate = type("Candidate", (), {"package_sha256": bundle().sha256})()
+    r._structured_bundle = True
+    r.bundle_programs = {"recover": program}
+    with pytest.raises(RunnerError, match="recovery_step_failed"):
+        r.loop()
+    failures = list((tmp_path / "run/recovery").glob("*-failure.json"))
+    assert len(failures) == 1
+    evidence = json.loads(failures[0].read_text())
+    assert evidence["observation_before"]["observation_id"] == "obs-2"
+    assert evidence["observation_after"]["observation_id"] == "obs-2"
+    assert evidence["tool_result"]["status"] == "failed"
+    assert backend.steps == 2
 
 
 def test_eef_expansion_reserves_planner_physical_budget():
