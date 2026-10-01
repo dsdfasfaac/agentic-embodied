@@ -111,7 +111,7 @@ class ExecutionOutput(StrictModel):
     ]
     last_committed_step: Annotated[int, Field(ge=0)]
     command_target_reached: bool | None
-    physical_arrival_verified: Literal[False] = False
+    physical_arrival_verified: bool = False
 
 
 class Proposal(StrictModel):

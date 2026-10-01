@@ -636,3 +636,53 @@ def test_motion_tools_native_after_normal_completion(tmp_path):
     result, _ = call(core, "arx.hold", {"steps": 2})
     assert result["status"] == "completed" and result["executed_steps"] == 2
     assert backend.steps == 6 and core.recovery is None
+
+
+def test_hardware_receipt_and_arrival_are_distinct_and_unverified_halts(tmp_path):
+    from dataclasses import replace
+    from robots.arx.gateway.backend import HardwareEvidence
+
+    class ReceiptBackend(FakeBackend):
+        def __init__(self, arrived):
+            super().__init__()
+            self.arrived = arrived
+            self.sink = None
+
+        def set_event_sink(self, sink):
+            self.sink = sink
+
+        def step(self, target):
+            self.sink("command_dispatch_started", {"target": target.tolist()})
+            self.sink("command_sent", {"status": "ros_publish_returned"})
+            self.steps += 1
+            self.command = target.copy()
+            self.sink(
+                "arrival_observed" if self.arrived else "arrival_unverified",
+                {"verified": self.arrived},
+            )
+            return replace(
+                self.commit(),
+                hardware=HardwareEvidence(
+                    observation={"state_monotonic_ns": self.steps},
+                    command_receipt={"status": "ros_publish_returned"},
+                    arrival_verified=self.arrived,
+                ),
+            )
+
+    arrived_core, _, _ = make_core(tmp_path / "arrived", backend=ReceiptBackend(True))
+    arrived_result, _ = call(arrived_core)
+    assert arrived_result["result"]["physical_arrival_verified"] is True
+    assert arrived_result["executed_steps"] == 4
+
+    core, backend, _ = make_core(tmp_path / "unverified", backend=ReceiptBackend(False))
+    result, _ = call(core)
+    assert result["status"] == "unknown"
+    assert result["executed_steps"] == 1
+    assert backend.steps == 1
+    kinds = [
+        row[0] for row in core.journal.db.execute(
+            "SELECT kind FROM records ORDER BY sequence"
+        )
+    ]
+    assert kinds.index("command_sent") < kinds.index("arrival_unverified")
+    assert "ObservationPublished" in kinds

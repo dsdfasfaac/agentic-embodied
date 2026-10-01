@@ -30,6 +30,13 @@ class PrivilegedObservation:
 
 
 @dataclass(frozen=True)
+class HardwareEvidence:
+    observation: dict[str, Any]
+    command_receipt: dict[str, Any] | None
+    arrival_verified: bool | None
+
+
+@dataclass(frozen=True)
 class StepCommit:
     policy: PolicyObservation
     command: np.ndarray
@@ -37,6 +44,7 @@ class StepCommit:
     environment_ended: bool
     private_evaluation: dict[str, Any]
     privileged: PrivilegedObservation | None = None
+    hardware: HardwareEvidence | None = None
 
 
 class Backend(Protocol):

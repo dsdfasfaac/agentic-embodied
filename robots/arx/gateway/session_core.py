@@ -104,6 +104,10 @@ class ArxSessionCore:
         if self.current is not None or self.journal.snapshot() is not None:
             raise RuntimeError("episodes cannot be reset or resumed")
         self.phase_changed("reset")
+        if hasattr(self.backend, "set_event_sink"):
+            self.backend.set_event_sink(
+                lambda kind, payload: self._record(kind, payload)
+            )
         self.commit = self.backend.reset()
         self._publish(self.commit, lifecycle="reset")
         self.phase_changed("critic")
@@ -141,6 +145,9 @@ class ArxSessionCore:
             "lifecycle": lifecycle,
             "cameras": references,
         }
+        if commit.hardware is not None:
+            self.current["clock_domain"] = "host_monotonic_ns"
+            self.current["hardware"] = deepcopy(commit.hardware.observation)
         if self.privileged and commit.privileged is not None:
             privileged = deepcopy(dataclasses.asdict(commit.privileged))
             self.current["privileged"] = privileged
@@ -404,6 +411,8 @@ class ArxSessionCore:
     def execute_targets(self, prepared, request, result):
         """The sole physical target loop. Every committed step crosses the critic barrier."""
         completion = "plan_exhausted"
+        hardware_steps = 0
+        verified_steps = 0
         result["planned_steps"] = prepared.planned_steps
         while True:
             completion = self._gate(result)
@@ -458,6 +467,9 @@ class ArxSessionCore:
                     self.state = "EXECUTION_UNCERTAIN"
                     raise
                 self.commit = commit
+                if commit.hardware is not None:
+                    hardware_steps += 1
+                    verified_steps += int(commit.hardware.arrival_verified is True)
                 self.step_index += 1
                 result["executed_steps"] += 1
                 result["write_certainty"] = "known_partial"
@@ -474,6 +486,10 @@ class ArxSessionCore:
                 self._publish(
                     commit, lifecycle="recovery" if self.recovery else "nominal"
                 )
+                if commit.hardware is not None and commit.hardware.arrival_verified is not True:
+                    self.state = "EXECUTION_UNCERTAIN"
+                    self._save()
+                    raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
                 prepared.on_commit(self._context())
                 self._assess(result, terminal=commit.environment_ended)
                 self._save()
@@ -506,7 +522,7 @@ class ArxSessionCore:
                 "completion": completion,
                 "last_committed_step": self.step_index,
                 "command_target_reached": prepared.reached,
-                "physical_arrival_verified": False,
+                "physical_arrival_verified": bool(hardware_steps and hardware_steps == verified_steps),
             },
         )
         if result["executed_steps"] and status == "completed":

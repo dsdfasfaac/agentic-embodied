@@ -291,3 +291,23 @@ def default_registry(*, zeva, gripper=None, eef=None, reentry=None):
     )
     registry.freeze()
     return registry
+
+
+class PolicyGripperPlanner:
+    """Right gripper opening in the calibrated 14D policy coordinate."""
+
+    def __init__(self, *, closed_policy: float, open_policy: float):
+        if not np.isfinite([closed_policy, open_policy]).all() or closed_policy == open_policy:
+            raise ValueError("distinct finite gripper endpoints required")
+        self.closed_policy = float(closed_policy)
+        self.open_policy = float(open_policy)
+
+    def prepare(self, args, context):
+        target = context.command.copy()
+        target[13] = self.closed_policy + args.opening * (
+            self.open_policy - self.closed_policy
+        )
+        return ArrayPlan(
+            np.repeat(target[None], args.max_steps, axis=0),
+            convergence_target=target,
+        )

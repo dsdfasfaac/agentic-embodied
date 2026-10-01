@@ -1,0 +1,362 @@
+"""Hardware-neutral real backend and official ARX SingleArm adapter tests."""
+
+import time
+from pathlib import Path
+
+import numpy as np
+import pytest
+
+from robots.arx.contracts import load_task_manifest
+from robots.arx.gateway.arx_x5_device import ArmCalibration, ArxX5Device
+from robots.arx.gateway.real_backend import (
+    CameraFrame,
+    CameraIdentity,
+    CommandReceipt,
+    DeviceHealth,
+    JointSample,
+    RealBackend,
+    RealBackendConfig,
+)
+
+
+TASK = load_task_manifest(
+    Path(__file__).resolve().parents[1] / "robots/arx/manifests/pickup_test_tube.yaml"
+)
+
+
+class FakeCameraSource:
+    def __init__(self, identities, *, stale=False):
+        self.identities = identities
+        self.stale = stale
+        self.first = None
+        self.closed = False
+
+    def capture(self, timeout_s):
+        stamp = time.monotonic_ns()
+        if self.first is None:
+            self.first = stamp
+        if self.stale:
+            stamp = self.first
+        return {
+            identity.name: CameraFrame(
+                np.zeros((identity.height, identity.width, 3), np.uint8),
+                stamp,
+                identity,
+            )
+            for identity in self.identities
+        }
+
+    def close(self):
+        self.closed = True
+
+
+class FakeArmDevice:
+    def __init__(self, *, move=True):
+        self.positions = np.asarray(TASK.start_state, dtype=np.float32).copy()
+        self.move = move
+        self.sent = []
+        self.closed = False
+
+    def read(self):
+        start = time.monotonic_ns()
+        return JointSample(
+            self.positions.copy(),
+            time.monotonic_ns(),
+            start,
+            DeviceHealth(True, diagnostics_available=True),
+        )
+
+    def send(self, target, command_id):
+        self.sent.append(target.copy())
+        if self.move:
+            self.positions = target.copy()
+        return CommandReceipt(command_id, time.monotonic_ns(), "sdk_call_returned")
+
+    def close(self):
+        self.closed = True
+
+
+def make_backend(*, move=True, stale=False):
+    identities = tuple(
+        CameraIdentity(name, "device-" + name, "cal-" + name, "a" * 64, 2, 2)
+        for name in ("front_rgb", "left_rgb", "right_rgb")
+    )
+    cameras = FakeCameraSource(identities, stale=stale)
+    arm = FakeArmDevice(move=move)
+    config = RealBackendConfig(
+        cameras=identities,
+        state_units=("rad",) * 6 + ("policy_gripper",)
+        + ("rad",) * 6 + ("policy_gripper",),
+        control_hz=1000,
+        max_sensor_skew_ms=50,
+        max_sensor_age_ms=200,
+        observation_timeout_s=0.015,
+        arrival_timeout_s=0.025,
+        feedback_poll_s=0.001,
+        position_tolerance=(0.001,) * 14,
+    )
+    backend = RealBackend(arms=arm, cameras=cameras, config=config, task=TASK)
+    return backend, arm, cameras
+
+
+def test_real_backend_reports_send_and_measured_arrival_separately():
+    backend, arm, cameras = make_backend()
+    events = []
+    backend.set_event_sink(lambda kind, payload: events.append((kind, payload)))
+    initial = backend.reset()
+    assert initial.hardware.command_receipt is None
+    assert not arm.sent
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] += 0.01
+    commit = backend.step(raw)
+    assert commit.hardware.arrival_verified is True
+    assert commit.hardware.command_receipt["status"] == "sdk_call_returned"
+    assert np.allclose(commit.policy.state, arm.sent[-1])
+    assert [kind for kind, _ in events] == [
+        "command_dispatch_started", "command_sent", "arrival_observed"
+    ]
+    assert commit.hardware.observation["sensor_skew_ms"] < 50
+    backend.close()
+    assert arm.closed and cameras.closed
+
+
+def test_unverified_arrival_is_not_reported_as_acknowledgement():
+    backend, arm, _ = make_backend(move=False)
+    events = []
+    backend.set_event_sink(lambda kind, payload: events.append(kind))
+    backend.reset()
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] += 0.01
+    commit = backend.step(raw)
+    assert commit.hardware.command_receipt["status"] == "sdk_call_returned"
+    assert commit.hardware.arrival_verified is False
+    assert "command_sent" in events and "arrival_unverified" in events
+    assert not np.allclose(commit.command, commit.policy.state)
+
+
+def test_stale_camera_prevents_motion_observation():
+    backend, arm, _ = make_backend(stale=True)
+    backend.reset()
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] += 0.01
+    with pytest.raises(TimeoutError, match="stale camera frame"):
+        backend.step(raw)
+    assert len(arm.sent) == 1
+
+
+class FakeSingleArm:
+    def __init__(self, grip=-3.0):
+        self.positions = np.array([0.0] * 6 + [grip])
+        self.commands = []
+
+    def get_joint_positions(self):
+        return self.positions.copy()
+
+    def set_joint_positions(self, *, positions):
+        self.commands.append(("joints", positions))
+        self.positions[:6] = positions
+
+    def set_gripper_pos(self, value):
+        self.commands.append(("gripper", value))
+        self.positions[6] = value
+
+
+def test_arx_adapter_converts_gripper_and_respects_locked_arm():
+    left, right = FakeSingleArm(), FakeSingleArm()
+    calibration = ArmCalibration(
+        can_port="can1", arm_type=2,
+        joint_min_rad=(-3.0,) * 6,
+        joint_max_rad=(3.0,) * 6,
+        gripper_native_min=-3.5,
+        gripper_native_max=0.0,
+        gripper_policy_scale=2.0,
+        gripper_policy_offset=1.0,
+    )
+    device = ArxX5Device(
+        left=left, right=right,
+        left_calibration=calibration, right_calibration=calibration,
+        command_left=False, command_right=True,
+    )
+    state = device.read().positions
+    assert state.shape == (14,) and state[6] == state[13] == -5.0
+    target = state.copy()
+    target[7] = 0.1
+    target[13] = -3.0
+    receipt = device.send(target, "cmd-test")
+    assert receipt.status == "sdk_call_returned"
+    assert not left.commands
+    assert right.commands[-1] == ("gripper", -2.0)
+    assert device.read().positions[13] == -3.0
+
+
+class FakeRosPublisher:
+    def __init__(self):
+        self.messages = []
+
+    def publish(self, message):
+        self.messages.append(message)
+
+
+class FakeRosNode:
+    def __init__(self):
+        self.publishers = {}
+        self.subscribers = {}
+
+    def create_publisher(self, message_type, topic, depth):
+        publisher = FakeRosPublisher()
+        self.publishers[topic] = publisher
+        return publisher
+
+    def create_subscription(self, message_type, topic, callback, depth):
+        self.subscribers[topic] = callback
+
+    def get_clock(self):
+        class Clock:
+            def now(self):
+                class Stamp:
+                    def to_msg(self):
+                        return object()
+                return Stamp()
+        return Clock()
+
+
+class FakeRobotStatus:
+    def __init__(self):
+        self.header = type("Header", (), {})()
+        self.joint_pos = [0.0] * 7
+
+
+def test_dodo_ros2_topics_use_status_feedback_and_publish_receipt():
+    from robots.arx.gateway.arx_ros2_device import ArxRos2Device, Ros2Topics
+
+    node = FakeRosNode()
+    calibration = ArmCalibration(
+        can_port="can1", arm_type=2,
+        joint_min_rad=(-3.0,) * 6, joint_max_rad=(3.0,) * 6,
+        gripper_native_min=-3.5, gripper_native_max=0.0,
+        gripper_policy_scale=1.0, gripper_policy_offset=0.0,
+    )
+    device = ArxRos2Device(
+        node=node, message_type=FakeRobotStatus, topics=Ros2Topics(),
+        left_calibration=calibration, right_calibration=calibration,
+        command_left=False, command_right=True,
+        keepalive_hz=10, command_lease_s=0.01,
+    )
+    try:
+        for topic in ("/arm_slave_l_status", "/arm_slave_r_status"):
+            msg = FakeRobotStatus()
+            msg.joint_pos[6] = -3.0
+            node.subscribers[topic](msg)
+        state = device.read().positions
+        assert state.shape == (14,)
+        target = state.copy()
+        target[7] = 0.1
+        receipt = device.send(target, "ros-cmd")
+        assert receipt.status == "ros_publish_returned"
+        assert len(node.publishers["/arm_master_r_status"].messages) == 1
+        assert not node.publishers["/arm_master_l_status"].messages
+        assert node.publishers["/arm_master_r_status"].messages[0].joint_pos[0] == pytest.approx(0.1)
+    finally:
+        device.close()
+
+
+def test_static_real_hardware_config_matches_vla_and_calibration_files(tmp_path):
+    import json
+    from robots.arx.gateway.real_config import (
+        load_real_hardware_config, validate_real_hardware_config,
+    )
+    from zetta.evolution.jsonio import file_sha256
+
+    root = Path(__file__).resolve().parents[1]
+    model_path = root / "robots/arx/manifests/task7_model_a.yaml"
+    task_path = root / "robots/arx/manifests/pickup_test_tube.yaml"
+    model = json.loads(model_path.read_text())
+    cameras = []
+    for index, camera in enumerate(model["cameras"]):
+        calibration = tmp_path / f"camera-{index}.json"
+        calibration.write_text(json.dumps({
+            "schema_version": "arx.real.rgb_intrinsics.v1",
+            "calibration_scope": "rgb_intrinsics_only",
+            "camera": {
+                "logical_name": camera["name"],
+                "serial": f"serial-{index}",
+                "width": 640, "height": 480,
+                "intrinsics": {
+                    "fx": 395.0, "fy": 395.0, "ppx": 320.0, "ppy": 240.0,
+                    "coeffs": [0.0] * 5,
+                    "distortion_model": "inverse_brown_conrady",
+                },
+            },
+        }))
+        cameras.append({
+            "name": camera["name"],
+            "serial": f"serial-{index}",
+            "calibration_id": camera["calibration_id"],
+            "calibration_file": str(calibration),
+            "calibration_sha256": file_sha256(calibration),
+            "width": camera["width"],
+            "height": camera["height"],
+            "capture_width": 640,
+            "capture_height": 480,
+            "capture_fps": 30,
+        })
+    arm = {
+        "can_port": "can1", "arm_type": 2,
+        "joint_min_rad": [-4.0] * 6,
+        "joint_max_rad": [4.0] * 6,
+        "gripper_native_min": -4.0,
+        "gripper_native_max": 0.5,
+        "gripper_policy_scale": 1.0,
+        "gripper_policy_offset": 0.0,
+    }
+    payload = {
+        "schema_version": "arx.real.hardware.v1",
+        "arm_transport": "arx_ros2",
+        "camera_transport": "realsense",
+        "left": arm,
+        "right": {**arm, "can_port": "can3"},
+        "command_left": False,
+        "command_right": True,
+        "cameras": cameras,
+        "timing": {
+            "control_hz": 15.0,
+            "max_sensor_skew_ms": 30.0,
+            "max_sensor_age_ms": 150.0,
+            "observation_timeout_s": 1.0,
+            "arrival_timeout_s": 0.25,
+            "feedback_poll_s": 0.01,
+            "position_tolerance": [0.01] * 14,
+        },
+        "right_gripper_closed_policy": 0.0,
+        "right_gripper_open_policy": -3.4,
+    }
+    path = tmp_path / "real-hardware.json"
+    path.write_text(json.dumps(payload))
+    config = load_real_hardware_config(path, file_sha256(path))
+    validate_real_hardware_config(config, task_path, model_path)
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        load_real_hardware_config(path, "0" * 64)
+    cameras[0]["serial"] = cameras[1]["serial"]
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="serials must be unique"):
+        load_real_hardware_config(path, file_sha256(path))
+    cameras[0]["serial"] = "serial-0"
+    calibration = Path(cameras[0]["calibration_file"])
+    calibration.write_text(json.dumps({
+        "schema_version": "arx.real.rgb_intrinsics.v1",
+        "calibration_scope": "rgb_intrinsics_only",
+        "camera": {
+            "logical_name": "front_rgb", "serial": "old-camera",
+            "width": 640, "height": 480,
+            "intrinsics": {
+                "fx": 395.0, "fy": 395.0, "ppx": 320.0, "ppy": 240.0,
+                "coeffs": [0.0] * 5,
+                "distortion_model": "inverse_brown_conrady",
+            },
+        },
+    }))
+    cameras[0]["calibration_sha256"] = file_sha256(calibration)
+    path.write_text(json.dumps(payload))
+    config = load_real_hardware_config(path, file_sha256(path))
+    with pytest.raises(ValueError, match="calibration identity"):
+        validate_real_hardware_config(config, task_path, model_path)

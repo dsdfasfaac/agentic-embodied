@@ -1,0 +1,25 @@
+{
+  "calibration_scope": "rgb_intrinsics_only",
+  "camera": {
+    "height": 480,
+    "intrinsics": {
+      "coeffs": [
+        -0.05257856473326683,
+        0.0549410842359066,
+        0.0014854990877211094,
+        -8.131132199196145e-05,
+        -0.017545683309435844
+      ],
+      "distortion_model": "inverse_brown_conrady",
+      "fx": 396.2483825683594,
+      "fy": 395.9893798828125,
+      "ppx": 319.63616943359375,
+      "ppy": 238.58644104003906
+    },
+    "logical_name": "left_rgb",
+    "serial": "260422271945",
+    "width": 640
+  },
+  "schema_version": "arx.real.rgb_intrinsics.v1",
+  "source": "dodo pyrealsense2 stream-profile read 2026-10-01"
+}
