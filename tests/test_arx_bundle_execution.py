@@ -1,14 +1,17 @@
 """Bundle calls are executable constraints, including order and reentry evidence."""
 
 import json
+import time
+from dataclasses import replace
 
 import pytest
 
 from robots.arx.deployment.bundle_program import compile_programs, verify_call_result
-from robots.arx.gateway.bundle_runtime import RealBundleReentry
+from robots.arx.gateway.bundle_runtime import RealBundleReentry, RealFeatureProvider
 from tests.test_arx_deployment import runner
 from tests.test_arx_gateway import ScriptCritic, call, limits, make_core
 from zetta.evolution.models import CandidateBundle, CriticRule, RecoveryRule, RecoveryStep
+from zetta.evolution.jsonio import file_sha256
 
 
 def bundle():
@@ -38,9 +41,9 @@ def test_bundle_program_enforces_order_and_runner_records_steps(tmp_path):
     core, backend, _ = make_core(tmp_path / "core", ScriptCritic({1: "a"}), config=limits(max_steps=8))
     core.bindings = (program.binding,)
     core.programs = {"recover": program}
-    first = call(core)
+    first, _ = call(core)
     assert first["status"] == "interrupted"
-    rejected = call(core, "arx.review_reentry", {"observation_ids": [core.current["observation_id"]]})
+    rejected, _ = call(core, "arx.review_reentry", {"observation_ids": [core.current["observation_id"]]})
     assert rejected["status"] == "rejected"
     assert rejected["error"]["code"] == "BUNDLE_STEP_MISMATCH"
     r = runner(tmp_path / "run", core)
@@ -96,3 +99,50 @@ def test_review_denial_does_not_grant_reentry_token():
                 "assessment": {"status": "ineligible"}, "reentry_token": None,
             },
         }, real=True)
+
+
+def test_eef_expansion_reserves_planner_physical_budget():
+    original = bundle()
+    recovery = original.recovery_rules[0]
+    steps = (
+        RecoveryStep("arx.set_gripper", {"opening": 1.0, "max_steps": 15}, "open"),
+        RecoveryStep("arx.move_eef", {
+            "delta_xyz_m": [0.0, 0.0, 0.02], "frame": "tool", "speed_m_s": 0.01,
+        }, "move"),
+        *recovery.steps[1:],
+    )
+    program = compile_programs(replace(original, recovery_rules=(replace(recovery, steps=steps),)))["recover"]
+    assert [call.tool for call in program.calls] == [
+        "arx.set_gripper", "arx.move_eef", "arx.move_eef", "arx.review_reentry", "arx.zeva",
+    ]
+    assert program.binding.max_recovery_steps == 75
+    assert program.binding.max_agent_decisions == 5
+    with pytest.raises(ValueError, match="budget"):
+        compile_programs(replace(original, recovery_rules=(replace(recovery, steps=steps),)),
+                         max_physical_steps=74)
+
+
+def test_sha_pinned_real_feature_provider_requires_fresh_joint_feedback(tmp_path):
+    module = tmp_path / "provider.py"
+    module.write_text('''
+from pathlib import Path
+from zetta.evolution.jsonio import file_sha256
+class Provider:
+    def feature_sources(self):
+        return [{"name": "real_error", "provider_id": "test",
+                 "provider_sha256": file_sha256(Path(__file__)),
+                 "source_kind": "joint_feedback", "source_ids": ["right_joint_1"],
+                 "scalar_type": "number", "units": "rad", "max_age_ms": 100}]
+    def observe(self, observation, images):
+        return {"real_error": float(observation["hardware"]["measured_state"][7])}
+def create_provider():
+    return Provider()
+''')
+    provider = RealFeatureProvider(module, file_sha256(module))
+    stamp = time.monotonic_ns()
+    observation = {"hardware": {"state_monotonic_ns": stamp,
+                                "measured_state": [0.] * 14}}
+    assert provider.augment(observation, {})["real_error"] == 0.
+    observation["hardware"]["state_monotonic_ns"] = stamp - 500_000_000
+    with pytest.raises(ValueError, match="stale"):
+        provider.augment(observation, {})

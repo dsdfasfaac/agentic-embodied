@@ -92,7 +92,7 @@ class CoreFactory:
                 critic = BundleMonitor(bundle)
                 bindings = tuple(program.binding for program in programs.values())
                 package_sha256 = bundle.sha256
-                reentry = RealBundleReentry(bundle, require_hardware=False)
+                reentry = RealBundleReentry(bundle, require_hardware=False, monitor=critic)
             else:
                 critics = ArxCriticRegistry(
                     limits=WorkerLimits.model_validate(self.critic_limits)

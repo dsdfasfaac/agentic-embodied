@@ -93,12 +93,13 @@ class BundleMonitor:
 
 class RealBundleReentry:
     def __init__(self, bundle, provider=None, *, max_sensor_age_ms=1000,
-                 max_sensor_skew_ms=1000, require_hardware=True):
+                 max_sensor_skew_ms=1000, require_hardware=True, monitor=None):
         self.rules = {rule.rule_id: rule for rule in bundle.critic_rules}
         self.recoveries = {rule.recovery_id: rule for rule in bundle.recovery_rules}
         self.provider = provider
         self.max_age, self.max_skew = max_sensor_age_ms, max_sensor_skew_ms
         self.require_hardware = require_hardware
+        self.monitor = monitor
 
     def inspect(self, args, context):
         obs = context["observations"][-1]
@@ -127,8 +128,12 @@ class RealBundleReentry:
         for rule_id in rule.trigger_rule_ids:
             critic = self.rules[rule_id]
             active = all(TemporalCritic._predicate(p, measured) for p in critic.activation_conditions)
-            if critic.operator == "stagnant":
-                status = "unknown"  # A single review frame cannot disprove temporal stagnation.
+            if critic.operator == "stagnant" and active:
+                history = (self.monitor.temporal._state[rule_id].history
+                           if self.monitor is not None else [])
+                status = ("unknown" if len(history) < critic.dwell_steps else
+                          "fail" if TemporalCritic._condition(critic, resolve_feature(measured, critic.feature), history)
+                          else "pass")
             else:
                 status = "fail" if active and TemporalCritic._condition(
                     critic, resolve_feature(measured, critic.feature), [resolve_feature(measured, critic.feature)]

@@ -103,10 +103,12 @@ class RealCoreFactory:
                 )
                 if any(call.tool == "arx.move_eef" for program in programs.values() for call in program.calls) and eef is None:
                     raise ValueError("bundle EEF recovery requires reviewed kinematics calibration")
+            monitor = BundleMonitor(bundle, provider) if bundle else BaselineMonitor()
             reentry = (RealBundleReentry(
                 bundle, provider,
                 max_sensor_age_ms=config.timing.max_sensor_age_ms,
                 max_sensor_skew_ms=config.timing.max_sensor_skew_ms,
+                monitor=monitor,
             ) if bundle else None)
             registry = default_registry(
                 zeva=zeva,
@@ -157,7 +159,7 @@ class RealCoreFactory:
                 journal=Journal(Path(self.output) / "journal.sqlite3"),
                 output=Path(self.output),
                 limits=limits,
-                critic=BundleMonitor(bundle, provider) if bundle else BaselineMonitor(),
+                critic=monitor,
                 bindings=tuple(program.binding for program in programs.values()),
                 programs=programs,
                 package_sha256=bundle.sha256 if bundle else "baseline",
