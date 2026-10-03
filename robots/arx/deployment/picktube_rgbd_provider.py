@@ -80,11 +80,24 @@ class PickTubeRgbdProvider:
             raise ValueError("PickTube front RGB must be 320x240 uint8")
         hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
         red, green, blue = (rgb[..., i].astype(np.int16) for i in range(3))
+        rack_mask = (((hsv[..., 0] >= 18) & (hsv[..., 0] <= 45))
+                     & (hsv[..., 1] >= 80) & (hsv[..., 2] >= 90)).astype(np.uint8)
+        rack_count, _, rack_stats, _ = cv2.connectedComponentsWithStats(rack_mask, 8)
+        if rack_count < 2:
+            raise ValueError("yellow test-tube rack is not visible in front RGB")
+        rack_index = int(np.argmax(rack_stats[1:, cv2.CC_STAT_AREA]) + 1)
+        rack_x, rack_y, rack_w, rack_h, rack_area = map(int, rack_stats[rack_index])
+        if rack_area < 500 or rack_w < 60 or rack_h < 10:
+            raise ValueError("yellow test-tube rack is not reliably visible")
         hsv_mask = (((hsv[..., 0] >= 155) | (hsv[..., 0] <= 6))
                     & (hsv[..., 1] >= 70) & (hsv[..., 2] >= 65))
         rgb_mask = ((red >= green + 18) & (blue >= green + 5)
                     & (red >= blue - 30) & (red >= 55))
-        mask = (hsv_mask | rgb_mask).astype(np.uint8)
+        # The current dodo D405 exposure renders the pale pink label nearly
+        # neutral, while the table and blue/green tubes remain cyan.
+        pale_mask = ((red >= green - 10) & (blue >= green + 4)
+                     & (blue >= red) & (red >= 90) & (blue >= 100))
+        mask = (hsv_mask | rgb_mask | pale_mask).astype(np.uint8)
         mask[:10] = 0
         mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, np.ones((3, 3), np.uint8))
         count, labels, stats, centroids = cv2.connectedComponentsWithStats(mask, 8)
@@ -95,11 +108,12 @@ class PickTubeRgbdProvider:
                 continue
             cx, cy = map(float, centroids[component])
             if self.last_centre is None:
-                # All 50 PickTube episode starts contain a 79-107 pixel
-                # label (320x240). Admit a margin, but reject large pink
-                # objects such as packaging before establishing a track.
-                if (cy >= 0.38 * rgb.shape[0] or not 50 <= area <= 180
-                        or width > 30 or height > 22):
+                # The label starts above the yellow rack. This is decisive
+                # when a pink sticker elsewhere in view has similar size.
+                if (not rack_x - 5 <= cx <= rack_x + rack_w + 5
+                        or not rack_y - 40 <= cy <= rack_y + 20
+                        or not 25 <= area <= 200
+                        or width > 30 or height > 24):
                     continue
                 score = -area
             else:

@@ -28,6 +28,7 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
         right_gripper_open_policy=-3.4,
     ))
     rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+    rgb[70:105, 110:220] = [240, 240, 10]
     rgb[40:52, 150:164] = [230, 70, 150]
     depth = np.zeros((240, 320), dtype=np.uint16)
     depth[40:52, 150:164] = 500
@@ -63,6 +64,21 @@ def test_large_pink_distractor_is_not_a_tracked_tube():
     provider = PickTubeRgbdProvider()
     provider.last_centre = (170.0, 80.0)
     rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+    rgb[70:95, 100:220] = [240, 240, 10]
     rgb[100:170, 130:210] = [230, 70, 150]
     with pytest.raises(ValueError, match="not reliably visible"):
         provider._pink_component(rgb)
+
+
+def test_rack_context_selects_pale_tube_over_pink_sticker():
+    pytest.importorskip("cv2")
+    provider = PickTubeRgbdProvider()
+    rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+    rgb[:, :] = [10, 35, 35]
+    rgb[70:105, 110:220] = [240, 240, 10]
+    rgb[45:56, 145:156] = [130, 125, 140]
+    rgb[59:71, 276:298] = [200, 80, 140]
+    mask = provider._pink_component(rgb)
+    yy, xx = np.nonzero(mask)
+    assert 145 <= np.median(xx) <= 156
+    assert 45 <= np.median(yy) <= 56
