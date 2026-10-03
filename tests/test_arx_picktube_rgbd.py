@@ -56,3 +56,13 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
             cameras=[SimpleNamespace(**{**front.__dict__, "depth_enabled": False})],
             right_gripper_closed_policy=0.0, right_gripper_open_policy=-3.4,
         ))
+
+
+def test_large_pink_distractor_is_not_a_tracked_tube():
+    pytest.importorskip("cv2")
+    provider = PickTubeRgbdProvider()
+    provider.last_centre = (170.0, 80.0)
+    rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+    rgb[100:170, 130:210] = [230, 70, 150]
+    with pytest.raises(ValueError, match="not reliably visible"):
+        provider._pink_component(rgb)

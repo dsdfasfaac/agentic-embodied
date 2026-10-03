@@ -62,3 +62,5 @@ reset 只读取同步观测，不回零或移动。每个 step 先经过现有 A
 2026-10-01 只读联调：三台 D405 单独均可打开；三台同时 640×480@30 出现 `VIDIOC_S_FMT` I/O 错误，改成 640×480@15 后成功采到 front RGB+depth、left/right RGB，一组帧的主机时间差为 24.3 ms。硬件配置应使用 15 fps；此结果不是长时稳定性测试。当前现场 front 图像没有可见粉色试管，因此尚未取得真实试管距离。
 
 现场可在相机空闲、粉色试管放入 front 视野后执行只读探针：先 source `/opt/ros/jazzy/setup.bash` 和 `/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/install/setup.bash`，再运行 `/home/dodo/chenfu/.venv_data_collect_py312/bin/python scripts/deployment/probe_picktube_distance.py`。探针只订阅 `/arm_slave_r_status`，不会发布运动命令；它输出距离、前相机序列号和 RGB-D/TCP 时间差。若设备被其他进程占用、目标不可见或深度无效，则返回 `status=unavailable`，退出码 2。2026-10-01 后续尝试时，`act_pilot.live` 已占用三台相机，故没有强行重启或释放设备。
+
+2026-10-03 再次只读检查：front D405 可打开，但 `/arm_slave_r_status` 没有发布者，dodo 上也不存在 `can1`、`can3`，因此无法取得当前右臂 TCP。现场图像里的粉色物体是一盒饮料，不能当作试管；颜色检测器已加入以 PickTube 数据集标签尺寸为依据的组件面积/外形上限，当前干扰物在初始与跟踪路径均被拒绝。重新跑数据集仍为 50/50 个 episode 首帧检出、每 10 帧抽样 1251/1595 帧检出。此次没有真实试管距离，也没有发送运动命令。

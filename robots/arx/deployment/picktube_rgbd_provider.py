@@ -95,10 +95,19 @@ class PickTubeRgbdProvider:
                 continue
             cx, cy = map(float, centroids[component])
             if self.last_centre is None:
-                if cy >= 0.38 * rgb.shape[0]:
+                # All 50 PickTube episode starts contain a 79-107 pixel
+                # label (320x240). Admit a margin, but reject large pink
+                # objects such as packaging before establishing a track.
+                if (cy >= 0.38 * rgb.shape[0] or not 50 <= area <= 180
+                        or width > 30 or height > 22):
                     continue
                 score = -area
             else:
+                # Across 1251 sampled tracked frames the largest component
+                # was 636 pixels, 38x28. Larger blobs are out of this
+                # task's validated visual envelope and may be distractors.
+                if area > 700 or width > 45 or height > 40:
+                    continue
                 displacement = float(np.hypot(cx - self.last_centre[0], cy - self.last_centre[1]))
                 if displacement > 80:
                     continue
