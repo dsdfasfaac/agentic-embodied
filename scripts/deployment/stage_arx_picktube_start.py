@@ -72,10 +72,10 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             device._native_target(chunk, calibration)
         delta = goal - current
         arm_steps = np.abs(delta[[i for i in range(14) if i not in (6, 13)]]) / 0.015
-        gripper_steps = np.abs(delta[[6, 13]]) / 0.08
+        gripper_steps = np.abs(delta[[6, 13]]) / 0.06
         planned = max(1, math.ceil(float(max(np.max(arm_steps), np.max(gripper_steps)))))
-        if planned > 60:
-            raise ValueError(f"start-state staging requires {planned} steps, exceeds 60")
+        if planned > 100:
+            raise ValueError(f"start-state staging requires {planned} steps, exceeds 100")
         report.update({
             "initial_state": current.tolist(), "goal_state": goal.tolist(),
             "planned_steps": planned,
@@ -87,11 +87,18 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         if execute_steps == 0:
             return report
         tolerance = np.asarray([0.015] * 6 + [0.03] + [0.015] * 6 + [0.03])
-        for index in range(1, min(execute_steps, planned) + 1):
-            target = current + delta * (index / planned)
+        start_tolerance = np.asarray(config.timing.position_tolerance)
+        for index in range(1, execute_steps + 1):
+            if np.all(np.abs(current - goal) <= start_tolerance):
+                break
+            # Replan from measured feedback each time. A fixed interpolation
+            # accumulates gripper tracking lag even when every step passes.
+            step = np.clip(goal - current, -0.015, 0.015)
+            step[[6, 13]] = np.clip((goal - current)[[6, 13]], -0.06, 0.06)
+            target = current + step
             command_id = "stage-" + uuid.uuid4().hex
             receipt = device.send(target.astype(np.float32), command_id)
-            deadline = time.monotonic() + 1.5
+            deadline = time.monotonic() + 2.0
             last = None
             while time.monotonic() < deadline:
                 sample = _read_fresh(device, deadline)
@@ -116,13 +123,12 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
             if not arrived:
                 raise TimeoutError(f"stage step {index} did not reach its bounded target")
+            current = np.asarray(last.positions, dtype=np.float64)
         final = _read_fresh(device, time.monotonic() + 1)
         report["final_state"] = final.positions.tolist()
-        report["status"] = "complete" if len(report["command_log"]) == planned else "partial"
-        if report["status"] == "complete":
-            start_tolerance = np.asarray(config.timing.position_tolerance)
-            if not np.all(np.abs(final.positions - goal) <= start_tolerance):
-                raise ValueError("final measured state is outside frozen task start tolerance")
+        report["status"] = "complete" if np.all(
+            np.abs(final.positions - goal) <= start_tolerance
+        ) else "partial"
         return report
     except BaseException as exc:
         report["status"] = "failed"
@@ -144,8 +150,8 @@ def main() -> None:
     parser.add_argument("--execute-steps", type=int, default=0)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    if not 0 <= args.execute_steps <= 60:
-        parser.error("execute-steps must be 0..60")
+    if not 0 <= args.execute_steps <= 100:
+        parser.error("execute-steps must be 0..100")
     try:
         result = stage(args.hardware_config, args.hardware_sha256,
                        args.task, args.execute_steps, args.output)
