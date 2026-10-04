@@ -1,0 +1,128 @@
+{
+  "schema_version": "arx.real.hardware.v1",
+  "arm_transport": "arx_ros2",
+  "camera_transport": "realsense",
+  "left": {
+    "can_port": "can1",
+    "arm_type": 2,
+    "joint_min_rad": [
+      -0.06888274848461151,
+      -0.05171661451458931,
+      -0.04752044752240181,
+      -0.09215335547924042,
+      -0.07727508246898651,
+      -0.11427859961986542
+    ],
+    "joint_max_rad": [
+      0.08261661231517792,
+      0.05743866041302681,
+      0.05400543287396431,
+      0.013187218457460403,
+      0.05324249342083931,
+      0.03111724928021431
+    ],
+    "gripper_native_min": -3.45,
+    "gripper_native_max": 0.0,
+    "gripper_policy_scale": 1.0,
+    "gripper_policy_offset": 0.0
+  },
+  "right": {
+    "can_port": "can3",
+    "arm_type": 2,
+    "joint_min_rad": [
+      -0.17302589118480682,
+      -0.05820159986615181,
+      -0.04904632642865181,
+      -0.2638166546821594,
+      -0.526654064655304,
+      -0.18981055915355682
+    ],
+    "joint_max_rad": [
+      0.8112342953681946,
+      2.5519073009490967,
+      1.650099515914917,
+      1.322411298751831,
+      0.859300434589386,
+      0.34621602296829224
+    ],
+    "gripper_native_min": -3.45,
+    "gripper_native_max": 0.0,
+    "gripper_policy_scale": 1.0,
+    "gripper_policy_offset": 0.0
+  },
+  "command_left": false,
+  "command_right": true,
+  "cameras": [
+    {
+      "name": "front_rgb",
+      "serial": "260422272500",
+      "calibration_id": "arx-task7-front-v1",
+      "calibration_file": "/home/dodo/chenfu/Agentic-Embodied/robots/arx/manifests/real/dodo_front_rgb_d405_intrinsics.json",
+      "calibration_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "width": 320,
+      "height": 240,
+      "capture_width": 640,
+      "capture_height": 480,
+      "capture_fps": 15,
+      "depth_enabled": true
+    },
+    {
+      "name": "left_rgb",
+      "serial": "260422271945",
+      "calibration_id": "arx-task7-left-v1",
+      "calibration_file": "/home/dodo/chenfu/Agentic-Embodied/robots/arx/manifests/real/dodo_left_rgb_d405_intrinsics.json",
+      "calibration_sha256": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "width": 320,
+      "height": 240,
+      "capture_width": 640,
+      "capture_height": 480,
+      "capture_fps": 15,
+      "depth_enabled": false
+    },
+    {
+      "name": "right_rgb",
+      "serial": "260422275847",
+      "calibration_id": "arx-task7-right-v1",
+      "calibration_file": "/home/dodo/chenfu/Agentic-Embodied/robots/arx/manifests/real/dodo_right_rgb_d405_intrinsics.json",
+      "calibration_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+      "width": 320,
+      "height": 240,
+      "capture_width": 640,
+      "capture_height": 480,
+      "capture_fps": 15,
+      "depth_enabled": false
+    }
+  ],
+  "timing": {
+    "control_hz": 15.0,
+    "max_sensor_skew_ms": 100.0,
+    "max_sensor_age_ms": 150.0,
+    "observation_timeout_s": 5.0,
+    "arrival_timeout_s": 3.0,
+    "feedback_poll_s": 0.02,
+    "position_tolerance": [
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.1,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.05,
+      0.1
+    ]
+  },
+  "right_gripper_closed_policy": 0.0,
+  "right_gripper_open_policy": -3.4,
+  "ros2_topics": {
+    "left_status": "/arm_slave_l_status",
+    "right_status": "/arm_slave_r_status",
+    "left_command": "/arm_master_l_status",
+    "right_command": "/arm_master_r_status"
+  }
+}

@@ -1,4 +1,4 @@
-"""Real input preflight uses the existing structured sample bundle."""
+"""Real input preflight uses the tracked structured sample bundle."""
 
 import json
 from pathlib import Path
@@ -10,13 +10,12 @@ from robots.arx.deployment.real_input import (
     RealInputContract,
     preflight_real_bundle,
 )
+from scripts.deployment.freeze_arx_picktube_inputs import freeze
 from zetta.evolution.jsonio import canonical_sha256, file_sha256
 
 
 ROOT = Path(__file__).resolve().parents[1]
-CAMPAIGN = ROOT / "runs/arx_privileged_test_20260929_061734/campaign"
-BUNDLE = CAMPAIGN / "bundle.json"
-CATALOG = CAMPAIGN / "tool-catalog.json"
+BUNDLE = ROOT / "robots/arx/manifests/real/sample_picktube_candidate_bundle.json"
 TASK = ROOT / "robots/arx/manifests/pickup_test_tube.yaml"
 MODEL = ROOT / "robots/arx/manifests/task7_model_a.yaml"
 
@@ -24,7 +23,8 @@ MODEL = ROOT / "robots/arx/manifests/task7_model_a.yaml"
 @pytest.fixture
 def frozen_input(tmp_path):
     bundle = json.loads(BUNDLE.read_text())
-    catalog = json.loads(CATALOG.read_text())
+    catalog_path = Path(freeze(BUNDLE, tmp_path / "frozen")["catalog"])
+    catalog = json.loads(catalog_path.read_text())
     model = json.loads(MODEL.read_text())
     cameras = [
         {
@@ -104,7 +104,7 @@ def frozen_input(tmp_path):
             bundle_path=bundle_path,
             task_manifest_path=TASK,
             model_contract_path=MODEL,
-            tool_catalog_path=CATALOG,
+            tool_catalog_path=catalog_path,
             real_contract_path=contract_path,
             live_capabilities=LiveCapabilities.model_validate(current_live),
             expected_real_contract_sha256=file_sha256(contract_path),

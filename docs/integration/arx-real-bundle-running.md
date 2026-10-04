@@ -1,5 +1,51 @@
 # ARX CandidateBundle real-robot execution
 
+## Dodo verification state (2026-10-04)
+
+The current checkout freezes the sample CandidateBundle, tool catalog,
+real-input contract, hardware settings, controller-EE kinematics, and runner
+limits under `robots/arx/manifests/real/`. The hardware file's SHA-256 is
+`cdf5ebaa574f84bd04a1393d3b1b5f404294c60324d442368a5df3d7e0484a4e`;
+the real-input contract SHA-256 is
+`e0ff9f10ee16cab57ebef291da3ff979679f8fe383ed27a0d9f44b09b1da1bf8`.
+`freeze_arx_picktube_inputs.py` regenerates the catalog/contract and
+`freeze_arx_dodo_hardware.py` regenerates the hardware file from the 50 raw
+PickTube episodes. Its provenance file records the exact source hashes.
+The joint command bounds are a narrow envelope of recorded controller
+feedback plus 0.05 rad; they are task bounds, not mechanical hard stops.
+
+The ARX Task7 training dataset README on aigc31 explicitly defines
+`observation.state` as 14D joint feedback and `action[t] = state[t+1]` as a
+joint-position action proxy. PickUpTestTube zeroes the inactive left 7D.
+The raw episode 000048 used for model smoke inference has
+`action_mode=joint`; the general data collection guide's EEF default does
+not apply to that episode or the Task7 training data.
+
+The read-only `audit_arx_live_cameras.py` opened the three actual D405s at
+640×480@15, validated their pinned serials/intrinsics, and saw the pink
+label with valid aligned depth in five fresh synchronized frame sets. Label
+depth was about 382–385 mm, depth MAD 1–2.5 mm, and camera skew 11–28 ms.
+This determines a camera/left-base target point, but it is not yet a measured
+target-to-gripper distance without fresh arm feedback.
+
+The old simulation `robot_calibration.json` disagreed with recorded
+controller `end_pos` by about 0.29 m and must not be used on dodo.
+`calibrate_arx_right_fk_from_raw.py` fitted the base and controller-EE offset
+from 40 raw episodes and tested against 10 held-out episodes. The pinned
+`dodo_right_controller_ee_fk.json` had held-out position error P95 1.10 mm,
+maximum 1.24 mm, and orientation error below 0.001°. The PickTube feature
+provider now checks this FK against fresh controller `end_pos`, then applies
+the nominal gripper tool offset from `ac_one_nominal_chain.json`. The physical
+gripper contact point and live target distance still need an observed check.
+
+The full bundle `--check-config` passed on dodo with `hardware_opened: false`.
+The sample recovery compiled to five calls: one gripper, two EEF increments,
+one reentry review, and one VLA continuation. The robot control processes
+remain stopped, so synchronized live 14D feedback, task start-state match,
+and motor command/arrival have not yet been verified. Use
+`audit_arx_live_observation.py` for the next read-only check once the status
+controllers are running; it never publishes a command.
+
 ## Direct inference and the H100 Model A checkpoint
 
 Dodo already has a direct real-robot inference client in the separate
@@ -78,12 +124,12 @@ files. The isolated model service loaded on GPU 0, answered `ping` and
 `get_modality_config` at `127.0.0.1:5580`, and was then stopped. Its reported
 action shape was `[1,32,14]`, `action_normalization` was `meanstd`, and its
 prompt was a training-style instruction. No robot controller was started.
-The historical sample CandidateBundle is only in aigc31's
-`runs/arx_privileged_test_20260929_061734/campaign/bundle.json`; the dodo
-checkout has no frozen real hardware/input/catalog/runner-limit JSON or
-reviewed right-arm recovery kinematics. These files, the RealData contract,
-controller-coordinate joint and gripper calibration, and the actual task
-start-state match remain prerequisites for motor execution.
+The sample CandidateBundle from aigc31's
+`runs/arx_privileged_test_20260929_061734/campaign/bundle.json` is now
+tracked byte-for-byte as `robots/arx/manifests/real/sample_picktube_candidate_bundle.json`.
+The separate chemistry RealData contract remains unfinished; the Task7 Model A
+path has the frozen inputs described above. Live controller feedback and
+physical motion checks remain necessary before a full episode.
 
 The real deployment entry point is `python -m scripts.deployment.run_arx_real_bundle`.
 It owns one gateway process and one episode. Run it on the host that has the ARX
@@ -205,6 +251,7 @@ D405 sample had no visible pink tube; real object-distance accuracy is still
 unmeasured. Three cameras plus front depth worked at 640×480@15, while
 simultaneous 30 fps startup failed with a USB I/O error.
 
-This path has been tested with fake hardware and the frozen sample bundle.
-It has not commanded dodo's motors. A real trial requires the operator's
-calibrations, feature provider, frozen limits, and an available Zeva endpoint.
+This path has been tested with fake hardware, the frozen sample bundle, and
+read-only dodo cameras. It has not commanded dodo's motors. The live 14D
+status/start-state check and small-motion arrival check are the remaining
+hardware gates before a full CandidateBundle episode.

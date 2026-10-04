@@ -1,0 +1,10 @@
+{
+  "max_steps": 600,
+  "max_decisions": 64,
+  "max_recoveries": 4,
+  "operation_timeout_s": 360,
+  "critic_timeout_s": 5,
+  "idle_agent_timeout_s": 600,
+  "lease_timeout_s": 60,
+  "shutdown_timeout_s": 15
+}

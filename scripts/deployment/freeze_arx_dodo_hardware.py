@@ -68,7 +68,7 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
             "gripper_native_min": -3.45, "gripper_native_max": 0.0,
             "gripper_policy_scale": 1.0, "gripper_policy_offset": 0.0,
         }
-    config = RealHardwareConfig.model_validate({
+    payload = {
         "schema_version": "arx.real.hardware.v1",
         "arm_transport": "arx_ros2", "camera_transport": "realsense",
         "left": arm("can1", left_low, left_high),
@@ -89,7 +89,8 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
             "left_command": "/arm_master_l_status",
             "right_command": "/arm_master_r_status",
         },
-    })
+    }
+    config = RealHardwareConfig.model_validate_json(json.dumps(payload))
     validate_real_hardware_config(config, task_path, model_path)
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_text(config.model_dump_json(indent=2) + "\n")

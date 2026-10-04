@@ -1,0 +1,11 @@
+{
+  "startup_timeout_s": 180,
+  "episode_timeout_s": 1800,
+  "reconciliation_timeout_s": 15,
+  "shutdown_timeout_s": 15,
+  "heartbeat_interval_s": 5,
+  "max_tool_attempts": 128,
+  "max_agent_calls": 64,
+  "max_recovery_agent_calls": 4,
+  "max_contract_retries": 2
+}

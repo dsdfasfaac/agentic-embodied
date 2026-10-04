@@ -64,7 +64,7 @@ def probe(timeout_s: float = 5.0, max_skew_ms: float = 100.0) -> dict:
         pose = np.asarray(message.end_pos, dtype=np.float64)
         joints = np.asarray(message.joint_pos, dtype=np.float64)
         if pose.shape == (6,) and joints.shape == (7,) and np.isfinite(pose).all() and np.isfinite(joints).all():
-            latest["sample"] = (pose[:3].copy(), stamp)
+            latest["sample"] = (joints.copy(), pose[:3].copy(), stamp)
 
     node.create_subscription(RobotStatus, "/arm_slave_r_status", on_status, 10)
     spin_thread = threading.Thread(target=rclpy.spin, args=(node,), daemon=True)
@@ -97,7 +97,7 @@ def probe(timeout_s: float = 5.0, max_skew_ms: float = 100.0) -> dict:
                 last_error = "front RGB-D frame is incomplete"
                 continue
             sample = latest.get("sample")
-            tcp, state_stamp = sample if sample is not None else (None, None)
+            joints, controller_ee, state_stamp = sample if sample is not None else (None, None, None)
             if state_stamp is None or abs(stamp - state_stamp) / 1e6 > max_skew_ms:
                 last_error = "front RGB-D and right TCP are not synchronized"
                 continue
@@ -111,7 +111,16 @@ def probe(timeout_s: float = 5.0, max_skew_ms: float = 100.0) -> dict:
                 (320, 240), interpolation=cv2.INTER_NEAREST,
             )
             try:
-                distance = observer.measure_distance(rgb, depth_mm, tcp)
+                state = np.zeros(14, dtype=np.float64)
+                state[7:14] = joints
+                features = observer.observe({"hardware": {
+                    "measured_state": state.tolist(),
+                    "state_monotonic_ns": state_stamp,
+                    "right_tcp_monotonic_ns": state_stamp,
+                    "right_tcp_xyz_m": controller_ee.tolist(),
+                    "right_tcp_frame": "right_arm_local_base",
+                }}, {"front_rgb": rgb, "front_depth_mm": depth_mm})
+                distance = features["privileged.selected.target_gripper_distance_m"]
             except ValueError as exc:
                 last_error = str(exc)
                 continue
