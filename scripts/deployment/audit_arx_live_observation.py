@@ -38,13 +38,16 @@ def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
         features = provider.observe(
             {"hardware": evidence}, {**policy.images, **feature_frames},
         )
-        error = np.asarray(policy.state, dtype=float) - np.asarray(task.start_state)
+        expected = np.asarray(task.start_state, dtype=float).copy()
+        expected[[6, 13]] += np.asarray(task.control.gripper_command_offsets)
+        error = np.asarray(policy.state, dtype=float) - expected
         tolerance = np.asarray(config.timing.position_tolerance)
         return {
             "schema_version": "arx.live.observation.audit.v1",
             "status": "observed",
             "robot_commands_sent": False,
             "measured_state": policy.state.tolist(),
+            "expected_feedback_start_state": expected.tolist(),
             "task_start_error": error.tolist(),
             "task_start_eligible": bool(np.all(np.abs(error) <= tolerance)),
             "features": features,
