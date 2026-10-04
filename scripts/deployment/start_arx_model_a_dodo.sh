@@ -5,6 +5,7 @@ set -euo pipefail
 # robot controller is opened. Keep the source package immutable.
 ACTION="${1:-status}"
 PACKAGE="${ARX_MODEL_A_PACKAGE:-/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817}"
+EXPECTED_PACKAGE_CHECKSUMS_SHA256="${EXPECTED_PACKAGE_CHECKSUMS_SHA256:-cd8af4d2eff284cc2c139c5951b6e328ad18adb9e03da2f6d667d44637b0c5e6}"
 RUNTIME="${ARX_MODEL_A_RUNTIME:-$PACKAGE/runtime_dodo}"
 CHECKPOINT="${CHECKPOINT:-$RUNTIME/model}"
 CONFIG_FILE="${CONFIG_FILE:-$RUNTIME/config.dodo.yaml}"
@@ -33,6 +34,26 @@ check_inputs() {
     [[ -f "$path" ]] || { echo "missing Model A runtime artifact: $path" >&2; exit 2; }
   done
   [[ -x "$PYTHON" ]] || { echo "missing Cosmos Python: $PYTHON" >&2; exit 2; }
+  actual_checksums_sha="$(sha256sum "$PACKAGE/checksums/SHA256SUMS" | cut -d' ' -f1)"
+  [[ "$actual_checksums_sha" == "$EXPECTED_PACKAGE_CHECKSUMS_SHA256" ]] || {
+    echo "Model A package checksum-list SHA-256 differs" >&2; exit 2;
+  }
+  # The export's first checksum entry names the checksum file itself but
+  # contains the digest of an empty file. Verify every actual package entry.
+  (cd "$PACKAGE" && awk '$2 != "./checksums/SHA256SUMS" {print}' \
+    checksums/SHA256SUMS | sha256sum -c - >/dev/null) || {
+    echo "Model A package file SHA-256 verification failed" >&2; exit 2;
+  }
+  env -u LD_LIBRARY_PATH -u PYTHONPATH "$PYTHON" - \
+    "$RUNTIME/provenance.json" "$CONFIG_FILE" "$CHECKPOINT/config.json" <<'PY'
+import hashlib, json, sys
+from pathlib import Path
+provenance = json.loads(Path(sys.argv[1]).read_text())
+for path, key in ((Path(sys.argv[2]), "runtime_config_sha256"),
+                  (Path(sys.argv[3]), "runtime_model_config_sha256")):
+    if hashlib.sha256(path.read_bytes()).hexdigest() != provenance[key]:
+        raise SystemExit(f"Model A generated runtime SHA-256 differs: {path}")
+PY
 }
 
 case "$ACTION" in
