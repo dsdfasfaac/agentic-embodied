@@ -1,7 +1,7 @@
 {
   "schema_version": "arx.real.input.v1",
-  "candidate_sha256": "9619dd86070c8f7f7a2b615a6b610c4bc749692e4b3ec8d1e7a7eed067d91119",
-  "candidate_file_sha256": "5ba85d4fde75f938ba8b6d680ee6a23bb02b3aa62b488de5ce7b5b255351ec96",
+  "candidate_sha256": "4ca69f3260760bf8d0df54bcd907023df2c86a2c3c4d5d80f7b32958a63a3e7a",
+  "candidate_file_sha256": "d3549226cd19d571684978171803ee689535aad3e80663e7dfe89551909d309e",
   "task_manifest_sha256": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56",
   "task_id": 0,
   "task_name": "pickup_test_tube",
