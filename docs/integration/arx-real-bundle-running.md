@@ -92,6 +92,11 @@ and 15 Hz controller. Contact and success thresholds are provisional and need
 measured loaded/empty validation on the actual arm before interpreting them
 as physical ground truth.
 
+For every reset and post-action observation, the gateway writes the computed
+feature vector, observation ID, and pinned provider SHA to a private
+`real_feature_evidence` journal record. The matching `ObservationPublished`
+record retains the hardware samples and timestamps used for review.
+
 The original two-step recovery is compiled to three allowed tool calls:
 `arx.set_gripper`, an automatically inserted read-only
 `arx.review_reentry`, then `arx.zeva` with that review's live token. The

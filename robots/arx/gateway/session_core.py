@@ -119,6 +119,7 @@ class ArxSessionCore:
         self.critic.reset(self._critic_observation(), self._images())
         if time.monotonic() - started > self.limits.critic_timeout_s:
             raise GatewayError("CRITIC_EXECUTION_ERROR")
+        self._record_feature_evidence()
         self._record(
             "baseline_initialized",
             {"observation_id": self.current["observation_id"]},
@@ -137,6 +138,13 @@ class ArxSessionCore:
             copy.flags.writeable = False
             result[key] = copy
         return result
+
+    def _record_feature_evidence(self):
+        evidence = getattr(self.critic, "last_feature_evidence", None)
+        if evidence is not None:
+            if evidence.get("observation_id") != self.current["observation_id"]:
+                raise GatewayError("CRITIC_EXECUTION_ERROR")
+            self._record("real_feature_evidence", deepcopy(evidence))
 
     def _publish(self, commit, *, lifecycle):
         references, images = self.images.publish(commit.policy.images)
@@ -601,6 +609,7 @@ class ArxSessionCore:
         except Exception as exc:
             raise GatewayError("CRITIC_EXECUTION_ERROR") from exc
         self.assessment = assessment
+        self._record_feature_evidence()
         self._record(
             "critic_assessment",
             {

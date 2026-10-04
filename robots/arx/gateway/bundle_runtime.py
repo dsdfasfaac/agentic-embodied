@@ -77,17 +77,28 @@ class BundleMonitor:
         self.bundle, self.provider = bundle, provider
         self.temporal = TemporalCritic(bundle.critic_rules)
         self.by_id = {rule.rule_id: rule for rule in bundle.critic_rules}
+        self.last_feature_evidence = None
+
+    def _remember_features(self, observation, measured):
+        if self.provider:
+            self.last_feature_evidence = {
+                "observation_id": observation["observation_id"],
+                "provider_sha256": self.provider.sources[0].provider_sha256,
+                "features": {source.name: measured[source.name]
+                             for source in self.provider.sources},
+            }
 
     def reset(self, observation, images):
         self.temporal.reset()
         if self.provider:
-            self.provider.augment(observation, images)
+            self._remember_features(observation, self.provider.augment(observation, images))
 
     def lifecycle(self, event):
         pass
 
     def observe(self, observation, images):
         measured = self.provider.augment(observation, images) if self.provider else observation
+        self._remember_features(observation, measured)
         events = []
         for item in self.temporal.evaluate(measured, step_index=observation["step_index"]):
             rule = self.by_id[item["rule_id"]]

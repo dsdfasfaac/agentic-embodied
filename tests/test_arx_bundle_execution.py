@@ -3,13 +3,14 @@
 import json
 import time
 from dataclasses import replace
+from types import SimpleNamespace
 
 import numpy as np
 import pytest
 
 from robots.arx.deployment.bundle_program import compile_programs, verify_call_result
 from robots.arx.deployment.runner import RunnerError
-from robots.arx.gateway.bundle_runtime import RealBundleReentry, RealFeatureProvider
+from robots.arx.gateway.bundle_runtime import BundleMonitor, RealBundleReentry, RealFeatureProvider
 from robots.arx.gateway.contracts import GripperArgs
 from robots.arx.gateway.tools import PolicyGripperPlanner
 from robots.arx.gateway.tools import RegisteredTool
@@ -91,6 +92,29 @@ def test_provisional_null_token_runs_inserted_review_then_vla(tmp_path):
         "arx.hold", "arx.review_reentry", "arx.zeva",
     ]
     assert backend.steps == 8
+
+
+def test_real_feature_values_are_private_auditable_observation_evidence(tmp_path):
+    class Provider:
+        sources = [SimpleNamespace(name="real_error", provider_sha256="b" * 64)]
+
+        def augment(self, observation, images):
+            return dict(observation, real_error=observation["step_index"] * 0.01)
+
+    core, _, _ = make_core(tmp_path / "core", BundleMonitor(bundle(), Provider()))
+    call(core)
+    rows = core.journal.db.execute(
+        "SELECT public, payload FROM records WHERE kind='real_feature_evidence' ORDER BY sequence"
+    ).fetchall()
+    assert len(rows) == 5
+    assert all(public == 0 for public, _ in rows)
+    values = [json.loads(payload) for _, payload in rows]
+    assert [value["observation_id"] for value in values] == [f"obs-{i}" for i in range(5)]
+    assert [value["features"]["real_error"] for value in values] == pytest.approx(
+        [0.0, 0.01, 0.02, 0.03, 0.04]
+    )
+    assert {value["provider_sha256"] for value in values} == {"b" * 64}
+    assert "real_feature_evidence" not in str(core.journal.events(0))
 
 
 def test_reentry_uses_real_health_arrival_and_rule_clearance():
