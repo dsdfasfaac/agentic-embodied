@@ -162,6 +162,21 @@ def test_uncertain_submit_only_queries_original_id(tmp_path):
     core.close()
 
 
+def test_failed_tool_result_counts_known_partial_step(tmp_path):
+    core, _, _ = make_core(tmp_path / "core")
+    r = runner(tmp_path / "run", core)
+    r.collect()
+    observation = r.snapshot["observation"]
+    result = {
+        "status": "failed", "executed_steps": 1,
+        "observation_id_before": observation["observation_id"],
+        "result": None, "write_certainty": "known_partial",
+    }
+    r.reconcile(SimpleNamespace(request_id="partial-step"), result)
+    assert r.counts.physical_steps == observation["step_index"] + 1
+    core.close()
+
+
 def test_adapter_fresh_planners_and_public_image_tools(tmp_path):
     from zetta.planner.base import PlannerResult
 

@@ -388,6 +388,12 @@ class RolloutRunner:
                 self.pending = None
                 self.last = result
                 self._save(f"tools/{request.request_id}-result.json", result)
+                start = self.snapshot["observation"]
+                partial_step = (
+                    start["step_index"] + result.get("executed_steps", 0)
+                    if result.get("observation_id_before") == start["observation_id"]
+                    else 0
+                )
                 self.counts = self.counts.model_copy(
                     update={
                         "physical_steps": max(
@@ -395,6 +401,7 @@ class RolloutRunner:
                             result.get("result", {}).get("last_committed_step", 0)
                             if result.get("result")
                             else 0,
+                            partial_step,
                         )
                     }
                 )

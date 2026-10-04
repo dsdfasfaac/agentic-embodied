@@ -65,7 +65,9 @@ still visible and the gripper was open. The 1.5 s, 5-pixel fallback above is
 the subsequent fix; it has not yet been proven by another live trial. The
 trial did not establish successful tube pickup. The controller was stopped
 after the failure. The journal is the authoritative record of the partial
-444th step; `result.json` reports only 443 completed physical steps.
+444th step; that trial's `result.json` reports only 443 completed physical
+steps. Subsequent runner code also counts a gateway-reported known partial
+step in the final result.
 
 ## Deployment commands
 
