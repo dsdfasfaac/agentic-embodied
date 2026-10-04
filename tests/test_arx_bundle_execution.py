@@ -153,11 +153,11 @@ def test_eef_expansion_reserves_planner_physical_budget():
     assert [call.tool for call in program.calls] == [
         "arx.set_gripper", "arx.move_eef", "arx.move_eef", "arx.review_reentry", "arx.zeva",
     ]
-    assert program.binding.max_recovery_steps == 75
+    assert program.binding.max_recovery_steps == 77
     assert program.binding.max_agent_decisions == 5
     with pytest.raises(ValueError, match="budget"):
         compile_programs(replace(original, recovery_rules=(replace(recovery, steps=steps),)),
-                         max_physical_steps=74)
+                         max_physical_steps=76)
 
 
 def test_sha_pinned_real_feature_provider_requires_fresh_joint_feedback(tmp_path):
