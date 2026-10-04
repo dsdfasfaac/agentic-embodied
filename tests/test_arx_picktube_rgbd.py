@@ -45,12 +45,24 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
         "right_tcp_monotonic_ns": stamp,
         "right_tcp_xyz_m": controller_ee.tolist(),
         "right_tcp_frame": "right_arm_local_base",
+        "depth_monotonic_ns": {"front_depth_mm": stamp},
     }}
     result = provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": depth})
     assert result["privileged.interaction.gripper_closed"] is True
     assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     with pytest.raises(ValueError, match="insufficient valid metric depth"):
         provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
+    open_state = state.copy()
+    open_state[13] = -2.5
+    dropout = {"hardware": {**obs["hardware"],
+                            "measured_state": open_state.tolist(),
+                            "depth_monotonic_ns": {"front_depth_mm": stamp + 100_000_000}}}
+    fallback = provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
+    assert fallback["privileged.interaction.gripper_closed"] is False
+    assert fallback["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
+    dropout["hardware"]["depth_monotonic_ns"]["front_depth_mm"] = stamp + 600_000_000
+    with pytest.raises(ValueError, match="insufficient valid metric depth"):
+        provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
     with pytest.raises(ValueError, match="controller FK"):
         provider.observe({"hardware": {**obs["hardware"], "right_tcp_frame": "unknown"}},
                          {"front_rgb": rgb, "front_depth_mm": depth})
