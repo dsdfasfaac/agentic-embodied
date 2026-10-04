@@ -196,6 +196,16 @@ def test_real_gripper_recovery_rejects_impossible_step_budget_before_motion():
     assert planner.prepare(GripperArgs(opening=1.0, max_steps=60), context).limit == 60
 
 
+def test_sample_recovery_reserves_rounded_eef_actions():
+    from pathlib import Path
+    from robots.arx.deployment.real_input import _load_bundle
+
+    root = Path(__file__).resolve().parents[1]
+    sample, _ = _load_bundle(root / "robots/arx/manifests/real/sample_picktube_candidate_bundle.json")
+    program = compile_programs(sample)["open_nudge_resume"]
+    assert program.binding.max_recovery_steps == 122
+
+
 def test_real_feature_freshness_uses_acquisition_time_after_journaling(tmp_path):
     module = tmp_path / "provider.py"
     module.write_text('''

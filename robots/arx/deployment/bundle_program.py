@@ -28,8 +28,10 @@ class RecoveryProgram:
 def _eef_budget(args):
     distance = math.sqrt(sum(x * x for x in args["delta_xyz_m"]))
     rotation = math.sqrt(sum(x * x for x in args.get("delta_rotvec_rad", (0, 0, 0))))
+    # CommandKinematics.plan rotates the vector before taking its NumPy norm.
+    # Reserve one action for floating-point rounding at exact 1 cm boundaries.
     actions = max(1, math.ceil(distance / min(.001, args.get("speed_m_s", .01) / 15)),
-                  math.ceil(rotation / .01)) + 15
+                  math.ceil(rotation / .01)) + 16
     if actions > 60:
         raise ValueError("EEF call exceeds planner's 60-action horizon")
     return actions
