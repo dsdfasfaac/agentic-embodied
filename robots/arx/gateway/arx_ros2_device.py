@@ -174,7 +174,7 @@ class ArxRos2Device:
         ):
             raise ValueError("ARX ROS2 joint command exceeds calibrated radian bounds")
         result = np.asarray(policy, dtype=np.float64).copy()
-        result[6] = calibration.to_native(float(policy[6]))
+        result[6] = calibration.to_native_command(float(policy[6]))
         return result
 
     def send(self, target: np.ndarray, command_id: str) -> CommandReceipt:
@@ -202,6 +202,17 @@ class ArxRos2Device:
         return CommandReceipt(
             command_id, stamp, "ros_publish_returned",
             "ROS2 publisher returned; controller/CAN receipt unavailable",
+            expected_feedback_target=tuple(float(x) for x in (
+                positions + np.asarray(
+                    [0.0] * 6 + [self.left_calibration.gripper_command_offset
+                                   * self.left_calibration.gripper_policy_scale
+                                   if self.command_left else 0.0]
+                    + [0.0] * 6 + [self.right_calibration.gripper_command_offset
+                                   * self.right_calibration.gripper_policy_scale
+                                   if self.command_right else 0.0],
+                    dtype=np.float32,
+                )
+            )),
         )
 
     def _keepalive_loop(self):

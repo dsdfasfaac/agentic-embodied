@@ -35,8 +35,8 @@ class ArmSettings(StrictModel):
     gripper_policy_scale: float
     gripper_policy_offset: float
 
-    def calibration(self) -> ArmCalibration:
-        return ArmCalibration(**self.model_dump())
+    def calibration(self, command_offset: float = 0.0) -> ArmCalibration:
+        return ArmCalibration(**self.model_dump(), gripper_command_offset=command_offset)
 
 
 class CameraSettings(StrictModel):
@@ -159,11 +159,14 @@ def validate_real_hardware_config(
             actual.capture_width, actual.capture_height,
         ):
             raise ValueError(f"camera calibration identity/geometry differs: {actual.name}")
-    right = config.right.calibration()
-    right.to_native(config.right_gripper_closed_policy)
+    left = config.left.calibration(task.control.gripper_command_offsets[0])
+    right = config.right.calibration(task.control.gripper_command_offsets[1])
+    for calibration, start_gripper in ((left, task.start_state[6]),
+                                       (right, task.start_state[13])):
+        calibration.to_native_command(start_gripper)
+    right.to_native_command(config.right_gripper_closed_policy)
     right.to_native(config.right_gripper_open_policy)
-    config.left.calibration().to_native(task.start_state[6])
-    right.to_native(task.start_state[13])
+    right.to_native_command(task.start_state[13])
 
 
 def build_real_backend(
@@ -188,15 +191,15 @@ def build_real_backend(
     if config.arm_transport == "arx_ros2":
         arms = ArxRos2Device.from_ros2(
             topics=Ros2Topics(**config.ros2_topics) if config.ros2_topics else Ros2Topics(),
-            left_calibration=config.left.calibration(),
-            right_calibration=config.right.calibration(),
+            left_calibration=config.left.calibration(task.control.gripper_command_offsets[0]),
+            right_calibration=config.right.calibration(task.control.gripper_command_offsets[1]),
             command_left=config.command_left,
             command_right=config.command_right,
         )
     else:
         arms = ArxX5Device.from_official_sdk(
-            left_calibration=config.left.calibration(),
-            right_calibration=config.right.calibration(),
+            left_calibration=config.left.calibration(task.control.gripper_command_offsets[0]),
+            right_calibration=config.right.calibration(task.control.gripper_command_offsets[1]),
             command_left=config.command_left,
             command_right=config.command_right,
         )

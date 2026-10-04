@@ -60,19 +60,19 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
             "capture_width": 640, "capture_height": 480, "capture_fps": 15,
             "depth_enabled": depth,
         })
-    def arm(port: str, low, high):
+    def arm(port: str, low, high, *, native_max: float = 0.0):
         return {
             "can_port": port, "arm_type": 2,
             "joint_min_rad": [float(x) for x in low],
             "joint_max_rad": [float(x) for x in high],
-            "gripper_native_min": -3.45, "gripper_native_max": 0.0,
+            "gripper_native_min": -3.45, "gripper_native_max": native_max,
             "gripper_policy_scale": 1.0, "gripper_policy_offset": 0.0,
         }
     payload = {
         "schema_version": "arx.real.hardware.v1",
         "arm_transport": "arx_ros2", "camera_transport": "realsense",
         "left": arm("can1", left_low, left_high),
-        "right": arm("can3", right_low, right_high),
+        "right": arm("can3", right_low, right_high, native_max=0.95),
         "command_left": False, "command_right": True,
         "cameras": camera_settings,
         "timing": {
@@ -104,7 +104,7 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
         "raw_frame_count": len(states),
         "raw_data_sha256": {path.parent.name: file_sha256(path) for path in files},
         "joint_limit_scope": "recorded PickTube controller feedback envelope plus 0.05 rad; not mechanical hard stops",
-        "gripper_scope": "policy coordinate equals controller native coordinate; -3.45 to 0.0 includes recorded feedback and direct-client nominal endpoints",
+        "gripper_scope": "feedback remains controller native; PickTube right actions add +0.9 native for firmer grip as frozen in the task manifest; right command range extends to +0.95",
         "motion_tested": False,
     }
     provenance_path.parent.mkdir(parents=True, exist_ok=True)

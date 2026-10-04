@@ -46,7 +46,7 @@
       0.34621602296829224
     ],
     "gripper_native_min": -3.45,
-    "gripper_native_max": 0.0,
+    "gripper_native_max": 0.95,
     "gripper_policy_scale": 1.0,
     "gripper_policy_offset": 0.0
   },

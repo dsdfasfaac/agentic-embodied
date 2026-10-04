@@ -69,6 +69,7 @@ class CommandReceipt:
     sent_monotonic_ns: int
     status: Literal["sdk_call_returned", "ros_publish_returned", "transport_acknowledged"]
     detail: str = ""
+    expected_feedback_target: tuple[float, ...] | None = None
 
 
 class CameraSource(Protocol):
@@ -258,7 +259,10 @@ class RealBackend:
         if self._started_ns is not None or self._closed:
             raise RuntimeError("real backend cannot reset an existing episode")
         policy, observed, feature_frames, now = self._observe()
-        start = np.asarray(self.task.start_state, dtype=np.float32)
+        start = np.asarray(self.task.start_state, dtype=np.float32).copy()
+        start[[6, 13]] += np.asarray(
+            self.task.control.gripper_command_offsets, dtype=np.float32
+        )
         tolerance = np.asarray(self.config.position_tolerance, dtype=np.float32)
         mismatched = np.flatnonzero(np.abs(policy.state - start) > tolerance)
         if mismatched.size:
@@ -266,7 +270,11 @@ class RealBackend:
                 "real arm differs from frozen task start state at channels "
                 + ",".join(str(int(index)) for index in mismatched)
             )
-        self._processor = ActionProcessor(self.task, policy.state)
+        command_state = policy.state.copy()
+        command_state[[6, 13]] -= np.asarray(
+            self.task.control.gripper_command_offsets, dtype=np.float32
+        )
+        self._processor = ActionProcessor(self.task, command_state)
         self._started_ns = now
         self._next_send_ns = now
         hardware = HardwareEvidence(
@@ -295,8 +303,15 @@ class RealBackend:
         receipt = self.arms.send(target.copy(), command_id)
         if receipt.command_id != command_id or receipt.sent_monotonic_ns <= 0:
             raise ValueError("arm device returned invalid command receipt")
+        arrival_target = np.asarray(
+            receipt.expected_feedback_target if receipt.expected_feedback_target is not None
+            else target, dtype=np.float32,
+        )
+        if arrival_target.shape != (14,) or not np.isfinite(arrival_target).all():
+            raise ValueError("arm device returned invalid expected feedback target")
         self._emit("command_sent", {
             "command_id": command_id, "target": target.tolist(),
+            "expected_feedback_target": arrival_target.tolist(),
             "receipt": asdict(receipt),
         })
         period_ns = round(1e9 / self.config.control_hz)
@@ -307,16 +322,17 @@ class RealBackend:
         policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
         arrived = (
             observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
-            and bool(np.all(np.abs(policy.state - target) <= tolerances))
+            and bool(np.all(np.abs(policy.state - arrival_target) <= tolerances))
         )
         while not arrived and time.monotonic() < deadline:
             time.sleep(min(self.config.feedback_poll_s, max(0, deadline - time.monotonic())))
             policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
             arrived = (
                 observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
-                and bool(np.all(np.abs(policy.state - target) <= tolerances))
+                and bool(np.all(np.abs(policy.state - arrival_target) <= tolerances))
             )
-        observed["position_error"] = (policy.state - target).tolist()
+        observed["position_error"] = (policy.state - arrival_target).tolist()
+        observed["expected_feedback_target"] = arrival_target.tolist()
         self._emit("arrival_observed" if arrived else "arrival_unverified", {
             "command_id": command_id,
             "state_monotonic_ns": observed["state_monotonic_ns"],

@@ -52,9 +52,13 @@ class FakeCameraSource:
 
 
 class FakeArmDevice:
-    def __init__(self, *, move=True):
+    def __init__(self, *, move=True, command_offset=0.0):
         self.positions = np.asarray(TASK.start_state, dtype=np.float32).copy()
+        self.positions[[6, 13]] += np.asarray(
+            TASK.control.gripper_command_offsets, dtype=np.float32
+        )
         self.move = move
+        self.command_offset = command_offset
         self.sent = []
         self.closed = False
 
@@ -69,21 +73,26 @@ class FakeArmDevice:
 
     def send(self, target, command_id):
         self.sent.append(target.copy())
+        expected = target.copy()
+        expected[13] += self.command_offset
         if self.move:
-            self.positions = target.copy()
-        return CommandReceipt(command_id, time.monotonic_ns(), "sdk_call_returned")
+            self.positions = expected.copy()
+        return CommandReceipt(
+            command_id, time.monotonic_ns(), "sdk_call_returned",
+            expected_feedback_target=tuple(float(x) for x in expected),
+        )
 
     def close(self):
         self.closed = True
 
 
-def make_backend(*, move=True, stale=False):
+def make_backend(*, move=True, stale=False, command_offset=0.0):
     identities = tuple(
         CameraIdentity(name, "device-" + name, "cal-" + name, "a" * 64, 2, 2)
         for name in ("front_rgb", "left_rgb", "right_rgb")
     )
     cameras = FakeCameraSource(identities, stale=stale)
-    arm = FakeArmDevice(move=move)
+    arm = FakeArmDevice(move=move, command_offset=command_offset)
     config = RealBackendConfig(
         cameras=identities,
         state_units=("rad",) * 6 + ("policy_gripper",)
@@ -119,6 +128,18 @@ def test_real_backend_reports_send_and_measured_arrival_separately():
     assert commit.hardware.observation["sensor_skew_ms"] < 50
     backend.close()
     assert arm.closed and cameras.closed
+
+
+def test_real_backend_arrival_uses_firmer_grip_command_feedback():
+    backend, arm, _ = make_backend(command_offset=0.9)
+    backend.reset()
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] += 0.01
+    commit = backend.step(raw)
+    assert commit.hardware.arrival_verified is True
+    assert arm.sent[-1][13] == pytest.approx(-3.4)
+    assert commit.policy.state[13] == pytest.approx(-2.5)
+    assert commit.hardware.observation["expected_feedback_target"][13] == pytest.approx(-2.5)
 
 
 def test_real_backend_rejects_unlocked_arm_outside_frozen_start_state():
@@ -222,6 +243,28 @@ def test_arx_adapter_converts_gripper_and_respects_locked_arm():
     assert not left.commands
     assert right.commands[-1] == ("gripper", -2.0)
     assert device.read().positions[13] == -3.0
+
+
+def test_arx_adapter_applies_task_command_offset_without_changing_feedback():
+    left, right = FakeSingleArm(), FakeSingleArm()
+    calibration = ArmCalibration(
+        can_port="can3", arm_type=2,
+        joint_min_rad=(-3.0,) * 6, joint_max_rad=(3.0,) * 6,
+        gripper_native_min=-3.5, gripper_native_max=1.0,
+        gripper_policy_scale=1.0, gripper_policy_offset=0.0,
+        gripper_command_offset=0.9,
+    )
+    device = ArxX5Device(
+        left=left, right=right,
+        left_calibration=calibration, right_calibration=calibration,
+        command_left=False, command_right=True,
+    )
+    target = device.read().positions
+    target[13] = -3.4
+    receipt = device.send(target, "offset-test")
+    assert right.commands[-1] == ("gripper", pytest.approx(-2.5))
+    assert device.read().positions[13] == pytest.approx(-2.5)
+    assert receipt.expected_feedback_target[13] == pytest.approx(-2.5)
 
 
 class FakeRosPublisher:
@@ -343,7 +386,7 @@ def test_static_real_hardware_config_matches_vla_and_calibration_files(tmp_path)
         "joint_min_rad": [-4.0] * 6,
         "joint_max_rad": [4.0] * 6,
         "gripper_native_min": -4.0,
-        "gripper_native_max": 0.5,
+        "gripper_native_max": 1.0,
         "gripper_policy_scale": 1.0,
         "gripper_policy_offset": 0.0,
     }

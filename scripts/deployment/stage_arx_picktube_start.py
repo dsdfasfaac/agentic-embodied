@@ -64,7 +64,8 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
     try:
         initial = _read_fresh(device, time.monotonic() + 5)
         current = np.asarray(initial.positions, dtype=np.float64)
-        goal = np.asarray(task.start_state, dtype=np.float64)
+        goal = np.asarray(task.start_state, dtype=np.float64).copy()
+        goal[[6, 13]] += np.asarray(task.control.gripper_command_offsets)
         for side, calibration, chunk in (
             ("left", config.left.calibration(), goal[:7]),
             ("right", config.right.calibration(), goal[7:]),
@@ -78,6 +79,8 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             raise ValueError(f"start-state staging requires {planned} steps, exceeds 150")
         report.update({
             "initial_state": current.tolist(), "goal_state": goal.tolist(),
+            "model_start_state": list(task.start_state),
+            "gripper_command_offsets": list(task.control.gripper_command_offsets),
             "planned_steps": planned,
             "max_joint_step_rad": float(np.max(np.abs(delta[[i for i in range(14) if i not in (6, 13)]])) / planned),
             "max_gripper_step": float(np.max(np.abs(delta[[6, 13]])) / planned),

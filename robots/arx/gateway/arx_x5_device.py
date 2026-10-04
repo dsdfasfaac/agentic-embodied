@@ -29,6 +29,7 @@ class ArmCalibration:
     gripper_native_max: float
     gripper_policy_scale: float
     gripper_policy_offset: float
+    gripper_command_offset: float = 0.0
 
     def __post_init__(self):
         if not self.can_port or self.arm_type not in (0, 1, 2):
@@ -39,6 +40,7 @@ class ArmCalibration:
             *self.joint_min_rad, *self.joint_max_rad,
             self.gripper_native_min, self.gripper_native_max,
             self.gripper_policy_scale, self.gripper_policy_offset,
+            self.gripper_command_offset,
         )
         if not all(math.isfinite(value) for value in values):
             raise ValueError("ARX unit calibration must be finite")
@@ -59,6 +61,13 @@ class ArmCalibration:
         result = (policy - self.gripper_policy_offset) / self.gripper_policy_scale
         if not self.gripper_native_min <= result <= self.gripper_native_max:
             raise ValueError("gripper command exceeds calibrated SDK-native range")
+        return result
+
+    def to_native_command(self, policy: float) -> float:
+        result = (policy - self.gripper_policy_offset) / self.gripper_policy_scale
+        result += self.gripper_command_offset
+        if not self.gripper_native_min <= result <= self.gripper_native_max:
+            raise ValueError("gripper command with task offset exceeds calibrated SDK-native range")
         return result
 
 
@@ -154,7 +163,7 @@ class ArxX5Device:
             joints > calibration.joint_max_rad
         ):
             raise ValueError("ARX joint command exceeds calibrated radian bounds")
-        return joints.tolist(), calibration.to_native(float(target[6]))
+        return joints.tolist(), calibration.to_native_command(float(target[6]))
 
     def send(self, target: np.ndarray, command_id: str) -> CommandReceipt:
         if self._closed:
@@ -183,6 +192,15 @@ class ArxX5Device:
             sent_monotonic_ns=time.monotonic_ns(),
             status="sdk_call_returned",
             detail="SDK setter returned; no hardware acknowledgement exposed",
+            expected_feedback_target=tuple(float(x) for x in (
+                positions + np.asarray([0.0] * 6 + [
+                    self.left_calibration.gripper_command_offset
+                    * self.left_calibration.gripper_policy_scale if self.command_left else 0.0]
+                    + [0.0] * 6 + [
+                    self.right_calibration.gripper_command_offset
+                    * self.right_calibration.gripper_policy_scale if self.command_right else 0.0],
+                                       dtype=np.float32)
+            )),
         )
 
     def close(self) -> None:
