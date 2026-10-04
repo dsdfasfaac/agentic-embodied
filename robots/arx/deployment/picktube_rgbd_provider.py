@@ -7,8 +7,9 @@ base, which is 0.5 m in negative Y from the left local base. The offset is
 the AC one model relation documented in ARX_X5_CAMERA_TRANSFORMS_HANDOFF.md.
 The controller's end_pos is the link-six endpoint. A recorded-trajectory
 calibration checks that point against joint feedback; nominal AC one tool
-geometry then estimates the gripper centre. The output target is the visible
-pink label centre, a grasp-target proxy.
+geometry then estimates the gripper centre. The visible pink label is a target
+proxy. Contact and grasp are conservative RGB-D/current/kinematic estimates,
+not tactile or MuJoCo contact flags.
 """
 
 from __future__ import annotations
@@ -30,6 +31,15 @@ CONTROLLER_FK_SHA256 = "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f
 NOMINAL_CHAIN_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_one_nominal_chain.json"
 NOMINAL_CHAIN_SHA256 = "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
 RIGHT_JOINT_IDS = [f"right_joint_{i}" for i in range(1, 7)]
+RIGHT_GRIPPER_CURRENT = "right_gripper_current_native"
+# The first 100 frames of 50 accepted PickTube recordings have a 99th
+# percentile empty/open right gripper current of 0.0904 native units.
+CONTACT_CURRENT_THRESHOLD = 0.16
+CONTACT_DISTANCE_MAX_M = 0.05
+RETAINED_RELATIVE_DRIFT_MAX_M = 0.012
+GRASP_LIFT_MIN_M = 0.005
+SUCCESS_LIFT_MIN_M = 0.01
+SUCCESS_HOLD_FRAMES = 5
 
 
 def _pinned_json(path: Path, digest: str) -> dict:
@@ -59,6 +69,14 @@ class PickTubeRgbdProvider:
         self.last_target_ns: int | None = None
         self.closed_policy: float | None = None
         self.open_policy: float | None = None
+        self.initial_target_left: np.ndarray | None = None
+        self.contact_relative_left: np.ndarray | None = None
+        self.contact_tool_left: np.ndarray | None = None
+        self.contact_rearmed = True
+        self.success_hold_frames = 0
+        self.success_latched = False
+        self.last_observation_id: str | None = None
+        self.last_values: dict | None = None
 
     def validate_hardware(self, config) -> None:
         front = config.cameras[0]
@@ -87,6 +105,24 @@ class PickTubeRgbdProvider:
         return [
             {**common, "name": "privileged.interaction.gripper_closed",
              "source_kind": "joint_feedback", "source_ids": ["right_gripper_policy"],
+             "scalar_type": "boolean", "units": "boolean"},
+            {**common, "name": "privileged.interaction.gripper_contact",
+             "source_kind": "rgbd_fused",
+             "source_ids": ["front_rgb", "front_depth_mm", *RIGHT_JOINT_IDS,
+                            "right_gripper_policy", RIGHT_GRIPPER_CURRENT],
+             "scalar_type": "boolean", "units": "boolean"},
+            {**common, "name": "privileged.interaction.lift_m",
+             "source_kind": "camera_rgbd", "source_ids": ["front_rgb", "front_depth_mm"],
+             "scalar_type": "number", "units": "m"},
+            {**common, "name": "privileged.interaction.grasped",
+             "source_kind": "rgbd_fused",
+             "source_ids": ["front_rgb", "front_depth_mm", *RIGHT_JOINT_IDS,
+                            "right_gripper_policy", RIGHT_GRIPPER_CURRENT],
+             "scalar_type": "boolean", "units": "boolean"},
+            {**common, "name": "privileged.interaction.success",
+             "source_kind": "rgbd_fused",
+             "source_ids": ["front_rgb", "front_depth_mm", *RIGHT_JOINT_IDS,
+                            "right_gripper_policy", RIGHT_GRIPPER_CURRENT],
              "scalar_type": "boolean", "units": "boolean"},
             {**common, "name": "privileged.selected.target_gripper_distance_m",
              "source_kind": "rgbd_fused",
@@ -192,7 +228,50 @@ class PickTubeRgbdProvider:
         tcp_left = tcp_right + np.array([0.0, -0.5, 0.0])
         return float(np.linalg.norm(target_left - tcp_left))
 
+    def _interaction_values(self, target_left: np.ndarray, tool_left: np.ndarray,
+                            distance: float, gripper_closed: bool, current: float) -> dict:
+        if self.initial_target_left is None:
+            self.initial_target_left = target_left.copy()
+        lift = float(target_left[2] - self.initial_target_left[2])
+        relative = target_left - tool_left
+        if not gripper_closed:
+            self.contact_relative_left = None
+            self.contact_tool_left = None
+            self.contact_rearmed = True
+        elif self.contact_relative_left is not None and (
+            distance > CONTACT_DISTANCE_MAX_M or
+            np.linalg.norm(relative - self.contact_relative_left) > RETAINED_RELATIVE_DRIFT_MAX_M
+        ):
+            self.contact_relative_left = None
+            self.contact_tool_left = None
+            self.contact_rearmed = False
+        if (gripper_closed and self.contact_rearmed
+                and self.contact_relative_left is None
+                and distance <= CONTACT_DISTANCE_MAX_M
+                and abs(float(current)) >= CONTACT_CURRENT_THRESHOLD):
+            self.contact_relative_left = relative.copy()
+            self.contact_tool_left = tool_left.copy()
+            self.contact_rearmed = False
+        contact = self.contact_relative_left is not None
+        grasped = bool(contact and lift >= GRASP_LIFT_MIN_M and
+                       np.linalg.norm(tool_left - self.contact_tool_left) >= GRASP_LIFT_MIN_M)
+        self.success_hold_frames = self.success_hold_frames + 1 if (
+            grasped and lift >= SUCCESS_LIFT_MIN_M
+        ) else 0
+        self.success_latched |= self.success_hold_frames >= SUCCESS_HOLD_FRAMES
+        return {
+            "privileged.interaction.gripper_closed": gripper_closed,
+            "privileged.interaction.gripper_contact": contact,
+            "privileged.interaction.lift_m": lift,
+            "privileged.interaction.grasped": grasped,
+            "privileged.interaction.success": self.success_latched,
+            "privileged.selected.target_gripper_distance_m": distance,
+        }
+
     def observe(self, observation, images):
+        observation_id = observation.get("observation_id")
+        if observation_id is not None and observation_id == self.last_observation_id:
+            return dict(self.last_values)
         if self.closed_policy is None or self.open_policy is None:
             raise ValueError("PickTube provider hardware was not validated")
         hardware = observation["hardware"]
@@ -212,6 +291,12 @@ class PickTubeRgbdProvider:
         tool_centre, _, _ = self.tool_fk.fk(right_joints)
         gripper_span = self.open_policy - self.closed_policy
         gripper_fraction = (float(state[13]) - self.closed_policy) / gripper_span
+        gripper_closed = gripper_fraction <= 0.25
+        current = hardware.get("auxiliary_feedback", {}).get(RIGHT_GRIPPER_CURRENT)
+        current_stamp = hardware.get("auxiliary_monotonic_ns", {}).get(RIGHT_GRIPPER_CURRENT)
+        if (type(current) not in (int, float) or not np.isfinite(current)
+                or current_stamp != hardware.get("state_monotonic_ns")):
+            raise ValueError("fresh right gripper motor current is required")
         depth_stamp = hardware.get("depth_monotonic_ns", {}).get("front_depth_mm")
         try:
             distance = self.measure_distance(
@@ -236,10 +321,14 @@ class PickTubeRgbdProvider:
             # gripper position still comes from this fresh joint sample.
             tcp_left = tool_centre + np.array([0.0, -0.5, 0.0])
             distance = float(np.linalg.norm(self.last_target_left - tcp_left))
-        return {
-            "privileged.interaction.gripper_closed": gripper_fraction <= 0.25,
-            "privileged.selected.target_gripper_distance_m": distance,
-        }
+        target_left = self.last_target_left
+        tool_left = tool_centre + np.array([0.0, -0.5, 0.0])
+        values = self._interaction_values(
+            target_left, tool_left, distance, gripper_closed, float(current),
+        )
+        if observation_id is not None:
+            self.last_observation_id, self.last_values = observation_id, values.copy()
+        return values
 
 
 def create_provider():

@@ -19,6 +19,7 @@ if __package__ in (None, ""):
 from robots.arx.contracts import load_model_contract, load_task_manifest
 from robots.arx.gateway.contracts import RuntimeLimits
 from robots.arx.gateway.real_config import (
+    REAL_ARX_CURRENT_CHANNELS,
     REAL_JOINT_CHANNELS,
     build_real_backend,
     load_real_hardware_config,
@@ -136,6 +137,8 @@ class RealCoreFactory:
                     depth_cameras=[c.name.removesuffix("_rgb") + "_depth_mm"
                                    for c in config.cameras if c.depth_enabled],
                     joint_channels=list(REAL_JOINT_CHANNELS),
+                    auxiliary_channels=(list(REAL_ARX_CURRENT_CHANNELS)
+                                        if config.arm_transport == "arx_ros2" else []),
                     feature_sources=provider.sources,
                     tool_catalog_sha256=catalog["catalog_sha256"],
                 )

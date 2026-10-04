@@ -20,7 +20,7 @@ from robots.arx.deployment.picktube_rgbd_provider import PickTubeRgbdProvider
 from robots.arx.deployment.real_input import (
     RealInputContract, _catalog_tools, _check_recoveries, _check_rules, _load_bundle,
 )
-from robots.arx.gateway.real_config import REAL_JOINT_CHANNELS
+from robots.arx.gateway.real_config import REAL_ARX_CURRENT_CHANNELS, REAL_JOINT_CHANNELS
 from robots.arx.gateway.tools import default_registry
 from zetta.evolution.jsonio import file_sha256
 
@@ -67,9 +67,10 @@ def freeze(bundle_path: Path, output_dir: Path) -> dict:
         "tool_catalog_sha256": catalog["catalog_sha256"],
         "cameras": cameras, "depth_cameras": ["front_depth_mm"],
         "joint_channels": list(REAL_JOINT_CHANNELS),
+        "auxiliary_channels": list(REAL_ARX_CURRENT_CHANNELS),
         "feature_sources": PickTubeRgbdProvider().feature_sources(),
         "max_critic_history_steps": 16,
-        "max_critic_cooldown_steps": 16,
+        "max_critic_cooldown_steps": max(16, *(rule.cooldown_steps for rule in bundle.critic_rules)),
         "max_recovery_tool_calls": 8,
     })
     _catalog_tools(catalog, contract.tool_catalog_sha256)

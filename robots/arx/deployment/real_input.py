@@ -59,7 +59,7 @@ class RealFeatureSource(StrictModel):
     name: str = Field(min_length=1, max_length=128)
     provider_id: str = Field(min_length=1, max_length=128)
     provider_sha256: SHA
-    source_kind: Literal["camera_rgb", "joint_feedback", "fused", "rgbd_fused"]
+    source_kind: Literal["camera_rgb", "camera_rgbd", "joint_feedback", "fused", "rgbd_fused"]
     source_ids: list[str] = Field(min_length=1, max_length=17)
     scalar_type: Literal["number", "integer", "boolean", "string"]
     units: str = Field(min_length=1, max_length=64)
@@ -84,6 +84,7 @@ class RealInputContract(StrictModel):
     cameras: list[RealCamera] = Field(min_length=3, max_length=3)
     depth_cameras: list[str] = Field(default_factory=list)
     joint_channels: list[str] = Field(min_length=ARX_ACTION_DIM, max_length=ARX_ACTION_DIM)
+    auxiliary_channels: list[str] = Field(default_factory=list, max_length=16)
     feature_sources: list[RealFeatureSource] = Field(min_length=1, max_length=128)
     max_critic_history_steps: int = Field(ge=1, le=1024)
     max_critic_cooldown_steps: int = Field(ge=0, le=10000)
@@ -97,6 +98,8 @@ class RealInputContract(StrictModel):
             not name.strip() for name in self.joint_channels
         ):
             raise ValueError("14 distinct joint feedback channels are required")
+        if len(set(self.auxiliary_channels)) != len(self.auxiliary_channels):
+            raise ValueError("duplicate auxiliary feedback channel")
         if len({feature.name for feature in self.feature_sources}) != len(self.feature_sources):
             raise ValueError("duplicate feature source")
         if len(set(self.depth_cameras)) != len(self.depth_cameras) or not set(self.depth_cameras) <= {
@@ -114,6 +117,7 @@ class LiveCapabilities(StrictModel):
     cameras: list[RealCamera] = Field(min_length=3, max_length=3)
     depth_cameras: list[str] = Field(default_factory=list)
     joint_channels: list[str] = Field(min_length=ARX_ACTION_DIM, max_length=ARX_ACTION_DIM)
+    auxiliary_channels: list[str] = Field(default_factory=list, max_length=16)
     feature_sources: list[RealFeatureSource] = Field(max_length=128)
     tool_catalog_sha256: SHA
 
@@ -123,6 +127,8 @@ class LiveCapabilities(StrictModel):
             raise ValueError("duplicate live camera")
         if len(set(self.joint_channels)) != ARX_ACTION_DIM:
             raise ValueError("duplicate live joint channel")
+        if len(set(self.auxiliary_channels)) != len(self.auxiliary_channels):
+            raise ValueError("duplicate live auxiliary channel")
         if len({feature.name for feature in self.feature_sources}) != len(self.feature_sources):
             raise ValueError("duplicate live feature")
         return self
@@ -189,11 +195,14 @@ def _check_sources(contract: RealInputContract, live: LiveCapabilities) -> None:
         raise ValueError("live aligned metric depth streams differ")
     if contract.joint_channels != live.joint_channels:
         raise ValueError("live 14D joint feedback mapping differs")
+    if contract.auxiliary_channels != live.auxiliary_channels:
+        raise ValueError("live auxiliary feedback mapping differs")
     if contract.tool_catalog_sha256 != live.tool_catalog_sha256:
         raise ValueError("live tool catalog differs")
     available = {feature.name: feature for feature in live.feature_sources}
     cameras = {camera.name for camera in contract.cameras}
     joints = set(contract.joint_channels)
+    feedback = joints | set(contract.auxiliary_channels)
     depth = set(contract.depth_cameras)
     for feature in contract.feature_sources:
         if available.get(feature.name) != feature:
@@ -201,14 +210,18 @@ def _check_sources(contract: RealInputContract, live: LiveCapabilities) -> None:
         ids = set(feature.source_ids)
         if feature.source_kind == "camera_rgb" and not ids <= cameras:
             raise ValueError(f"feature has no matching real camera source: {feature.name}")
-        if feature.source_kind == "joint_feedback" and not ids <= joints:
+        if feature.source_kind == "camera_rgbd" and not (
+            ids <= cameras | depth and ids & cameras and ids & depth
+        ):
+            raise ValueError(f"RGBD feature needs RGB and metric depth: {feature.name}")
+        if feature.source_kind == "joint_feedback" and not ids <= feedback:
             raise ValueError(f"feature has no matching joint feedback source: {feature.name}")
         if feature.source_kind == "fused" and not (
-            ids <= cameras | joints and ids & cameras and ids & joints
+            ids <= cameras | feedback and ids & cameras and ids & feedback
         ):
             raise ValueError(f"fused feature needs camera and joint sources: {feature.name}")
         if feature.source_kind == "rgbd_fused" and not (
-            ids <= cameras | depth | joints and ids & cameras and ids & depth and ids & joints
+            ids <= cameras | depth | feedback and ids & cameras and ids & depth and ids & feedback
         ):
             raise ValueError(f"RGBD feature needs RGB, metric depth and joint sources: {feature.name}")
 
@@ -286,8 +299,8 @@ def _check_recoveries(
     tools = _catalog_tools(catalog, contract.tool_catalog_sha256)
     plans = []
     for recovery in bundle.recovery_rules:
-        if recovery.fallback != "stop_all_motion":
-            raise ValueError(f"real recovery must fail closed: {recovery.recovery_id}")
+        if not recovery.fallback.strip():
+            raise ValueError(f"recovery fallback text is required: {recovery.recovery_id}")
         calls = 0
         steps = []
         review_seen = False
@@ -319,13 +332,21 @@ def _check_recoveries(
                     arguments["observation_ids"] = ["obs-preflight"]
                 review_seen = True
             elif step.tool == "arx.zeva":
-                # The sample bundle uses the token returned by the prior review.
-                if arguments.get("reentry_token") == "token-from-review":
-                    if not review_seen:
-                        raise ValueError("Zeva token needs a preceding reentry review")
-                    arguments["reentry_token"] = "token-preflight"
+                token = arguments.get("reentry_token")
+                if token not in (None, "token-from-review"):
+                    raise ValueError("Zeva token must come from a fresh review")
+                if not review_seen:
+                    review_entry = tools.get("arx.review_reentry")
+                    if review_entry is None or "RECOVERING" not in review_entry.get("allowed_states", []):
+                        raise ValueError("automatic reentry review is absent from real catalog")
+                    calls += 1
+                    steps.append({"tool": "arx.review_reentry", "tool_calls": 1,
+                                  "inserted_before": "arx.zeva"})
+                    review_seen = True
+                arguments["reentry_token"] = "token-preflight"
             call_count = 1
             if step.tool == "arx.move_eef":
+                review_seen = False
                 vector = arguments.get("delta_xyz_m")
                 if isinstance(vector, list) and len(vector) == 3 and all(
                     type(value) in (int, float) and math.isfinite(value) for value in vector
@@ -335,6 +356,8 @@ def _check_recoveries(
                     if call_count > contract.max_recovery_tool_calls:
                         raise ValueError("EEF movement exceeds recovery call budget")
                     arguments["delta_xyz_m"] = [value / call_count for value in vector]
+            elif step.tool in ("arx.set_gripper", "arx.hold"):
+                review_seen = False
             try:
                 model.model_validate(arguments)
             except Exception as exc:

@@ -59,6 +59,8 @@ class RealFeatureProvider:
                     stamp = hardware["camera_monotonic_ns"][source_id]
                 elif source_id in hardware.get("depth_monotonic_ns", {}):
                     stamp = hardware["depth_monotonic_ns"][source_id]
+                elif source_id in hardware.get("auxiliary_monotonic_ns", {}):
+                    stamp = hardware["auxiliary_monotonic_ns"][source_id]
                 else:
                     stamp = hardware.get("state_monotonic_ns")
                 if not isinstance(stamp, int) or stamp <= 0 or stamp > reference_ns:

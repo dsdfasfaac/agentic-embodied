@@ -46,9 +46,15 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
         "right_tcp_xyz_m": controller_ee.tolist(),
         "right_tcp_frame": "right_arm_local_base",
         "depth_monotonic_ns": {"front_depth_mm": stamp},
+        "auxiliary_feedback": {"right_gripper_current_native": 0.07},
+        "auxiliary_monotonic_ns": {"right_gripper_current_native": stamp},
     }}
     result = provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": depth})
     assert result["privileged.interaction.gripper_closed"] is True
+    assert result["privileged.interaction.gripper_contact"] is False
+    assert result["privileged.interaction.lift_m"] == 0.0
+    assert result["privileged.interaction.grasped"] is False
+    assert result["privileged.interaction.success"] is False
     assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     with pytest.raises(ValueError, match="insufficient valid metric depth"):
         provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
@@ -77,11 +83,39 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
     with pytest.raises(ValueError, match="differs from fresh joint feedback"):
         provider.observe({"hardware": {**obs["hardware"], "right_tcp_xyz_m": [1, 1, 1]}},
                          {"front_rgb": rgb, "front_depth_mm": depth})
+    with pytest.raises(ValueError, match="motor current"):
+        provider.observe({"hardware": {**obs["hardware"], "auxiliary_feedback": {}}},
+                         {"front_rgb": rgb, "front_depth_mm": depth})
     with pytest.raises(ValueError, match="pinned 640x480"):
         provider.validate_hardware(SimpleNamespace(
             cameras=[SimpleNamespace(**{**front.__dict__, "depth_enabled": False})],
             right_gripper_closed_policy=0.0, right_gripper_open_policy=-3.4,
         ))
+
+
+def test_picktube_interaction_tracks_load_lift_retention_and_success():
+    provider = PickTubeRgbdProvider()
+    initial = np.array([0.0, 0.0, 0.0])
+    open_values = provider._interaction_values(initial, initial, 0.0, False, 0.07)
+    assert open_values["privileged.interaction.gripper_contact"] is False
+    loaded = provider._interaction_values(initial, initial, 0.0, True, 0.20)
+    assert loaded["privileged.interaction.gripper_contact"] is True
+    for frame in range(5):
+        position = np.array([0.0, 0.0, 0.012])
+        values = provider._interaction_values(position, position, 0.0, True, 0.07)
+        assert values["privileged.interaction.grasped"] is True
+        assert values["privileged.interaction.success"] is (frame == 4)
+    lost = PickTubeRgbdProvider()
+    lost._interaction_values(initial, initial, 0.0, False, 0.07)
+    lost._interaction_values(initial, initial, 0.0, True, 0.20)
+    lifted = np.array([0.0, 0.0, 0.008])
+    lost._interaction_values(lifted, lifted, 0.0, True, 0.07)
+    slipped = lost._interaction_values(lifted, np.array([0.0, 0.0, 0.022]),
+                                       0.014, True, 0.20)
+    assert slipped["privileged.interaction.lift_m"] == pytest.approx(0.008)
+    assert slipped["privileged.interaction.gripper_contact"] is False
+    assert slipped["privileged.interaction.grasped"] is False
+    assert slipped["privileged.interaction.success"] is False
 
 
 def test_large_pink_distractor_is_not_a_tracked_tube():

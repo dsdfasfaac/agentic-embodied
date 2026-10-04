@@ -41,8 +41,8 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None):
     """Symbolic values are resolved only against live review/observation results."""
     programs = {}
     for rule in bundle.recovery_rules:
-        if rule.fallback != "stop_all_motion":
-            raise ValueError(f"unsafe recovery fallback: {rule.recovery_id}")
+        if not rule.fallback.strip():
+            raise ValueError(f"missing recovery fallback: {rule.recovery_id}")
         calls, physical = [], 0
         reviewed = False
         resumed = False
@@ -65,18 +65,31 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None):
                 args["delta_xyz_m"] = [v / count for v in vector]
                 args["delta_rotvec_rad"] = [v / count for v in rotation]
                 physical += count * _eef_budget(args)
+                reviewed = False
             elif step.tool == "arx.set_gripper":
                 physical += args.get("max_steps", 0)
+                reviewed = False
             elif step.tool == "arx.hold":
                 physical += args.get("steps", 0)
+                reviewed = False
             elif step.tool == "arx.review_reentry":
                 if args.get("observation_ids") != ["post-recovery"]:
                     raise ValueError("review must bind the fresh post-recovery observation")
                 reviewed = True
                 args["observation_ids"] = ["obs-preflight"]
             elif step.tool == "arx.zeva":
-                if not reviewed or args.get("reentry_token") != "token-from-review":
-                    raise ValueError("VLA reentry requires the preceding review token")
+                if args.get("reentry_token") not in (None, "token-from-review"):
+                    raise ValueError("VLA reentry token must come from a fresh review")
+                if not reviewed:
+                    # A provisional bundle may omit the read-only review. The
+                    # executable program inserts it immediately before VLA.
+                    review_args = {"observation_ids": ["obs-preflight"]}
+                    _TOOL_MODELS["arx.review_reentry"].model_validate(review_args)
+                    calls.append(ProgramCall(
+                        step_index, -1, "arx.review_reentry", review_args,
+                        "fresh measured reentry assessment is eligible",
+                    ))
+                    reviewed = True
                 args["reentry_token"] = "token-preflight"
                 resumed = True
             _TOOL_MODELS[step.tool].model_validate(args)

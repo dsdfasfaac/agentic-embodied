@@ -23,6 +23,7 @@ REAL_JOINT_CHANNELS = tuple(
     [f"left_joint_{i}" for i in range(1, 7)] + ["left_gripper_policy"]
     + [f"right_joint_{i}" for i in range(1, 7)] + ["right_gripper_policy"]
 )
+REAL_ARX_CURRENT_CHANNELS = ("right_gripper_current_native",)
 
 
 class ArmSettings(StrictModel):

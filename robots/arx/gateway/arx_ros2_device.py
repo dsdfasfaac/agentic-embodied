@@ -124,13 +124,16 @@ class ArxRos2Device:
             end_pose = np.asarray(message.end_pos, dtype=np.float64)
             if end_pose.shape != (6,) or not np.isfinite(end_pose).all():
                 raise ValueError("ROS2 controller FK end_pos must be finite 6D")
+            currents = np.asarray(message.joint_cur, dtype=np.float64)
+            if currents.shape != (7,) or not np.isfinite(currents).all():
+                raise ValueError("ROS2 status must contain finite 7D motor currents")
             native[6] = calibration.to_policy(float(native[6]))
         except Exception as exc:
             with self._lock:
                 self._fault = f"{side} status invalid: {exc}"
             return
         with self._lock:
-            self._latest[side] = (native.astype(np.float32), stamp, end_pose[:3].copy())
+            self._latest[side] = (native.astype(np.float32), stamp, end_pose[:3].copy(), currents.copy())
 
     def read(self) -> JointSample:
         if self._closed.is_set():
@@ -155,6 +158,7 @@ class ArxRos2Device:
                 detail="fresh ROS2 RobotStatus; no CAN ACK or motor fault bits",
             ),
             right_tcp_xyz_m=right[2],
+            auxiliary_feedback={"right_gripper_current_native": float(right[3][6])},
         )
 
     def _message(self, positions: np.ndarray):

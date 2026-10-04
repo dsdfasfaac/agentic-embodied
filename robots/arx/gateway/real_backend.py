@@ -61,6 +61,7 @@ class JointSample:
     acquisition_started_ns: int
     health: DeviceHealth
     right_tcp_xyz_m: np.ndarray | None = None
+    auxiliary_feedback: Mapping[str, float] | None = None
 
 
 @dataclass(frozen=True)
@@ -253,6 +254,16 @@ class RealBackend:
                     evidence["right_tcp_xyz_m"] = tcp.tolist()
                     evidence["right_tcp_frame"] = "right_arm_local_base"
                     evidence["right_tcp_monotonic_ns"] = sample.monotonic_ns
+                if sample.auxiliary_feedback is not None:
+                    auxiliary = dict(sample.auxiliary_feedback)
+                    if any(not isinstance(name, str) or not name or
+                           type(value) not in (int, float) or not math.isfinite(value)
+                           for name, value in auxiliary.items()):
+                        raise ValueError("arm auxiliary feedback must be finite named scalars")
+                    evidence["auxiliary_feedback"] = auxiliary
+                    evidence["auxiliary_monotonic_ns"] = {
+                        name: sample.monotonic_ns for name in auxiliary
+                    }
                 return PolicyObservation(images, state.copy()), evidence, feature_frames, now
         raise TimeoutError(last_error)
 

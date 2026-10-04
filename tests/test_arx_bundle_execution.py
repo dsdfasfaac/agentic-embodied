@@ -206,6 +206,24 @@ def test_sample_recovery_reserves_rounded_eef_actions():
     assert program.binding.max_recovery_steps == 122
 
 
+def test_provisional_retention_bundle_inserts_measured_review_before_vla():
+    from pathlib import Path
+    from robots.arx.deployment.real_input import _load_bundle
+
+    root = Path(__file__).resolve().parents[1]
+    bundle, _ = _load_bundle(
+        root / "robots/arx/manifests/real/proposed_retention_candidate_bundle.json"
+    )
+    program = compile_programs(bundle)["reopen_then_fresh_reacquire"]
+    assert [call.tool for call in program.calls] == [
+        "arx.set_gripper", "arx.review_reentry", "arx.zeva",
+    ]
+    assert program.binding.max_recovery_steps == 60
+    assert program.binding.max_agent_decisions == 3
+    assert program.calls[1].call_index == -1
+    assert program.calls[2].arguments["reentry_token"] == "token-preflight"
+
+
 def test_real_feature_freshness_uses_acquisition_time_after_journaling(tmp_path):
     module = tmp_path / "provider.py"
     module.write_text('''

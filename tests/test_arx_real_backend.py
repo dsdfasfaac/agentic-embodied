@@ -302,6 +302,7 @@ class FakeRobotStatus:
     def __init__(self):
         self.header = type("Header", (), {})()
         self.joint_pos = [0.0] * 7
+        self.joint_cur = [0.0] * 7
         self.end_pos = [0.2, -0.1, 0.3, 0.0, 0.0, 0.0]
 
 
@@ -325,11 +326,13 @@ def test_dodo_ros2_topics_use_status_feedback_and_publish_receipt():
         for topic in ("/arm_slave_l_status", "/arm_slave_r_status"):
             msg = FakeRobotStatus()
             msg.joint_pos[6] = -3.0
+            msg.joint_cur[6] = 0.2
             node.subscribers[topic](msg)
         sample = device.read()
         state = sample.positions
         assert state.shape == (14,)
         assert sample.right_tcp_xyz_m.tolist() == [0.2, -0.1, 0.3]
+        assert sample.auxiliary_feedback == {"right_gripper_current_native": 0.2}
         target = state.copy()
         target[7] = 0.1
         receipt = device.send(target, "ros-cmd")

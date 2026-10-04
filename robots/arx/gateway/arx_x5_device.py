@@ -145,6 +145,13 @@ class ArxX5Device:
         right_pose = np.asarray(self.right.get_ee_pose(), dtype=np.float64)
         if right_pose.shape != (7,) or not np.isfinite(right_pose).all():
             raise ValueError("ARX SDK controller FK pose must be finite XYZ/quaternion")
+        auxiliary = None
+        get_currents = getattr(self.right, "get_joint_currents", None)
+        if callable(get_currents):
+            currents = np.asarray(get_currents(), dtype=np.float64)
+            if currents.shape != (7,) or not np.isfinite(currents).all():
+                raise ValueError("ARX SDK must return finite 7D motor currents")
+            auxiliary = {"right_gripper_current_native": float(currents[6])}
         finished = time.monotonic_ns()
         return JointSample(
             np.concatenate((left, right)), finished, started,
@@ -154,6 +161,7 @@ class ArxX5Device:
                 detail="fresh SDK read; motor fault bits and CAN ACK unavailable",
             ),
             right_tcp_xyz_m=right_pose[:3].copy(),
+            auxiliary_feedback=auxiliary,
         )
 
     @staticmethod
