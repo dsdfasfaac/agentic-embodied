@@ -260,12 +260,12 @@ class RealBackend:
         policy, observed, feature_frames, now = self._observe()
         start = np.asarray(self.task.start_state, dtype=np.float32)
         tolerance = np.asarray(self.config.position_tolerance, dtype=np.float32)
-        for locked, region in (
-            (self.task.control.lock_left_arm, slice(0, 7)),
-            (self.task.control.lock_right_arm, slice(7, 14)),
-        ):
-            if locked and not np.all(np.abs(policy.state[region] - start[region]) <= tolerance[region]):
-                raise ValueError("locked arm differs from frozen task start state")
+        mismatched = np.flatnonzero(np.abs(policy.state - start) > tolerance)
+        if mismatched.size:
+            raise ValueError(
+                "real arm differs from frozen task start state at channels "
+                + ",".join(str(int(index)) for index in mismatched)
+            )
         self._processor = ActionProcessor(self.task, policy.state)
         self._started_ns = now
         self._next_send_ns = now

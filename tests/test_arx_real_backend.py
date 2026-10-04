@@ -121,6 +121,14 @@ def test_real_backend_reports_send_and_measured_arrival_separately():
     assert arm.closed and cameras.closed
 
 
+def test_real_backend_rejects_unlocked_arm_outside_frozen_start_state():
+    backend, arm, _ = make_backend()
+    arm.positions[13] += 0.5
+    with pytest.raises(ValueError, match="frozen task start state at channels 13"):
+        backend.reset()
+    assert arm.sent == []
+
+
 def test_unverified_arrival_is_not_reported_as_acknowledgement():
     backend, arm, _ = make_backend(move=False)
     events = []
