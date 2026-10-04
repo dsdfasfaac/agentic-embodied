@@ -1,5 +1,38 @@
 # ARX CandidateBundle real-robot execution
 
+## Dodo chemistry model (2026-10-04)
+
+The supplied model checkpoint is
+`/mnt/hdd16t/chenfu/cosmos_models/arx5_chemistry_edge_stride2_gbs256_8gpu_2250/iter_000002250_ema_bf16_hf`
+on **dodo**. Run the model service and this repository's gateway/runner on
+dodo, using loopback `127.0.0.1`; no cross-host inference connection is needed.
+`scripts/deployment/start_arx_realdata_server_dodo.sh check` validates the
+checkpoint shards, matching 14D mean/std statistics, runtime config, processor,
+VAE, and Python installation without starting a service or robot controller.
+The same script accepts `start`, `status`, and `stop` for the model service on
+port 5580. Its environment variables allow replacing the dodo-specific paths.
+
+This is a **RealData ARX5 chemistry** model, not the earlier Task7 checkpoint.
+It uses `realdata_arx5`, internal mean/std normalization, a training-style
+prompt, and continuous raw gripper coordinates. The present model contract
+loader only accepts Task7 domain 17, raw normalization, and JSON prompts, and
+the real runner defaults to Task7 port 5581. Do not pass this checkpoint to
+`start_zeva_arx_task7_server.sh` or run robot motion through the Task7 contract.
+The RealData model contract and runtime compatibility need implementation and
+verification before a full real-robot episode.
+
+On 2026-10-04, dodo's checkpoint `SHA256SUMS` passed for all seven listed
+files. The isolated model service loaded on GPU 0, answered `ping` and
+`get_modality_config` at `127.0.0.1:5580`, and was then stopped. Its reported
+action shape was `[1,32,14]`, `action_normalization` was `meanstd`, and its
+prompt was a training-style instruction. No robot controller was started.
+The historical sample CandidateBundle is only in aigc31's
+`runs/arx_privileged_test_20260929_061734/campaign/bundle.json`; the dodo
+checkout has no frozen real hardware/input/catalog/runner-limit JSON or
+reviewed right-arm recovery kinematics. These files, the RealData contract,
+controller-coordinate joint and gripper calibration, and the actual task
+start-state match remain prerequisites for motor execution.
+
 The real deployment entry point is `python -m scripts.deployment.run_arx_real_bundle`.
 It owns one gateway process and one episode. Run it on the host that has the ARX
 controller, RealSense devices, ROS2 or the official SDK, and a reachable Zeva
