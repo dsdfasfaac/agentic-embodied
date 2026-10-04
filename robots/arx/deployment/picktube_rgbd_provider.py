@@ -100,7 +100,7 @@ class PickTubeRgbdProvider:
 
     def feature_sources(self):
         source_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-        common = {"provider_id": "dodo-ac-one-picktube-rgbd-v2", "provider_sha256": source_sha,
+        common = {"provider_id": "dodo-ac-one-picktube-rgbd-v3", "provider_sha256": source_sha,
                   "max_age_ms": 150}
         return [
             {**common, "name": "privileged.interaction.gripper_closed",
@@ -291,7 +291,9 @@ class PickTubeRgbdProvider:
         tool_centre, _, _ = self.tool_fk.fk(right_joints)
         gripper_span = self.open_policy - self.closed_policy
         gripper_fraction = (float(state[13]) - self.closed_policy) / gripper_span
-        gripper_closed = gripper_fraction <= 0.25
+        # Recorded PickTube grasps settle near -0.85 policy units; with the
+        # 0.0 closed and -3.4 open endpoints this is about 25% open.
+        gripper_closed = gripper_fraction <= 0.30
         current = hardware.get("auxiliary_feedback", {}).get(RIGHT_GRIPPER_CURRENT)
         current_stamp = hardware.get("auxiliary_monotonic_ns", {}).get(RIGHT_GRIPPER_CURRENT)
         if (type(current) not in (int, float) or not np.isfinite(current)

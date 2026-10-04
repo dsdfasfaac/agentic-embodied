@@ -337,7 +337,12 @@ def _check_recoveries(
                     raise ValueError("Zeva token must come from a fresh review")
                 if not review_seen:
                     review_entry = tools.get("arx.review_reentry")
-                    if review_entry is None or "RECOVERING" not in review_entry.get("allowed_states", []):
+                    review_schema = review_entry.get("input_schema", {}) if review_entry else {}
+                    if (review_entry is None or review_entry.get("version") != 1
+                            or "RECOVERING" not in review_entry.get("allowed_states", [])
+                            or review_schema.get("type") != "object"
+                            or review_schema.get("additionalProperties") is not False
+                            or set(review_schema.get("properties", {})) != set(ReviewArgs.model_fields)):
                         raise ValueError("automatic reentry review is absent from real catalog")
                     calls += 1
                     steps.append({"tool": "arx.review_reentry", "tool_calls": 1,

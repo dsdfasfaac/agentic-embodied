@@ -37,8 +37,11 @@ def _eef_budget(args):
     return actions
 
 
-def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None):
+def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
+                     nominal_chunk_steps=16):
     """Symbolic values are resolved only against live review/observation results."""
+    if type(nominal_chunk_steps) is not int or nominal_chunk_steps < 1:
+        raise ValueError("nominal VLA chunk length must be positive")
     programs = {}
     for rule in bundle.recovery_rules:
         if not rule.fallback.strip():
@@ -91,6 +94,7 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None):
                     ))
                     reviewed = True
                 args["reentry_token"] = "token-preflight"
+                physical += args["max_chunks"] * nominal_chunk_steps
                 resumed = True
             _TOOL_MODELS[step.tool].model_validate(args)
             for call_index in range(count):

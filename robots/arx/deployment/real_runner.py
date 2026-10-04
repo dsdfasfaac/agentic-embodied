@@ -80,6 +80,7 @@ class RealBundleRunner(RolloutRunner):
         self.bundle_programs = compile_programs(
             bundle, max_tool_calls=contract.max_recovery_tool_calls,
             max_physical_steps=limits.max_steps,
+            nominal_chunk_steps=task.execution_steps,
         )
         if (any(call.tool == "arx.move_eef" for p in self.bundle_programs.values() for call in p.calls)
                 and self.kinematics_calibration is None):

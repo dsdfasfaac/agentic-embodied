@@ -153,11 +153,11 @@ def test_eef_expansion_reserves_planner_physical_budget():
     assert [call.tool for call in program.calls] == [
         "arx.set_gripper", "arx.move_eef", "arx.move_eef", "arx.review_reentry", "arx.zeva",
     ]
-    assert program.binding.max_recovery_steps == 77
+    assert program.binding.max_recovery_steps == 93
     assert program.binding.max_agent_decisions == 5
     with pytest.raises(ValueError, match="budget"):
         compile_programs(replace(original, recovery_rules=(replace(recovery, steps=steps),)),
-                         max_physical_steps=76)
+                         max_physical_steps=92)
 
 
 def test_sha_pinned_real_feature_provider_requires_fresh_joint_feedback(tmp_path):
@@ -203,7 +203,7 @@ def test_sample_recovery_reserves_rounded_eef_actions():
     root = Path(__file__).resolve().parents[1]
     sample, _ = _load_bundle(root / "robots/arx/manifests/real/sample_picktube_candidate_bundle.json")
     program = compile_programs(sample)["open_nudge_resume"]
-    assert program.binding.max_recovery_steps == 122
+    assert program.binding.max_recovery_steps == 138
 
 
 def test_provisional_retention_bundle_inserts_measured_review_before_vla():
@@ -218,7 +218,7 @@ def test_provisional_retention_bundle_inserts_measured_review_before_vla():
     assert [call.tool for call in program.calls] == [
         "arx.set_gripper", "arx.review_reentry", "arx.zeva",
     ]
-    assert program.binding.max_recovery_steps == 60
+    assert program.binding.max_recovery_steps == 76
     assert program.binding.max_agent_decisions == 3
     assert program.calls[1].call_index == -1
     assert program.calls[2].arguments["reentry_token"] == "token-preflight"

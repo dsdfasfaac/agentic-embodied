@@ -131,6 +131,7 @@ class RolloutRunner:
         if t.candidate:
             c = t.candidate
             if Path(c.package).is_file():
+                from robots.arx.contracts import load_task_manifest
                 from zetta.evolution.jsonio import canonical_sha256, read_json
                 from .bundle_program import compile_programs
                 from .real_input import _load_bundle
@@ -139,6 +140,7 @@ class RolloutRunner:
                 bundle, _ = _load_bundle(Path(c.package))
                 self.bundle_programs = compile_programs(
                     bundle, max_physical_steps=limits.max_steps,
+                    nominal_chunk_steps=load_task_manifest(Path(t.environment.task)).execution_steps,
                 )
                 self.package_path = Path(c.package).resolve()
                 self.skill = ""

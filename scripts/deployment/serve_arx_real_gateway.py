@@ -103,6 +103,7 @@ class RealCoreFactory:
                 programs = compile_programs(
                     bundle, max_tool_calls=contract.max_recovery_tool_calls,
                     max_physical_steps=limits.max_steps,
+                    nominal_chunk_steps=task.execution_steps,
                 )
                 if any(call.tool == "arx.move_eef" for program in programs.values() for call in program.calls) and eef is None:
                     raise ValueError("bundle EEF recovery requires reviewed kinematics calibration")

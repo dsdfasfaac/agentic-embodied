@@ -55,6 +55,13 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
     assert result["privileged.interaction.lift_m"] == 0.0
     assert result["privileged.interaction.grasped"] is False
     assert result["privileged.interaction.success"] is False
+    settled_state = state.copy()
+    settled_state[13] = -0.858
+    settled = provider.observe(
+        {"hardware": {**obs["hardware"], "measured_state": settled_state.tolist()}},
+        {"front_rgb": rgb, "front_depth_mm": depth},
+    )
+    assert settled["privileged.interaction.gripper_closed"] is True
     assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     with pytest.raises(ValueError, match="insufficient valid metric depth"):
         provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
