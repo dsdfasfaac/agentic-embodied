@@ -1,0 +1,93 @@
+{
+  "candidate_id": "arx-privileged-distance-recovery",
+  "causal_hypothesis": "closed gripper is far from the selected target",
+  "critic_rules": [
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true
+        }
+      ],
+      "cooldown_steps": 8,
+      "dwell_steps": 1,
+      "evidence_ids": [
+        "privileged-observation"
+      ],
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "operator": "gt",
+      "proposal": "interrupt",
+      "rule_id": "far_closed_gripper",
+      "safety_only": false,
+      "threshold": 0.1,
+      "title": "Closed gripper is far from target"
+    }
+  ],
+  "diagnosis_sha256": "c0ab53c873967b4d59ae905f2931b3219133a784f407080a3b51f232bb0a3896",
+  "generation": 0,
+  "mechanism_change": "open and nudge the end effector toward the gripper before VLA resumes",
+  "parent_sha256": null,
+  "recovery_rules": [
+    {
+      "evidence_ids": [
+        "privileged-observation"
+      ],
+      "fallback": "stop_all_motion",
+      "precondition": "gripper is closed and target distance exceeds 0.10m",
+      "recovery_id": "open_nudge_resume",
+      "safety_constraints": [
+        "named tools only",
+        "gateway limits apply"
+      ],
+      "steps": [
+        {
+          "parameters": {
+            "max_steps": 15,
+            "opening": 1.0
+          },
+          "stop_when": "gripper open",
+          "tool": "arx.set_gripper"
+        },
+        {
+          "parameters": {
+            "delta_xyz_m": [
+              0.0,
+              0.0,
+              0.02
+            ],
+            "frame": "tool",
+            "speed_m_s": 0.01
+          },
+          "stop_when": "2cm move committed",
+          "tool": "arx.move_eef"
+        },
+        {
+          "parameters": {
+            "observation_ids": [
+              "post-recovery"
+            ]
+          },
+          "stop_when": "reentry eligible",
+          "tool": "arx.review_reentry"
+        },
+        {
+          "parameters": {
+            "max_chunks": 1,
+            "reentry_token": "token-from-review"
+          },
+          "stop_when": "VLA resumed",
+          "tool": "arx.zeva"
+        }
+      ],
+      "stop_condition": "steps complete",
+      "title": "Open gripper and move toward gripper",
+      "trigger_rule_ids": [
+        "far_closed_gripper"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "tool_plugin": null,
+  "validation_plan": "run each frozen pickup scene and verify privileged records and recovery events"
+}
