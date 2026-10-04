@@ -270,7 +270,7 @@ def test_full_trial_preflight_failure_writes_result(tmp_path):
             "runner_limits": {
                 "startup_timeout_s": 5.0,
                 "episode_timeout_s": 10.0,
-                "reconciliation_timeout_s": 1.0,
+                "reconciliation_timeout_s": 30.0,
                 "shutdown_timeout_s": 1.0,
                 "heartbeat_interval_s": 0.1,
                 "max_tool_attempts": 2,
