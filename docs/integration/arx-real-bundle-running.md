@@ -21,6 +21,29 @@ the real runner defaults to Task7 port 5581. Do not pass this checkpoint to
 The RealData model contract and runtime compatibility need implementation and
 verification before a full real-robot episode.
 
+The alternative H100 package
+`/mnt/100T/users/dingxin/WAM/playground/packages/arx_model_a_5task_iter5000_20260817`
+is Task7 Model A: 14D raw absolute actions, 32-step horizon, 15 Hz, and
+`concat_view`. It is a closer match for the current gateway model contract.
+For dodo-local serving, copy the immutable package to
+`/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817`,
+verify `checksums/SHA256SUMS`, then run
+`/home/dodo/chenfu/cosmos-framework-edge-arx5/.venv/bin/python
+scripts/deployment/prepare_arx_model_a_dodo.py`. This creates a small runtime
+view with local processor/VAE paths while leaving the source package and its
+checksums unchanged. `scripts/deployment/start_arx_model_a_dodo.sh start`
+serves it on dodo loopback port 5583 with Dynamo disabled; stop it with the
+same script's `stop` argument. The Zetta runner must receive
+`--zeva-host 127.0.0.1 --zeva-port 5583` when this model is selected.
+
+Dodo also has a separate direct PickTube client at
+`/home/dodo/chenfu/inference/x5_cosmos3_edge_pick_tube.py`. Its
+`run_zeva_task7_eval.sh` wrapper adds `--yes` and publishes robot commands;
+it is a baseline inference path, not the CandidateBundle monitor/recovery
+runner. The robot controller was deliberately left stopped during model-only
+checks. Dodo's existing Task7 service returned a 32×14 finite prediction from
+recorded three-camera images after `TORCHDYNAMO_DISABLE=1` was applied.
+
 On 2026-10-04, dodo's checkpoint `SHA256SUMS` passed for all seven listed
 files. The isolated model service loaded on GPU 0, answered `ping` and
 `get_modality_config` at `127.0.0.1:5580`, and was then stopped. Its reported
