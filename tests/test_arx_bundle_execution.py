@@ -66,6 +66,33 @@ def test_bundle_program_enforces_order_and_runner_records_steps(tmp_path):
     assert backend.steps == 8
 
 
+def test_provisional_null_token_runs_inserted_review_then_vla(tmp_path):
+    original = bundle()
+    recovery = replace(
+        original.recovery_rules[0],
+        steps=(
+            RecoveryStep("arx.hold", {"steps": 1}, "hold observed"),
+            RecoveryStep("arx.zeva", {"max_chunks": 1, "reentry_token": None}, "resumed"),
+        ),
+        fallback="Record the failed hypothesis and stop on any execution error.",
+    )
+    candidate = replace(original, recovery_rules=(recovery,))
+    program = compile_programs(candidate)["recover"]
+    core, backend, _ = make_core(tmp_path / "core", ScriptCritic({1: "a"}), config=limits(max_steps=8))
+    core.bindings = (program.binding,)
+    core.programs = {"recover": program}
+    r = runner(tmp_path / "run", core)
+    r.trial.candidate = type("Candidate", (), {"package_sha256": candidate.sha256})()
+    r._structured_bundle = True
+    r.bundle_programs = {"recover": program}
+    assert r.loop() == "environment_ended"
+    records = sorted((tmp_path / "run/recovery").glob("*.json"))
+    assert [json.loads(path.read_text())["tool"] for path in records] == [
+        "arx.hold", "arx.review_reentry", "arx.zeva",
+    ]
+    assert backend.steps == 8
+
+
 def test_reentry_uses_real_health_arrival_and_rule_clearance():
     class Provider:
         def augment(self, observation, images):
