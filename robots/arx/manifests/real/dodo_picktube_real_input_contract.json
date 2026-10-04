@@ -65,7 +65,7 @@
     {
       "name": "privileged.interaction.gripper_closed",
       "provider_id": "dodo-ac-one-picktube-rgbd-v2",
-      "provider_sha256": "e42be9c908f209d873fb445346486d272c518efc7cb9d9eaaa9f5b471612d9d5",
+      "provider_sha256": "c9a8bec8d4c7d5231373c17bea3f045d002efe9d836aadda1956d0c441da65f7",
       "source_kind": "joint_feedback",
       "source_ids": [
         "right_gripper_policy"
@@ -77,7 +77,7 @@
     {
       "name": "privileged.selected.target_gripper_distance_m",
       "provider_id": "dodo-ac-one-picktube-rgbd-v2",
-      "provider_sha256": "e42be9c908f209d873fb445346486d272c518efc7cb9d9eaaa9f5b471612d9d5",
+      "provider_sha256": "c9a8bec8d4c7d5231373c17bea3f045d002efe9d836aadda1956d0c441da65f7",
       "source_kind": "rgbd_fused",
       "source_ids": [
         "front_rgb",
