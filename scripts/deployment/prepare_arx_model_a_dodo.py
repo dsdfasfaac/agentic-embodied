@@ -59,19 +59,11 @@ def main() -> None:
     if not isinstance(training_config, dict):
         raise ValueError("Model A training config must be a mapping")
 
-    output.mkdir(parents=True)
-    runtime_model.mkdir()
-    for source in source_model.iterdir():
-        if source.name != "config.json":
-            (runtime_model / source.name).symlink_to(source)
-
     model = model_config["model"]["config"]
     model["tokenizer"]["vae_path"] = str(args.vae)
     model["vlm_config"]["tokenizer"]["tokenizer_type"] = str(runtime_model)
     model["vlm_config"]["pretrained_weights"]["enabled"] = False
     model["vlm_config"]["pretrained_weights"]["backbone_path"] = str(runtime_model)
-    _write_json(runtime_model / "config.json", model_config)
-
     training_config.pop("_type", None)
     training_config["checkpoint"]["load_path"] = str(runtime_model)
     training_config["checkpoint"]["load_from_object_store"]["enabled"] = False
@@ -83,14 +75,27 @@ def main() -> None:
     model["diffusion_expert_config"]["load_weights_from_pretrained"] = False
     model["ema"]["enabled"] = False
     for dataloader_name in ("dataloader_train", "dataloader_val"):
-        dataloader = training_config.get(dataloader_name, {}).get("dataloader", {})
+        section = training_config.get(dataloader_name)
+        if not isinstance(section, dict):
+            continue
+        dataloader = section.get("dataloader")
+        if not isinstance(dataloader, dict):
+            continue
         for entry in dataloader.get("datasets", {}).values():
             dataset = entry.get("dataset", {})
             tokenizer = dataset.get("tokenizer_config")
             if isinstance(tokenizer, dict):
                 tokenizer["tokenizer_type"] = str(runtime_model)
+    runtime_text = yaml.safe_dump(training_config, sort_keys=False)
+
+    output.mkdir(parents=True)
+    runtime_model.mkdir()
+    for source in source_model.iterdir():
+        if source.name != "config.json":
+            (runtime_model / source.name).symlink_to(source)
+    _write_json(runtime_model / "config.json", model_config)
     runtime_config = output / "config.dodo.yaml"
-    runtime_config.write_text(yaml.safe_dump(training_config, sort_keys=False))
+    runtime_config.write_text(runtime_text)
 
     _write_json(output / "provenance.json", {
         "source_package": str(package),
