@@ -17,8 +17,10 @@ The current frozen inputs are:
 | Hardware | `robots/arx/manifests/real/dodo_picktube_hardware.json` | `4578b5abf38262b59e8a85d6cae1026ba4517e50b284d0275499983f8b1e5ccf` |
 | CandidateBundle file | `robots/arx/manifests/real/sample_picktube_candidate_bundle.json` | `d3549226cd19d571684978171803ee689535aad3e80663e7dfe89551909d309e` |
 | CandidateBundle semantic identity | same file | `4ca69f3260760bf8d0df54bcd907023df2c86a2c3c4d5d80f7b32958a63a3e7a` |
-| Real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `835d92311753c17b06eb3e84d124afb77af604fe6943a93a3af332ac48c23c01` |
-| Feature provider | `robots/arx/deployment/picktube_rgbd_provider.py` | `21640d792ea53631499a6aa5d1ae18fd219c100bae8c9d7b8112f00fa01ffb13` |
+| Sample real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `0859d266bdea538842de7398c805d6a1ae24f8a117b881f1c71c8706aded5557` |
+| Provisional retention bundle | `robots/arx/manifests/real/proposed_retention_candidate_bundle.json` | `65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2` |
+| Retention real input contract | `robots/arx/manifests/real/dodo_retention_real_input_contract.json` | `c8710253e3a1e26334ab4e71269bff6050ed9797b4675ae66f6e8f9b12519bb0` |
+| Feature provider | `robots/arx/deployment/picktube_rgbd_provider.py` | `274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b` |
 
 The hardware file pins the README camera mapping: front `260422272500`, left
 `260422271945`, right `260422275847`, each with its measured intrinsics. It
@@ -33,10 +35,9 @@ URDF is in a different, unverified coordinate system. The command envelope
 and per-step tracking gates are enforced before each send.
 
 The provider computes `privileged.interaction.gripper_closed` from fresh
-right-gripper feedback, and
-`privileged.selected.target_gripper_distance_m` from front D405 aligned
-metric depth, its pinned camera-to-left-base extrinsic, and fresh right-arm
-joint feedback. The controller-EE FK was fitted from 40 raw episodes and
+right-gripper feedback, and target distance from front D405 aligned metric
+depth, its pinned camera-to-left-base extrinsic, and fresh right-arm joint
+feedback. The controller-EE FK was fitted from 40 raw episodes and
 held out on 10; position error P95 was 1.10 mm. The provider cross-checks
 that FK against the controller's fresh `end_pos`, then applies the nominal
 gripper tool offset. The observed pink-label centre is a grasp-target proxy,
@@ -49,7 +50,7 @@ gripper fails the feature check.
 The sample bundle's critic proposes an interrupt for a closed gripper far
 from the tube. The runner enforces the bundle's tool order and budgets: open
 the gripper, execute two 1 cm EEF increments, review fresh real observations,
-then invoke VLA only with a granted reentry token. Five decisions and 122
+then invoke VLA only with a granted reentry token. Five decisions and 138
 physical recovery steps are reserved. Every physical step records command
 send and measured arrival separately, with camera, state, timestamp and
 health data. Reentry requires fresh synchronized sensors, healthy transport,
@@ -68,6 +69,37 @@ after the failure. The journal is the authoritative record of the partial
 444th step; that trial's `result.json` reports only 443 completed physical
 steps. Subsequent runner code also counts a gateway-reported known partial
 step in the final result.
+
+## Provisional retention bundle
+
+The supplied provisional CandidateBundle is tracked byte-for-byte. Its six
+features have real sources in the frozen retention input contract:
+
+| Feature | Real observation and decision |
+| --- | --- |
+| `gripper_closed` | Fresh right gripper position; the recorded closed-grasp envelope is at most 30% of the calibrated open span. |
+| `gripper_contact` | A right-gripper `RobotStatus.joint_cur[6]` closing-load event above 0.16 native units, a target within 5 cm of the FK tool point, and continuing target/tool spatial agreement within 12 mm. The current threshold exceeds the 0.0904 99th percentile in the first 100 open-gripper frames of 50 accepted recordings. This is a contact proxy, not a tactile measurement. |
+| `lift_m` | Current pink-label 3D height from aligned D405 depth and the pinned extrinsic, minus its height at episode reset. |
+| `grasped` | Contact proxy remains true while the observed tube rises at least 5 mm and the tool has moved at least 5 mm since the load event. |
+| `success` | Observed grasp and at least 1 cm tube lift persist for five distinct observations, matching the task's lift/hold thresholds. This is a real-vision proxy; it does not reproduce MuJoCo's bilateral finger-contact evaluator. |
+| `target_gripper_distance_m` | Pink-label 3D point to nominal right gripper tool point from depth, camera extrinsic, and fresh FK. |
+
+The ROS2 backend records the gripper current with the same monotonic timestamp
+as the 14D state. A missing or stale current, target, depth, FK, or camera
+sample rejects feature evaluation. The source contract lists all six feature
+names and their real channels; the separate hardware contract pins the cameras
+and 15 Hz controller. Contact and success thresholds are provisional and need
+measured loaded/empty validation on the actual arm before interpreting them
+as physical ground truth.
+
+The original two-step recovery is compiled to three allowed tool calls:
+`arx.set_gripper`, an automatically inserted read-only
+`arx.review_reentry`, then `arx.zeva` with that review's live token. The
+gateway enforces the order, tool arguments and 76-step recovery budget (60
+gripper plus one 16-step VLA chunk). The prose fallback is retained as
+candidate metadata; any execution failure stops the episode. The candidate's
+65-step cooldown is frozen in its real input contract. This new bundle has
+passed offline compilation and tests; it has not been run on the robot.
 
 ## Deployment commands
 
