@@ -43,7 +43,7 @@
       "steps": [
         {
           "parameters": {
-            "max_steps": 15,
+            "max_steps": 60,
             "opening": 1.0
           },
           "stop_when": "gripper open",

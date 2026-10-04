@@ -117,6 +117,7 @@ class RealCoreFactory:
                 gripper=PolicyGripperPlanner(
                     closed_policy=config.right_gripper_closed_policy,
                     open_policy=config.right_gripper_open_policy,
+                    max_policy_step=task.control.max_gripper_step,
                 ),
                 eef=eef, reentry=reentry,
             )

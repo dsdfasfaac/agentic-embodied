@@ -296,17 +296,25 @@ def default_registry(*, zeva, gripper=None, eef=None, reentry=None):
 class PolicyGripperPlanner:
     """Right gripper opening in the calibrated 14D policy coordinate."""
 
-    def __init__(self, *, closed_policy: float, open_policy: float):
+    def __init__(self, *, closed_policy: float, open_policy: float,
+                 max_policy_step: float | None = None):
         if not np.isfinite([closed_policy, open_policy]).all() or closed_policy == open_policy:
             raise ValueError("distinct finite gripper endpoints required")
+        if max_policy_step is not None and (not np.isfinite(max_policy_step) or max_policy_step <= 0):
+            raise ValueError("positive gripper policy step limit required")
         self.closed_policy = float(closed_policy)
         self.open_policy = float(open_policy)
+        self.max_policy_step = max_policy_step
 
     def prepare(self, args, context):
         target = context.command.copy()
         target[13] = self.closed_policy + args.opening * (
             self.open_policy - self.closed_policy
         )
+        if (self.max_policy_step is not None and
+                abs(float(target[13] - context.command[13])) >
+                args.max_steps * self.max_policy_step + 1e-6):
+            raise ValueError("gripper recovery step budget cannot reach target")
         return ArrayPlan(
             np.repeat(target[None], args.max_steps, axis=0),
             convergence_target=target,

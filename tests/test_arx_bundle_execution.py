@@ -4,11 +4,14 @@ import json
 import time
 from dataclasses import replace
 
+import numpy as np
 import pytest
 
 from robots.arx.deployment.bundle_program import compile_programs, verify_call_result
 from robots.arx.deployment.runner import RunnerError
 from robots.arx.gateway.bundle_runtime import RealBundleReentry, RealFeatureProvider
+from robots.arx.gateway.contracts import GripperArgs
+from robots.arx.gateway.tools import PolicyGripperPlanner
 from robots.arx.gateway.tools import RegisteredTool
 from tests.test_arx_deployment import runner
 from tests.test_arx_gateway import ScriptCritic, call, limits, make_core
@@ -181,6 +184,16 @@ def create_provider():
     observation["hardware"]["state_monotonic_ns"] = stamp - 500_000_000
     with pytest.raises(ValueError, match="stale"):
         provider.augment(observation, {})
+
+
+def test_real_gripper_recovery_rejects_impossible_step_budget_before_motion():
+    planner = PolicyGripperPlanner(
+        closed_policy=0.0, open_policy=-3.4, max_policy_step=0.08,
+    )
+    context = type("Context", (), {"command": np.asarray([0.0] * 13 + [-1.6])})()
+    with pytest.raises(ValueError, match="budget cannot reach"):
+        planner.prepare(GripperArgs(opening=1.0, max_steps=15), context)
+    assert planner.prepare(GripperArgs(opening=1.0, max_steps=60), context).limit == 60
 
 
 def test_real_feature_freshness_uses_acquisition_time_after_journaling(tmp_path):
