@@ -129,6 +129,10 @@ def verify_call_result(call, result, *, real):
     if result["status"] != "completed":
         raise ValueError(f"recovery call did not complete: {call.tool}")
     output = result.get("result") or {}
+    if output.get("completion") == "task_success":
+        if real and output.get("physical_arrival_verified") is not True:
+            raise ValueError("physical arrival unverified at task success")
+        return None
     if call.tool in ("arx.move_eef", "arx.set_gripper"):
         if output.get("command_target_reached") is not True:
             raise ValueError(f"recovery target not reached: {call.tool}")

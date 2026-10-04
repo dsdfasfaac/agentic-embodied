@@ -534,9 +534,13 @@ class ArxSessionCore:
                     self._save()
                     raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
                 prepared.on_commit(self._context())
-                self._assess(result, terminal=commit.environment_ended)
+                task_success = self._assess(result, terminal=commit.environment_ended)
                 self._save()
                 self.journal.update(result)
+                if task_success:
+                    self.close()
+                    completion = "task_success"
+                    break
                 if commit.environment_ended:
                     self.close()
                     completion = "environment_ended"
@@ -618,6 +622,16 @@ class ArxSessionCore:
             },
             public=True,
         )
+        if not terminal and hasattr(self.critic, "completion_evidence"):
+            try:
+                completion = self.critic.completion_evidence()
+            except Exception as exc:
+                raise GatewayError("CRITIC_EXECUTION_ERROR") from exc
+            if completion is not None:
+                if completion.get("observation_id") != self.current["observation_id"]:
+                    raise GatewayError("CRITIC_EXECUTION_ERROR")
+                self._record("task_success", completion, public=True)
+                return True
         proposals = []
         for index, event in enumerate(assessment.events):
             event_id = "proposal-" + digest(

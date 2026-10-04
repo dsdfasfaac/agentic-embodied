@@ -637,6 +637,12 @@ class RolloutRunner:
                 raise RunnerError("execution_uncertain", "gateway_unknown")
             if state == "ENDED":
                 for record in reversed(records):
+                    if record["kind"] == "task_success":
+                        self.outcome = self.outcome.model_copy(update={
+                            "task_success": True,
+                            "evaluator_id": "real:" + record["payload"]["feature"],
+                        })
+                        return "task_success"
                     if record["kind"] == "interrupt" and record["payload"].get("code"):
                         return record["payload"]["code"].lower()
                 return "environment_ended"

@@ -73,11 +73,18 @@ class RealFeatureProvider:
 
 
 class BundleMonitor:
-    def __init__(self, bundle, provider=None):
+    def __init__(self, bundle, provider=None, *, terminal_feature=None):
         self.bundle, self.provider = bundle, provider
         self.temporal = TemporalCritic(bundle.critic_rules)
         self.by_id = {rule.rule_id: rule for rule in bundle.critic_rules}
         self.last_feature_evidence = None
+        if terminal_feature is not None and (
+            provider is None or not any(source.name == terminal_feature and
+                                        source.scalar_type == "boolean"
+                                        for source in provider.sources)
+        ):
+            raise ValueError("terminal feature requires a declared real boolean source")
+        self.terminal_feature = terminal_feature
 
     def _remember_features(self, observation, measured):
         if self.provider:
@@ -87,6 +94,15 @@ class BundleMonitor:
                 "features": {source.name: measured[source.name]
                              for source in self.provider.sources},
             }
+
+    def completion_evidence(self):
+        evidence = self.last_feature_evidence
+        if (self.terminal_feature is not None and evidence is not None
+                and evidence["features"][self.terminal_feature] is True):
+            return {"observation_id": evidence["observation_id"],
+                    "feature": self.terminal_feature,
+                    "provider_sha256": evidence["provider_sha256"]}
+        return None
 
     def reset(self, observation, images):
         self.temporal.reset()

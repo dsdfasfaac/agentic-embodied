@@ -117,6 +117,35 @@ def test_real_feature_values_are_private_auditable_observation_evidence(tmp_path
     assert "real_feature_evidence" not in str(core.journal.events(0))
 
 
+def test_real_success_feature_ends_motion_and_marks_runner_outcome(tmp_path):
+    class Provider:
+        sources = [
+            SimpleNamespace(name="real_error", scalar_type="number", provider_sha256="b" * 64),
+            SimpleNamespace(name="privileged.interaction.success", scalar_type="boolean",
+                            provider_sha256="b" * 64),
+        ]
+
+        def augment(self, observation, images):
+            return dict(observation, real_error=0.0,
+                        **{"privileged.interaction.success": observation["step_index"] >= 2})
+
+    monitor = BundleMonitor(bundle(), Provider(),
+                            terminal_feature="privileged.interaction.success")
+    core, backend, _ = make_core(tmp_path / "core", monitor)
+    result, _ = call(core)
+    assert result["status"] == "completed"
+    assert result["executed_steps"] == 2
+    assert result["result"]["completion"] == "task_success"
+    assert core.state == "ENDED" and backend.closed
+    success = [event for event in core.journal.events(0) if event["kind"] == "task_success"]
+    assert len(success) == 1
+    assert success[0]["payload"]["observation_id"] == "obs-2"
+    r = runner(tmp_path / "run", core)
+    assert r.loop() == "task_success"
+    assert r.outcome.task_success is True
+    assert r.outcome.evaluator_id == "real:privileged.interaction.success"
+
+
 def test_reentry_uses_real_health_arrival_and_rule_clearance():
     class Provider:
         def augment(self, observation, images):
@@ -155,6 +184,18 @@ def test_review_denial_does_not_grant_reentry_token():
                 "assessment": {"status": "ineligible"}, "reentry_token": None,
             },
         }, real=True)
+
+
+def test_task_success_supersedes_recovery_target_only_after_verified_arrival():
+    call_spec = compile_programs(bundle())["recover"].calls[0]
+    result = {"status": "completed", "result": {
+        "completion": "task_success", "command_target_reached": False,
+        "physical_arrival_verified": True,
+    }}
+    assert verify_call_result(call_spec, result, real=True) is None
+    result["result"]["physical_arrival_verified"] = False
+    with pytest.raises(ValueError, match="arrival unverified"):
+        verify_call_result(call_spec, result, real=True)
 
 
 def test_denied_reentry_stops_runner_and_records_failure_observation(tmp_path):

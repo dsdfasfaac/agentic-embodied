@@ -107,7 +107,11 @@ class RealCoreFactory:
                 )
                 if any(call.tool == "arx.move_eef" for program in programs.values() for call in program.calls) and eef is None:
                     raise ValueError("bundle EEF recovery requires reviewed kinematics calibration")
-            monitor = BundleMonitor(bundle, provider) if bundle else BaselineMonitor()
+            monitor = (BundleMonitor(
+                bundle, provider,
+                terminal_feature=("privileged.interaction.success"
+                                  if task.name == "pickup_test_tube" else None),
+            ) if bundle else BaselineMonitor())
             reentry = (RealBundleReentry(
                 bundle, provider,
                 max_sensor_age_ms=config.timing.max_sensor_age_ms,

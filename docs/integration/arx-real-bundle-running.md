@@ -92,6 +92,14 @@ and 15 Hz controller. Contact and success thresholds are provisional and need
 measured loaded/empty validation on the actual arm before interpreting them
 as physical ground truth.
 
+For PickTube, the gateway treats the pinned boolean `success` feature as a
+terminal condition only after a fresh, measured-arrival-verified physical
+step. It records a public `task_success` event, stops further commands, and
+sets `result.json` to `termination_reason: task_success` with
+`outcome.task_success: true`. Returning the arm to its initial pose is not
+required. Budget exhaustion and ordinary episode closure do not set this
+success outcome.
+
 For every reset and post-action observation, the gateway writes the computed
 feature vector, observation ID, and pinned provider SHA to a private
 `real_feature_evidence` journal record. The matching `ObservationPublished`

@@ -106,6 +106,7 @@ class ExecutionOutput(StrictModel):
         "budget_exhausted",
         "critic_interrupted",
         "environment_ended",
+        "task_success",
         "cancelled",
         "error",
     ]
