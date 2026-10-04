@@ -17,9 +17,9 @@ The current frozen inputs are:
 | Hardware | `robots/arx/manifests/real/dodo_picktube_hardware.json` | `4578b5abf38262b59e8a85d6cae1026ba4517e50b284d0275499983f8b1e5ccf` |
 | CandidateBundle file | `robots/arx/manifests/real/sample_picktube_candidate_bundle.json` | `d3549226cd19d571684978171803ee689535aad3e80663e7dfe89551909d309e` |
 | CandidateBundle semantic identity | same file | `4ca69f3260760bf8d0df54bcd907023df2c86a2c3c4d5d80f7b32958a63a3e7a` |
-| Sample real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `0859d266bdea538842de7398c805d6a1ae24f8a117b881f1c71c8706aded5557` |
+| Sample real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `a20a488bf7b6b1eaf828ab769e43f4d49cde97a5724fc83e7bead04a9e549c23` |
 | Provisional retention bundle | `robots/arx/manifests/real/proposed_retention_candidate_bundle.json` | `65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2` |
-| Retention real input contract | `robots/arx/manifests/real/dodo_retention_real_input_contract.json` | `c8710253e3a1e26334ab4e71269bff6050ed9797b4675ae66f6e8f9b12519bb0` |
+| Retention real input contract | `robots/arx/manifests/real/dodo_retention_real_input_contract.json` | `982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34` |
 | Feature provider | `robots/arx/deployment/picktube_rgbd_provider.py` | `274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b` |
 
 The hardware file pins the README camera mapping: front `260422272500`, left

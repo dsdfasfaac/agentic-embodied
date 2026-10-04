@@ -6,7 +6,7 @@
   "task_id": 0,
   "task_name": "pickup_test_tube",
   "model_contract_sha256": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
-  "tool_catalog_sha256": "315c4221bef503eb2c2c9727e2f62ff35f45ea908761c7bca2de8960a163bdda",
+  "tool_catalog_sha256": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
   "cameras": [
     {
       "name": "front_rgb",

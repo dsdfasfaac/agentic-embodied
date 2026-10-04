@@ -1,5 +1,5 @@
 {
-  "catalog_sha256": "315c4221bef503eb2c2c9727e2f62ff35f45ea908761c7bca2de8960a163bdda",
+  "catalog_sha256": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
   "schema_version": "arx.tool.catalog.v1",
   "tools": [
     {
@@ -109,6 +109,7 @@
               "budget_exhausted",
               "critic_interrupted",
               "environment_ended",
+              "task_success",
               "cancelled",
               "error"
             ],
@@ -217,6 +218,7 @@
               "budget_exhausted",
               "critic_interrupted",
               "environment_ended",
+              "task_success",
               "cancelled",
               "error"
             ],
@@ -477,6 +479,7 @@
               "budget_exhausted",
               "critic_interrupted",
               "environment_ended",
+              "task_success",
               "cancelled",
               "error"
             ],
@@ -572,6 +575,7 @@
               "budget_exhausted",
               "critic_interrupted",
               "environment_ended",
+              "task_success",
               "cancelled",
               "error"
             ],
