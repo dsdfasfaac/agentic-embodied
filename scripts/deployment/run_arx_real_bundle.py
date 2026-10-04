@@ -28,6 +28,7 @@ def main():
     parser.add_argument("--listen-port", type=int, default=8091)
     args = vars(parser.parse_args())
     limits = RunnerLimits.model_validate_json(Path(args.pop("runner_limits")).read_text())
+    args["catalog"] = args.pop("tool_catalog")
     result = RealBundleRunner(runner_limits=limits, **args).run()
     print(result.model_dump_json())
     raise SystemExit(EXIT_CODES[result.status])
