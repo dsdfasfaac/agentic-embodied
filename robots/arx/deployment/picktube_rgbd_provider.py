@@ -1,11 +1,14 @@
 # Copyright (c) 2026 Zetta Contributors
-"""Dodo AC one PickTube observer: aligned D405 depth and controller FK.
+"""Dodo AC one PickTube observer: aligned D405 depth and checked arm FK.
 
 The fixed front camera calibration maps its optical frame to the LEFT arm
 local base. The right controller reports TCP position in the RIGHT arm local
 base, which is 0.5 m in negative Y from the left local base. The offset is
 the AC one model relation documented in ARX_X5_CAMERA_TRANSFORMS_HANDOFF.md.
-The output point is the visible pink label centre, a grasp-target proxy.
+The controller's end_pos is the link-six endpoint. A recorded-trajectory
+calibration checks that point against joint feedback; nominal AC one tool
+geometry then estimates the gripper centre. The output target is the visible
+pink label centre, a grasp-target proxy.
 """
 
 from __future__ import annotations
@@ -16,10 +19,16 @@ from pathlib import Path
 
 import numpy as np
 
+from robots.arx.gateway.motion import Calibration, CommandKinematics
+
 CALIBRATION_SHA256 = "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10"
 FRONT_INTRINSICS_SHA256 = "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33"
 FRONT_SERIAL = "260422272500"
 CALIBRATION_PATH = Path(__file__).resolve().parents[1] / "manifests/real/dodo_front_d405_rgbd_calibration_BL_source.json"
+CONTROLLER_FK_PATH = Path(__file__).resolve().parents[1] / "manifests/real/dodo_right_controller_ee_fk.json"
+CONTROLLER_FK_SHA256 = "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86"
+NOMINAL_CHAIN_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_one_nominal_chain.json"
+NOMINAL_CHAIN_SHA256 = "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
 RIGHT_JOINT_IDS = [f"right_joint_{i}" for i in range(1, 7)]
 
 
@@ -33,6 +42,10 @@ def _pinned_json(path: Path, digest: str) -> dict:
 class PickTubeRgbdProvider:
     def __init__(self):
         self.calibration = _pinned_json(CALIBRATION_PATH, CALIBRATION_SHA256)
+        controller = Calibration.model_validate(_pinned_json(CONTROLLER_FK_PATH, CONTROLLER_FK_SHA256))
+        nominal = Calibration.model_validate(_pinned_json(NOMINAL_CHAIN_PATH, NOMINAL_CHAIN_SHA256))
+        self.controller_fk = CommandKinematics(controller)
+        self.tool_fk = CommandKinematics(controller.model_copy(update={"tcp_offset": nominal.tcp_offset}))
         if self.calibration.get("quality", {}).get("accepted") is not True:
             raise ValueError("front camera extrinsic was not accepted")
         self.transform = np.asarray(self.calibration["transforms"]["T_B_from_C"], dtype=np.float64)
@@ -58,10 +71,15 @@ class PickTubeRgbdProvider:
             raise ValueError("front D405 runtime calibration SHA differs")
         self.closed_policy = float(config.right_gripper_closed_policy)
         self.open_policy = float(config.right_gripper_open_policy)
+        if hasattr(config, "right"):
+            bounds = [(link.limits[0], link.limits[1]) for link in self.controller_fk.calibration.links]
+            configured = list(zip(config.right.joint_min_rad, config.right.joint_max_rad))
+            if not np.allclose(configured, bounds, rtol=0, atol=1e-8):
+                raise ValueError("right controller joint limits differ from audited FK envelope")
 
     def feature_sources(self):
         source_sha = hashlib.sha256(Path(__file__).read_bytes()).hexdigest()
-        common = {"provider_id": "dodo-ac-one-picktube-rgbd-v1", "provider_sha256": source_sha,
+        common = {"provider_id": "dodo-ac-one-picktube-rgbd-v2", "provider_sha256": source_sha,
                   "max_age_ms": 150}
         return [
             {**common, "name": "privileged.interaction.gripper_closed",
@@ -178,13 +196,18 @@ class PickTubeRgbdProvider:
         state = np.asarray(hardware["measured_state"], dtype=np.float64)
         if state.shape != (14,) or not np.isfinite(state).all():
             raise ValueError("fresh 14D feedback required")
-        tcp_right = np.asarray(hardware.get("right_tcp_xyz_m"), dtype=np.float64)
-        if (tcp_right.shape != (3,) or not np.isfinite(tcp_right).all()
+        controller_ee = np.asarray(hardware.get("right_tcp_xyz_m"), dtype=np.float64)
+        if (controller_ee.shape != (3,) or not np.isfinite(controller_ee).all()
                 or hardware.get("right_tcp_frame") != "right_arm_local_base"):
             raise ValueError("controller FK right TCP in local base is required")
+        right_joints = state[7:13]
+        predicted_ee, _, _ = self.controller_fk.fk(right_joints)
+        if np.linalg.norm(predicted_ee - controller_ee) > 0.01:
+            raise ValueError("right controller FK differs from fresh joint feedback")
+        tool_centre, _, _ = self.tool_fk.fk(right_joints)
         distance = self.measure_distance(
             np.asarray(images["front_rgb"]),
-            np.asarray(images.get("front_depth_mm")), tcp_right,
+            np.asarray(images.get("front_depth_mm")), tool_centre,
         )
         gripper_span = self.open_policy - self.closed_policy
         gripper_fraction = (float(state[13]) - self.closed_policy) / gripper_span

@@ -34,23 +34,28 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
     depth[40:52, 150:164] = 500
     point_camera = provider._deproject(156.5, 45.5, 0.5)
     point_left = (provider.transform @ np.r_[point_camera, 1])[:3]
-    right_tcp = point_left - [0, -0.5, 0] - [0.2, 0, 0]
     state = np.zeros(14)
+    controller_ee, _, _ = provider.controller_fk.fk(state[7:13])
+    tool_centre, _, _ = provider.tool_fk.fk(state[7:13])
+    expected_distance = np.linalg.norm(point_left - (tool_centre + [0, -0.5, 0]))
     stamp = time.monotonic_ns()
     obs = {"hardware": {
         "measured_state": state.tolist(),
         "state_monotonic_ns": stamp,
         "right_tcp_monotonic_ns": stamp,
-        "right_tcp_xyz_m": right_tcp.tolist(),
+        "right_tcp_xyz_m": controller_ee.tolist(),
         "right_tcp_frame": "right_arm_local_base",
     }}
     result = provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": depth})
     assert result["privileged.interaction.gripper_closed"] is True
-    assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(0.2, abs=0.005)
+    assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     with pytest.raises(ValueError, match="insufficient valid metric depth"):
         provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
     with pytest.raises(ValueError, match="controller FK"):
         provider.observe({"hardware": {**obs["hardware"], "right_tcp_frame": "unknown"}},
+                         {"front_rgb": rgb, "front_depth_mm": depth})
+    with pytest.raises(ValueError, match="differs from fresh joint feedback"):
+        provider.observe({"hardware": {**obs["hardware"], "right_tcp_xyz_m": [1, 1, 1]}},
                          {"front_rgb": rgb, "front_depth_mm": depth})
     with pytest.raises(ValueError, match="pinned 640x480"):
         provider.validate_hardware(SimpleNamespace(
