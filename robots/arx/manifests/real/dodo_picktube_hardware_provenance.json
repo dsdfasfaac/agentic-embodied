@@ -1,6 +1,6 @@
 {
   "gripper_scope": "feedback remains controller native; PickTube right actions add +0.9 native for firmer grip as frozen in the task manifest; right command range extends to +0.95",
-  "hardware_config_sha256": "6d400d95286ff55c2dd82373c0a67e20ea0bcc9a1846be84bad6408953502c4f",
+  "hardware_config_sha256": "4578b5abf38262b59e8a85d6cae1026ba4517e50b284d0275499983f8b1e5ccf",
   "joint_limit_scope": "recorded PickTube controller feedback envelope plus 0.05 rad; not mechanical hard stops",
   "model_contract_sha256": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
   "motion_tested": false,

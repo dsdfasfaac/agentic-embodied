@@ -79,7 +79,8 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
             "control_hz": 15.0, "max_sensor_skew_ms": 100.0,
             "max_sensor_age_ms": 150.0, "observation_timeout_s": 5.0,
             "arrival_timeout_s": 3.0, "feedback_poll_s": 0.02,
-            "position_tolerance": [0.05] * 6 + [0.1] + [0.05] * 6 + [0.1],
+            "position_tolerance": [0.05] * 6 + [0.1]
+            + [0.05] * 5 + [0.06] + [0.1],
         },
         "right_gripper_closed_policy": 0.0,
         "right_gripper_open_policy": -3.4,

@@ -99,6 +99,9 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             step = np.clip(goal - current, -0.015, 0.015)
             step[[6, 13]] = np.clip((goal - current)[[6, 13]], -0.07, 0.07)
             target = current + step
+            active_joints = [axis for axis in range(14) if axis not in (6, 13)
+                             and abs(goal[axis] - current[axis]) > start_tolerance[axis]
+                             and abs(step[axis]) >= 0.01]
             command_id = "stage-" + uuid.uuid4().hex
             receipt = device.send(target.astype(np.float32), command_id)
             deadline = time.monotonic() + 2.0
@@ -114,13 +117,19 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                     abs(sample.positions[grip] - current[grip]) >= 0.015
                     for grip in (6, 13) if abs(step[grip]) >= 0.05
                 )
-                if tracking_ok and grip_progress:
+                joint_progress = all(
+                    abs(sample.positions[axis] - current[axis]) >= 0.002
+                    for axis in active_joints
+                )
+                if tracking_ok and grip_progress and joint_progress:
                     break
                 time.sleep(0.02)
             arrived = last is not None and bool(
                 np.all(np.abs(last.positions - target) <= tolerance)
                 and all(abs(last.positions[grip] - current[grip]) >= 0.015
                         for grip in (6, 13) if abs(step[grip]) >= 0.05)
+                and all(abs(last.positions[axis] - current[axis]) >= 0.002
+                        for axis in active_joints)
             )
             report["command_log"].append({
                 "index": index, "target": target.tolist(),
