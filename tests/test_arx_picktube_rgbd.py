@@ -61,6 +61,14 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
     assert fallback["privileged.interaction.gripper_closed"] is False
     assert fallback["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     dropout["hardware"]["depth_monotonic_ns"]["front_depth_mm"] = stamp + 600_000_000
+    assert provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})[
+        "privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
+    moved_rgb = rgb.copy()
+    moved_rgb[40:52, 150:164] = 0
+    moved_rgb[40:52, 158:172] = [230, 70, 150]
+    with pytest.raises(ValueError, match="insufficient valid metric depth"):
+        provider.observe(dropout, {"front_rgb": moved_rgb, "front_depth_mm": np.zeros_like(depth)})
+    dropout["hardware"]["depth_monotonic_ns"]["front_depth_mm"] = stamp + 1_600_000_000
     with pytest.raises(ValueError, match="insufficient valid metric depth"):
         provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
     with pytest.raises(ValueError, match="controller FK"):

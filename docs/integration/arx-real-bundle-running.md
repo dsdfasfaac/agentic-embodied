@@ -1,257 +1,101 @@
-# ARX CandidateBundle real-robot execution
+# ARX CandidateBundle real-robot execution on dodo
 
-## Dodo verification state (2026-10-04)
+## Current verified state (2026-10-04)
 
-The current checkout freezes the sample CandidateBundle, tool catalog,
-real-input contract, hardware settings, controller-EE kinematics, and runner
-limits under `robots/arx/manifests/real/`. The hardware file's SHA-256 is
-`cdf5ebaa574f84bd04a1393d3b1b5f404294c60324d442368a5df3d7e0484a4e`;
-the real-input contract SHA-256 is
-`e0ff9f10ee16cab57ebef291da3ff979679f8fe383ed27a0d9f44b09b1da1bf8`.
-`freeze_arx_picktube_inputs.py` regenerates the catalog/contract and
-`freeze_arx_dodo_hardware.py` regenerates the hardware file from the 50 raw
-PickTube episodes. Its provenance file records the exact source hashes.
-The joint command bounds are a narrow envelope of recorded controller
-feedback plus 0.05 rad; they are task bounds, not mechanical hard stops.
+The direct deployment checkout is `/home/dodo/chenfu/Agentic-Embodied` on
+`dodo`. The model, gateway, runner, ROS2 controller and three D405 cameras all
+run on dodo; there is no cross-host inference transport. The H100 Task7 Model A
+package was copied, SHA-checked and served locally from
+`/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817` on
+loopback port 5583. The alternative chemistry RealData checkpoint is not
+compatible with this Task7 model contract.
 
-The ARX Task7 training dataset README on aigc31 explicitly defines
-`observation.state` as 14D joint feedback and `action[t] = state[t+1]` as a
-joint-position action proxy. PickUpTestTube zeroes the inactive left 7D.
-The raw episode 000048 used for model smoke inference has
-`action_mode=joint`; the general data collection guide's EEF default does
-not apply to that episode or the Task7 training data.
+The current frozen inputs are:
 
-The read-only `audit_arx_live_cameras.py` opened the three actual D405s at
-640×480@15, validated their pinned serials/intrinsics, and saw the pink
-label with valid aligned depth in five fresh synchronized frame sets. Label
-depth was about 382–385 mm, depth MAD 1–2.5 mm, and camera skew 11–28 ms.
-This determines a camera/left-base target point, but it is not yet a measured
-target-to-gripper distance without fresh arm feedback.
+| Input | Tracked path | SHA-256 |
+| --- | --- | --- |
+| Hardware | `robots/arx/manifests/real/dodo_picktube_hardware.json` | `4578b5abf38262b59e8a85d6cae1026ba4517e50b284d0275499983f8b1e5ccf` |
+| CandidateBundle file | `robots/arx/manifests/real/sample_picktube_candidate_bundle.json` | `d3549226cd19d571684978171803ee689535aad3e80663e7dfe89551909d309e` |
+| CandidateBundle semantic identity | same file | `4ca69f3260760bf8d0df54bcd907023df2c86a2c3c4d5d80f7b32958a63a3e7a` |
+| Real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `835d92311753c17b06eb3e84d124afb77af604fe6943a93a3af332ac48c23c01` |
+| Feature provider | `robots/arx/deployment/picktube_rgbd_provider.py` | `21640d792ea53631499a6aa5d1ae18fd219c100bae8c9d7b8112f00fa01ffb13` |
 
-The old simulation `robot_calibration.json` disagreed with recorded
-controller `end_pos` by about 0.29 m and must not be used on dodo.
-`calibrate_arx_right_fk_from_raw.py` fitted the base and controller-EE offset
-from 40 raw episodes and tested against 10 held-out episodes. The pinned
-`dodo_right_controller_ee_fk.json` had held-out position error P95 1.10 mm,
-maximum 1.24 mm, and orientation error below 0.001°. The PickTube feature
-provider now checks this FK against fresh controller `end_pos`, then applies
-the nominal gripper tool offset from `ac_one_nominal_chain.json`. The physical
-gripper contact point and live target distance still need an observed check.
+The hardware file pins the README camera mapping: front `260422272500`, left
+`260422271945`, right `260422275847`, each with its measured intrinsics. It
+sets 640×480 capture at 15 Hz and 320×240 RGB/depth input. The controller is
+ROS2 `remote_slave` on CAN `can1`/`can3`; 14D feedback and actions use six
+radian joints plus a native policy gripper coordinate per arm. The right
+outgoing gripper action alone receives `+0.9` to tighten grip. Feedback is
+stored unmodified. The controller-coordinate joint bounds are task envelopes
+from 50 recorded PickTube episodes plus a small margin, not mechanical hard
+stops. The SDK's type-2 URDF uses broad `[-10, 10]` rad bounds; the AC one CAD
+URDF is in a different, unverified coordinate system. The command envelope
+and per-step tracking gates are enforced before each send.
 
-The full bundle `--check-config` passed on dodo with `hardware_opened: false`.
-The sample recovery compiled to five calls: one gripper, two EEF increments,
-one reentry review, and one VLA continuation. The robot control processes
-remain stopped, so synchronized live 14D feedback, task start-state match,
-and motor command/arrival have not yet been verified. Use
-`audit_arx_live_observation.py` for the next read-only check once the status
-controllers are running; it never publishes a command.
+The provider computes `privileged.interaction.gripper_closed` from fresh
+right-gripper feedback, and
+`privileged.selected.target_gripper_distance_m` from front D405 aligned
+metric depth, its pinned camera-to-left-base extrinsic, and fresh right-arm
+joint feedback. The controller-EE FK was fitted from 40 raw episodes and
+held out on 10; position error P95 was 1.10 mm. The provider cross-checks
+that FK against the controller's fresh `end_pos`, then applies the nominal
+gripper tool offset. The observed pink-label centre is a grasp-target proxy,
+not a direct measurement of finger contact. When depth drops briefly while
+the gripper is open, the last depth point may be reused for at most 1.5 s only
+while the label remains within 5 pixels of its depth-validated location in a
+fresh RGB frame. Missing target, longer dropout, target motion, or a closed
+gripper fails the feature check.
 
-## Direct inference and the H100 Model A checkpoint
+The sample bundle's critic proposes an interrupt for a closed gripper far
+from the tube. The runner enforces the bundle's tool order and budgets: open
+the gripper, execute two 1 cm EEF increments, review fresh real observations,
+then invoke VLA only with a granted reentry token. Five decisions and 122
+physical recovery steps are reserved. Every physical step records command
+send and measured arrival separately, with camera, state, timestamp and
+health data. Reentry requires fresh synchronized sensors, healthy transport,
+measured arrival and clearance of the triggering rule.
 
-Dodo already has a direct real-robot inference client in the separate
-`/home/dodo/chenfu/inference` repository:
-`x5_cosmos3_edge_pick_tube.py` calls `cosmos3_edge.cli`. Its
-`run_zeva_task7_eval.sh` wrapper starts a Task7 model service and passes
-`--yes` to the client, which can publish motor commands. The
-`/home/dodo/chenfu/Agentic-Embodied` checkout instead has the
-`run_arx_real_bundle.py` gateway/runner for CandidateBundle monitoring and
-recovery. Both execute locally on dodo; the extra boundary is the bundle
-gateway, not a network hop to another host.
+Trial `runs/arx_real_picktube_20261004_trial05` on dodo recorded 443 physical
+steps in the runner result and one additional step committed before a safe
+failure. It exercised four critic interrupts; three complete recovery chains
+reached `reentry_accepted` and VLA continued. During the fourth chain, a D405
+metric-depth gap exceeded the previous 500 ms fallback, so feature evaluation
+failed and the runner stopped with `recovery_step_failed`. The RGB label was
+still visible and the gripper was open. The 1.5 s, 5-pixel fallback above is
+the subsequent fix; it has not yet been proven by another live trial. The
+trial did not establish successful tube pickup. The controller was stopped
+after the failure. The journal is the authoritative record of the partial
+444th step; `result.json` reports only 443 completed physical steps.
 
-The H100 export at
-`/mnt/100T/users/dingxin/WAM/playground/packages/arx_model_a_5task_iter5000_20260817`
-was copied to dodo's
-`/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817`.
-All 17 source files passed the package's SHA-256 list, excluding the list's
-invalid self-referential entry. The original package was not edited.
-`prepare_arx_model_a_dodo.py` creates a symlinked inference view with local
-asset paths and disabled-memory compatibility fields for dodo's newer Cosmos
-framework. `start_arx_model_a_dodo.sh` then serves it on dodo loopback port
-5583. Its `start`, `status`, and `stop` operations do not open ROS or the robot
-controller.
+## Deployment commands
 
-On 2026-10-04 this exact iter5000 package loaded and answered a Zetta
-`CosmosEdgeClient` request using recorded PickTube episode 000048 RGB images
-and its 14D state. The prediction was finite with shape `32×14` and a 0.83 s
-round trip. This proves model loading and offline contract compatibility; it
-does not validate physical actions or recovery. The model service was stopped
-after the test, and the robot controller remained stopped. In particular, the
-first predicted gripper coordinate differed from the recorded state by about
-0.344 on the left and 0.140 on the right; those values need controller-unit
-and limit checks before any motor execution.
+The dodo environment is `/home/dodo/chenfu/.venv_arx_real`; prepend
+`/home/dodo/chenfu/.venv_data_collect_py312/lib/python3.12/site-packages`
+to `PYTHONPATH`, and source `/opt/ros/jazzy/setup.bash` and
+`/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/install/setup.bash`. Check the
+controller and model service with `scripts/deployment/manage_arx_dodo_controller.sh
+status` and `scripts/deployment/start_arx_model_a_dodo.sh status`. The model
+service does not open robot hardware.
 
-## Dodo chemistry model (2026-10-04)
+Run `scripts/deployment/audit_arx_live_observation.py` for a read-only
+camera/depth/14D/start-state check. The staging script
+`scripts/deployment/stage_arx_picktube_start.py` sends bounded steps to the
+empty arms and grippers and verifies measured tracking. It is a motion
+operation. Stop the controller on any unexpected motion or failed arrival.
 
-The supplied model checkpoint is
-`/mnt/hdd16t/chenfu/cosmos_models/arx5_chemistry_edge_stride2_gbs256_8gpu_2250/iter_000002250_ema_bf16_hf`
-on **dodo**. Run the model service and this repository's gateway/runner on
-dodo, using loopback `127.0.0.1`; no cross-host inference connection is needed.
-`scripts/deployment/start_arx_realdata_server_dodo.sh check` validates the
-checkpoint shards, matching 14D mean/std statistics, runtime config, processor,
-VAE, and Python installation without starting a service or robot controller.
-The same script accepts `start`, `status`, and `stop` for the model service on
-port 5580. Its environment variables allow replacing the dodo-specific paths.
+The gateway `--check-config` validates the bundle schema, semantic and file
+SHA, task, model, camera serials/calibrations, 14D channel names, feature
+provider and its source declarations, catalog, recovery tool sequence, and
+budgets without opening hardware. On reset, the runner also checks live
+camera identity, synchronization, fresh state, joint bounds and effective
+start state before sending a command. `scripts/deployment/run_arx_real_bundle.py`
+accepts these tracked paths plus their expected SHA values, `--python
+/home/dodo/chenfu/.venv_arx_real/bin/python`, and `--zeva-host 127.0.0.1
+--zeva-port 5583`. Each attempt must use a new output directory. It writes
+`result.json`, gateway journal and per-call recovery observations under that
+directory. A runner error can follow a partially committed tool step; inspect
+the journal before any restart.
 
-This is a **RealData ARX5 chemistry** model, not the earlier Task7 checkpoint.
-It uses `realdata_arx5`, internal mean/std normalization, a training-style
-prompt, and continuous raw gripper coordinates. The present model contract
-loader only accepts Task7 domain 17, raw normalization, and JSON prompts, and
-the real runner defaults to Task7 port 5581. Do not pass this checkpoint to
-`start_zeva_arx_task7_server.sh` or run robot motion through the Task7 contract.
-The RealData model contract and runtime compatibility need implementation and
-verification before a full real-robot episode.
-
-The alternative H100 package
-`/mnt/100T/users/dingxin/WAM/playground/packages/arx_model_a_5task_iter5000_20260817`
-is Task7 Model A: 14D raw absolute actions, 32-step horizon, 15 Hz, and
-`concat_view`. It is a closer match for the current gateway model contract.
-For dodo-local serving, copy the immutable package to
-`/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817`,
-verify `checksums/SHA256SUMS`, then run
-`/home/dodo/chenfu/cosmos-framework-edge-arx5/.venv/bin/python
-scripts/deployment/prepare_arx_model_a_dodo.py`. This creates a small runtime
-view with local processor/VAE paths while leaving the source package and its
-checksums unchanged. `scripts/deployment/start_arx_model_a_dodo.sh start`
-serves it on dodo loopback port 5583 with Dynamo disabled; stop it with the
-same script's `stop` argument. The Zetta runner must receive
-`--zeva-host 127.0.0.1 --zeva-port 5583` when this model is selected.
-
-Dodo's older Task7 s4000 service also returned a 32×14 finite prediction from
-recorded three-camera images after `TORCHDYNAMO_DISABLE=1` was applied.
-
-On 2026-10-04, dodo's checkpoint `SHA256SUMS` passed for all seven listed
-files. The isolated model service loaded on GPU 0, answered `ping` and
-`get_modality_config` at `127.0.0.1:5580`, and was then stopped. Its reported
-action shape was `[1,32,14]`, `action_normalization` was `meanstd`, and its
-prompt was a training-style instruction. No robot controller was started.
-The sample CandidateBundle from aigc31's
-`runs/arx_privileged_test_20260929_061734/campaign/bundle.json` is now
-tracked byte-for-byte as `robots/arx/manifests/real/sample_picktube_candidate_bundle.json`.
-The separate chemistry RealData contract remains unfinished; the Task7 Model A
-path has the frozen inputs described above. Live controller feedback and
-physical motion checks remain necessary before a full episode.
-
-The real deployment entry point is `python -m scripts.deployment.run_arx_real_bundle`.
-It owns one gateway process and one episode. Run it on the host that has the ARX
-controller, RealSense devices, ROS2 or the official SDK, and a reachable Zeva
-server. The runner writes `result.json`, gateway journal data, tool requests and
-results, and `recovery/<incident>-<call>.json` with the observation before and
-after every recovery call. The gateway also rejects out-of-order or altered
-bundle calls; `arx.finish` remains available to stop an episode.
-
-For the structured sample, `arx.move_eef`'s 2 cm request becomes two 1 cm tool
-calls. The compiled recovery allows exactly five decisions and reserves 75
-physical action steps: 15 gripper steps and 30 for each EEF call. The actual
-planner may stop early on measured convergence. A successful command setter
-return is recorded separately from measured arrival. Review grants a reentry
-token only after fresh synchronized RGB and joint feedback, healthy device
-status, measured arrival, and clearance of the triggering critic rule. The
-subsequent `arx.zeva` call must use that token.
-
-## Required frozen inputs
-
-Supply absolute paths and SHA-256 values for:
-
-- hardware config, task manifest, model contract, gateway limits, runner limits;
-- CandidateBundle JSON, tool catalog JSON, real input contract JSON;
-- one Python feature provider and its SHA-256;
-- a reviewed right-arm kinematics calibration when recovery uses `arx.move_eef`.
-
-Generate the full recovery tool catalog with
-`python -m scripts.deployment.export_arx_real_catalog --with-eef --output /absolute/path/tool-catalog.json`.
-The printed digest goes into the real input contract. Omit `--with-eef` only
-when the bundle has no EEF step. The gateway compares the entire catalog with
-its actual registered tools before opening hardware.
-The older simulation campaign's catalog has a different execution output
-schema, so its digest cannot be reused for this gateway; the CandidateBundle
-JSON itself remains unchanged.
-
-The feature provider is a single Python module exporting `create_provider()`.
-The returned object implements `feature_sources()` (a list of
-`RealFeatureSource` dictionaries) and `observe(observation, images)` (a map of
-feature names to scalar values). Each source declares its camera and/or 14D
-joint feedback channels, scalar type, unit, maximum age, and the module's
-SHA-256. The runner and gateway compare these declarations with the real input
-contract. Runtime values must be finite, correctly typed, and computed from
-fresh timestamped sources. The sample's real provider is `robots/arx/deployment/picktube_rgbd_provider.py`.
-It uses aligned front D405 metric depth, the pinned front-to-left-base extrinsic,
-and right-arm controller forward kinematics to estimate the pink-label-centre
-to TCP distance. `front_rgb` must enable depth in the frozen hardware config,
-and the input contract must list `front_depth_mm`. Missing or inconsistent
-depth, target visibility, or TCP feedback stops feature evaluation.
-
-The 14 real input channel names, in order, are `left_joint_1` through
-`left_joint_6`, `left_gripper_policy`, `right_joint_1` through `right_joint_6`,
-and `right_gripper_policy`. Revolute joints use radians; grippers use the
-calibrated policy coordinate defined in the hardware config. The control
-frequency must match the VLA model contract. The camera serial mapping in
-`/home/dodo/chenfu/data_collect/data_collect_todo.md` is front
-`260422272500`, left `260422271945`, right `260422275847`. Camera intrinsics
-files and their SHA-256 values must be supplied separately.
-
-Before opening the devices, run the gateway with `--check-config` and the
-same `--hardware-config`, `--expected-hardware-sha256`, `--task`,
-`--model-contract`, `--runtime-config`, `--bundle`, `--tool-catalog`,
-`--real-input-contract`, `--expected-real-input-sha256`,
-`--feature-provider`, `--expected-feature-provider-sha256`, and optional
-`--kinematics-calibration` arguments. A successful report has
-`hardware_opened: false`; starting the runner still verifies live camera
-identity, synchronization, state shape, and position bounds on reset before
-any command.
-
-Then pass the same inputs to `run_arx_real_bundle`, using `--python` for the
-runtime with robot drivers, `--output` for a new attempt directory, and
-`--runner-limits` for the separate runner budget. The CLI also accepts
-`--zeva-host`, `--zeva-port`, `--listen-host`, and `--listen-port`.
-
-On dodo, the checkout is `/home/dodo/chenfu/Agentic-Embodied` at Git commit
-`3d842e2` (or a later commit from the same branch). An isolated Python 3.12
-environment is at `/home/dodo/chenfu/.venv_arx_real`; the existing collection
-environment provides NumPy, Pydantic, HTTPX, and RealSense bindings. In the
-shell that launches the runner, source `/opt/ros/jazzy/setup.bash` and
-`/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/install/setup.bash`, then prepend
-`/home/dodo/chenfu/.venv_data_collect_py312/lib/python3.12/site-packages` to
-`PYTHONPATH`. Set `--python` to
-`/home/dodo/chenfu/.venv_arx_real/bin/python`. Import checks for ROS2
-`RobotStatus`, RealSense, FastAPI, Uvicorn, NumPy, Pydantic, and HTTPX passed;
-this is an environment check, not a hardware motion test.
-
-## Joint bounds checked against the SDK
-
-On dodo, `SingleArm(type=2)` loads `x5_2025.urdf`. Its six joint limits are
-all `[-10, 10]` rad. The Python SDK exposes joint setters and feedback, but
-no public joint-limit getter. Its internal motor code has a bound-restriction
-symbol; this does not establish six safe controller-coordinate limits. The
-checked official AC one CAD URDF is pinned in
-`robots/arx/manifests/real/ac_one_urdf_limits.json`: its six revolute ranges
-are narrower, but the transformation from CAD coordinates to the deployed
-controller coordinates has not been verified. Accordingly, deployment requires
-explicit controller-coordinate `joint_min_rad` and `joint_max_rad` for each arm.
-Commands and initial feedback outside these bounds are rejected. Type-2
-bounds cannot exceed the SDK URDF's `[-10, 10]` envelope. The CAD numbers are
-not silently substituted for measured controller limits.
-On a read-only dodo status sample, left joint 2 was about `-0.00286 rad` while
-the CAD lower bound for its corresponding joint is `0 rad`; the right gripper
-native status was about `-1.54`, while the CAD finger joints are specified in
-metres. Direct substitution of CAD bounds would reject observed idle feedback;
-a measured coordinate and gripper calibration is required.
-The active dodo controllers use `remote_slave`, CAN `can1`/`can3`, end type 2,
-and the default status/command topics used by this backend.
-
-## PickTube RGB-D evidence
-
-`scripts/deployment/evaluate_picktube_rgbd.py /home/dodo/chenfu/data/raw/PickTube`
-checks the saved front RGB frames without moving hardware. On 2026-10-01 it
-located the label in the initial frame of all 50 valid episodes; sampling one
-frame in ten across the trajectories found it in 1251/1595 frames. The saved
-front depth JPEGs are 480×640×3 color previews, so they cannot validate a
-metre distance. Synthetic aligned uint16 depth plus a known right TCP gives
-the expected 0.20 m in the full provider wrapper. A read-only live front
-D405 sample had no visible pink tube; real object-distance accuracy is still
-unmeasured. Three cameras plus front depth worked at 640×480@15, while
-simultaneous 30 fps startup failed with a USB I/O error.
-
-This path has been tested with fake hardware, the frozen sample bundle, and
-read-only dodo cameras. It has not commanded dodo's motors. The live 14D
-status/start-state check and small-motion arrival check are the remaining
-hardware gates before a full CandidateBundle episode.
+`freeze_arx_picktube_inputs.py` regenerates the tool catalog and real input
+contract after a bundle or feature-provider change. The hardware provenance
+script `freeze_arx_dodo_hardware.py` reads the 50 raw PickTube episodes.

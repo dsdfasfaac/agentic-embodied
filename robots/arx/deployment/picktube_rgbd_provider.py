@@ -54,6 +54,7 @@ class PickTubeRgbdProvider:
         ):
             raise ValueError("invalid front camera to left base extrinsic")
         self.last_centre: tuple[float, float] | None = None
+        self.last_depth_centre: tuple[float, float] | None = None
         self.last_target_left: np.ndarray | None = None
         self.last_target_ns: int | None = None
         self.closed_policy: float | None = None
@@ -184,6 +185,7 @@ class PickTubeRgbdProvider:
         camera_xyz = self._deproject(x, y, median_mm / 1000)
         target_left = (self.transform @ np.r_[camera_xyz, 1.0])[:3]
         self.last_target_left = target_left.copy()
+        self.last_depth_centre = self.last_centre
         tcp_right = np.asarray(right_tcp_xyz_m, dtype=np.float64)
         if tcp_right.shape != (3,) or not np.isfinite(tcp_right).all():
             raise ValueError("controller FK right TCP must be finite XYZ metres")
@@ -223,12 +225,15 @@ class PickTubeRgbdProvider:
             if (str(exc) != "pink tube has insufficient valid metric depth"
                     or gripper_fraction <= 0.25
                     or self.last_target_left is None or self.last_target_ns is None
+                    or self.last_centre is None or self.last_depth_centre is None
+                    or np.hypot(self.last_centre[0] - self.last_depth_centre[0],
+                                self.last_centre[1] - self.last_depth_centre[1]) > 5
                     or type(depth_stamp) is not int
-                    or not 0 <= depth_stamp - self.last_target_ns <= 500_000_000):
+                    or not 0 <= depth_stamp - self.last_target_ns <= 1_500_000_000):
                 raise
-            # The tube remains in the rack while the gripper is open. A brief
-            # D405 depth dropout may reuse its recently measured 3D position;
-            # the gripper position still comes from this fresh joint sample.
+            # The tube remains at its measured rack pixel while the gripper is
+            # open. A short D405 depth dropout may reuse that 3D point; the
+            # gripper position still comes from this fresh joint sample.
             tcp_left = tool_centre + np.array([0.0, -0.5, 0.0])
             distance = float(np.linalg.norm(self.last_target_left - tcp_left))
         return {
