@@ -114,11 +114,13 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                 last = sample
                 tracking_ok = np.all(np.abs(sample.positions - target) <= tolerance)
                 grip_progress = all(
-                    abs(sample.positions[grip] - current[grip]) >= 0.015
+                    abs(sample.positions[grip] - goal[grip]) <= start_tolerance[grip]
+                    or abs(sample.positions[grip] - current[grip]) >= 0.015
                     for grip in (6, 13) if abs(step[grip]) >= 0.05
                 )
                 joint_progress = all(
-                    abs(sample.positions[axis] - current[axis]) >= 0.002
+                    abs(sample.positions[axis] - goal[axis]) <= start_tolerance[axis]
+                    or abs(sample.positions[axis] - current[axis]) >= 0.002
                     for axis in active_joints
                 )
                 if tracking_ok and grip_progress and joint_progress:
@@ -126,9 +128,11 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                 time.sleep(0.02)
             arrived = last is not None and bool(
                 np.all(np.abs(last.positions - target) <= tolerance)
-                and all(abs(last.positions[grip] - current[grip]) >= 0.015
+                and all(abs(last.positions[grip] - goal[grip]) <= start_tolerance[grip]
+                        or abs(last.positions[grip] - current[grip]) >= 0.015
                         for grip in (6, 13) if abs(step[grip]) >= 0.05)
-                and all(abs(last.positions[axis] - current[axis]) >= 0.002
+                and all(abs(last.positions[axis] - goal[axis]) <= start_tolerance[axis]
+                        or abs(last.positions[axis] - current[axis]) >= 0.002
                         for axis in active_joints)
             )
             report["command_log"].append({
