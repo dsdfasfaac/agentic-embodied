@@ -20,6 +20,9 @@ DEFAULT_PACKAGE = Path(
     "/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817"
 )
 DEFAULT_VAE = Path("/mnt/hdd16t/chenfu/assets/Wan2.2_VAE.pth")
+DEFAULT_COMPAT_CONFIG = Path(
+    "/mnt/nvme0/models/Cosmos3-Edge-ARX-Task7-s4000/deployment/dodo_inference_config.yaml"
+)
 
 
 def _write_json(path: Path, value: dict) -> None:
@@ -30,6 +33,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--package", type=Path, default=DEFAULT_PACKAGE)
     parser.add_argument("--vae", type=Path, default=DEFAULT_VAE)
+    parser.add_argument("--compat-config", type=Path, default=DEFAULT_COMPAT_CONFIG)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
 
@@ -56,8 +60,12 @@ def main() -> None:
     source_training = package / "config/config.yaml"
     model_config = json.loads(source_config.read_text())
     training_config = yaml.safe_load(source_training.read_text())
+    compat_config = yaml.safe_load(args.compat_config.read_text())
     if not isinstance(training_config, dict):
         raise ValueError("Model A training config must be a mapping")
+    compat_model = compat_config["model"]["config"]
+    if compat_model.get("memory_conditioning") is not False:
+        raise ValueError("dodo compatibility config must disable memory conditioning")
 
     model = model_config["model"]["config"]
     model["tokenizer"]["vae_path"] = str(args.vae)
@@ -74,6 +82,11 @@ def main() -> None:
     model["vlm_config"]["pretrained_weights"]["backbone_path"] = str(runtime_model)
     model["diffusion_expert_config"]["load_weights_from_pretrained"] = False
     model["ema"]["enabled"] = False
+    # The newer dodo framework requires memory fields even when this native
+    # Model A checkpoint does not use a memory module.
+    for key, value in compat_model.items():
+        if key.startswith("memory_"):
+            model.setdefault(key, value)
     for dataloader_name in ("dataloader_train", "dataloader_val"):
         section = training_config.get(dataloader_name)
         if not isinstance(section, dict):
@@ -102,6 +115,7 @@ def main() -> None:
         "source_manifest_sha256": hashlib.sha256((package / "manifest.json").read_bytes()).hexdigest(),
         "source_config_sha256": hashlib.sha256(source_config.read_bytes()).hexdigest(),
         "source_training_config_sha256": hashlib.sha256(source_training.read_bytes()).hexdigest(),
+        "compat_config_sha256": hashlib.sha256(args.compat_config.read_bytes()).hexdigest(),
         "runtime_model_config_sha256": hashlib.sha256((runtime_model / "config.json").read_bytes()).hexdigest(),
         "runtime_config_sha256": hashlib.sha256(runtime_config.read_bytes()).hexdigest(),
         "weight_shards": sorted(shards),
