@@ -150,7 +150,10 @@ class CosmosEdgeClient:
             "action_dim": self.contract.action_dim,
             "action_horizon": self.contract.action_horizon,
             "view_mode": self.contract.view_mode,
-            "action_normalization": self.contract.action_normalization,
+            "action_normalization": (
+                self.contract.server_action_normalization
+                or self.contract.action_normalization
+            ),
         }
         for key, expected in optional_identity.items():
             if key in value and value[key] != expected:

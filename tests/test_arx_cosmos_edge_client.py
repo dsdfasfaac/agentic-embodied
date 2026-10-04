@@ -88,6 +88,33 @@ def test_rejects_wrong_server_identity() -> None:
         server.close()
 
 
+def test_model_a_pins_server_normalization_separately_from_raw_actions() -> None:
+    contract = load_model_contract(
+        Path(__file__).resolve().parents[1] / "robots/arx/manifests/task7_model_a.yaml"
+    )
+    # The dodo Task7 server reports its internal fallback as minmax while
+    # returning raw absolute joint positions (it has no action-stats file).
+    modality = {
+        "camera_shape_hwc": [240, 320, 3],
+        "resolution": "480",
+        "action_semantic": _MODALITY["action_semantic"],
+        "action_normalization": "minmax",
+    }
+    server = _Server([{"status": "ok"}, modality])
+    try:
+        with CosmosEdgeClient("127.0.0.1", server.port, contract, timeout_sec=1):
+            pass
+    finally:
+        server.close()
+
+    server = _Server([{"status": "ok"}, dict(modality, action_normalization="meanstd")])
+    try:
+        with pytest.raises(RuntimeError, match="action_normalization mismatch"):
+            CosmosEdgeClient("127.0.0.1", server.port, contract, timeout_sec=1)
+    finally:
+        server.close()
+
+
 @pytest.mark.parametrize(
     "actions",
     [np.zeros((31, 14), np.float32), np.full((32, 14), np.nan, np.float32)],

@@ -110,6 +110,7 @@ class ArxModelContract:
     action_normalization: str
     prompt_format: str
     view_mode: str
+    server_action_normalization: str | None = None
 
     def __post_init__(self) -> None:
         if self.schema_version != _MODEL_SCHEMA:
@@ -132,6 +133,10 @@ class ArxModelContract:
             raise ValueError("Task7 actions must be continuous raw positions")
         if self.action_normalization != "raw":
             raise ValueError("Task7 actions must not use client-side normalization")
+        if self.server_action_normalization is not None and self.server_action_normalization not in {
+            "raw", "none", "minmax", "meanstd", "quantile", "quantile_rot"
+        }:
+            raise ValueError("unsupported Task7 server action normalization")
         if self.prompt_format != "json" or self.view_mode != "concat_view":
             raise ValueError("Task7 requires JSON prompts and concat_view")
 

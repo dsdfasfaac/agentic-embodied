@@ -13,6 +13,7 @@
   "conditioning_fps": 15.0,
   "action_semantic": "continuous raw positions",
   "action_normalization": "raw",
+  "server_action_normalization": "minmax",
   "prompt_format": "json",
   "view_mode": "concat_view"
 }
