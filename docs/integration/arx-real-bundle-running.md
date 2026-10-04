@@ -1,5 +1,39 @@
 # ARX CandidateBundle real-robot execution
 
+## Direct inference and the H100 Model A checkpoint
+
+Dodo already has a direct real-robot inference client in the separate
+`/home/dodo/chenfu/inference` repository:
+`x5_cosmos3_edge_pick_tube.py` calls `cosmos3_edge.cli`. Its
+`run_zeva_task7_eval.sh` wrapper starts a Task7 model service and passes
+`--yes` to the client, which can publish motor commands. The
+`/home/dodo/chenfu/Agentic-Embodied` checkout instead has the
+`run_arx_real_bundle.py` gateway/runner for CandidateBundle monitoring and
+recovery. Both execute locally on dodo; the extra boundary is the bundle
+gateway, not a network hop to another host.
+
+The H100 export at
+`/mnt/100T/users/dingxin/WAM/playground/packages/arx_model_a_5task_iter5000_20260817`
+was copied to dodo's
+`/mnt/hdd16t/chenfu/cosmos_models/arx_model_a_5task_iter5000_20260817`.
+All 17 source files passed the package's SHA-256 list, excluding the list's
+invalid self-referential entry. The original package was not edited.
+`prepare_arx_model_a_dodo.py` creates a symlinked inference view with local
+asset paths and disabled-memory compatibility fields for dodo's newer Cosmos
+framework. `start_arx_model_a_dodo.sh` then serves it on dodo loopback port
+5583. Its `start`, `status`, and `stop` operations do not open ROS or the robot
+controller.
+
+On 2026-10-04 this exact iter5000 package loaded and answered a Zetta
+`CosmosEdgeClient` request using recorded PickTube episode 000048 RGB images
+and its 14D state. The prediction was finite with shape `32×14` and a 0.83 s
+round trip. This proves model loading and offline contract compatibility; it
+does not validate physical actions or recovery. The model service was stopped
+after the test, and the robot controller remained stopped. In particular, the
+first predicted gripper coordinate differed from the recorded state by about
+0.344 on the left and 0.140 on the right; those values need controller-unit
+and limit checks before any motor execution.
+
 ## Dodo chemistry model (2026-10-04)
 
 The supplied model checkpoint is
@@ -36,12 +70,7 @@ serves it on dodo loopback port 5583 with Dynamo disabled; stop it with the
 same script's `stop` argument. The Zetta runner must receive
 `--zeva-host 127.0.0.1 --zeva-port 5583` when this model is selected.
 
-Dodo also has a separate direct PickTube client at
-`/home/dodo/chenfu/inference/x5_cosmos3_edge_pick_tube.py`. Its
-`run_zeva_task7_eval.sh` wrapper adds `--yes` and publishes robot commands;
-it is a baseline inference path, not the CandidateBundle monitor/recovery
-runner. The robot controller was deliberately left stopped during model-only
-checks. Dodo's existing Task7 service returned a 32×14 finite prediction from
+Dodo's older Task7 s4000 service also returned a 32×14 finite prediction from
 recorded three-camera images after `TORCHDYNAMO_DISABLE=1` was applied.
 
 On 2026-10-04, dodo's checkpoint `SHA256SUMS` passed for all seven listed
