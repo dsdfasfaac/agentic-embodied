@@ -181,3 +181,29 @@ def create_provider():
     observation["hardware"]["state_monotonic_ns"] = stamp - 500_000_000
     with pytest.raises(ValueError, match="stale"):
         provider.augment(observation, {})
+
+
+def test_real_feature_freshness_uses_acquisition_time_after_journaling(tmp_path):
+    module = tmp_path / "provider.py"
+    module.write_text('''
+from pathlib import Path
+from zetta.evolution.jsonio import file_sha256
+class Provider:
+    def feature_sources(self):
+        return [{"name": "joint", "provider_id": "test",
+                 "provider_sha256": file_sha256(Path(__file__)),
+                 "source_kind": "joint_feedback", "source_ids": ["right_joint_1"],
+                 "scalar_type": "number", "units": "rad", "max_age_ms": 100}]
+    def observe(self, observation, images):
+        return {"joint": 0.0}
+def create_provider():
+    return Provider()
+''')
+    provider = RealFeatureProvider(module, file_sha256(module))
+    now = time.monotonic_ns()
+    hardware = {"state_monotonic_ns": now - 200_000_000,
+                "observation_completed_ns": now - 190_000_000}
+    assert provider.augment({"hardware": hardware}, {})["joint"] == 0.0
+    hardware["observation_completed_ns"] = now - 90_000_000
+    with pytest.raises(ValueError, match="stale"):
+        provider.augment({"hardware": hardware}, {})

@@ -34,6 +34,13 @@ class RealFeatureProvider:
         if not isinstance(hardware, dict):
             raise ValueError("real feature provider requires hardware observation")
         now = time.monotonic_ns()
+        # Image publication and durable journaling occur before the critic.
+        # Source freshness is defined when the synchronized observation was
+        # acquired, not when its already captured pixels are evaluated.
+        reference_ns = hardware.get("observation_completed_ns", now)
+        if (not isinstance(reference_ns, int) or reference_ns <= 0
+                or reference_ns > now):
+            raise ValueError("invalid real observation completion timestamp")
         values = self.impl.observe(observation, images)
         if not isinstance(values, dict) or set(values) != {source.name for source in self.sources}:
             raise ValueError("real feature provider returned wrong feature names")
@@ -54,10 +61,10 @@ class RealFeatureProvider:
                     stamp = hardware["depth_monotonic_ns"][source_id]
                 else:
                     stamp = hardware.get("state_monotonic_ns")
-                if not isinstance(stamp, int) or stamp <= 0 or stamp > now:
+                if not isinstance(stamp, int) or stamp <= 0 or stamp > reference_ns:
                     raise ValueError(f"invalid source timestamp: {source.name}")
                 stamps.append(stamp)
-            if (now - min(stamps)) / 1e6 > source.max_age_ms:
+            if (reference_ns - min(stamps)) / 1e6 > source.max_age_ms:
                 raise ValueError(f"stale real feature source: {source.name}")
             result[source.name] = value
         return result
@@ -112,10 +119,15 @@ class RealBundleReentry:
                    and not health.get("fault_codes")
                    and all(x.get("responsive") is True for x in hardware.get("camera_health", {}).values())
                    and len(hardware.get("camera_health", {})) == 3)
+        completed_ns = hardware.get("observation_completed_ns")
+        wall_fresh = (completed_ns is None or
+                      (type(completed_ns) is int and 0 <=
+                       (time.monotonic_ns() - completed_ns) / 1e6 <= max(1000, 4 * self.max_age)))
         fresh = (type(hardware.get("sensor_age_ms")) in (int, float)
                  and hardware["sensor_age_ms"] <= self.max_age
                  and type(hardware.get("sensor_skew_ms")) in (int, float)
-                 and hardware["sensor_skew_ms"] <= self.max_skew)
+                 and hardware["sensor_skew_ms"] <= self.max_skew
+                 and wall_fresh)
         checks = [
             {"check_id": "device-health", "status": "pass" if healthy else "fail",
              "evidence_ids": [obs["observation_id"]], "reason_code": "healthy" if healthy else "device_fault"},
