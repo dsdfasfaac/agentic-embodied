@@ -42,10 +42,11 @@ case "$ACTION" in
     mkdir -p "$STATE_DIR"
     rm -f "$PID_FILE"
     setsid bash -c '
-      set -euo pipefail
+      set -eo pipefail
       echo $$ > "$1"
       source /opt/ros/jazzy/setup.bash
       source "$2/install/setup.bash"
+      set -u
       exec ros2 launch arx_x5_controller v2_joint_control.launch.py
     ' arx-dodo-controller "$PID_FILE" "$ARX_WS" >>"$LOG_FILE" 2>&1 </dev/null &
     for _ in {1..100}; do
