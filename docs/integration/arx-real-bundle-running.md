@@ -1,6 +1,6 @@
 # ARX CandidateBundle real-robot execution on dodo
 
-## Current verified state (2026-10-04)
+## Current verified state (2026-10-05)
 
 The direct deployment checkout is `/home/dodo/chenfu/Agentic-Embodied` on
 `dodo`. The model, gateway, runner, ROS2 controller and three D405 cameras all
@@ -112,7 +112,13 @@ gateway enforces the order, tool arguments and 76-step recovery budget (60
 gripper plus one 16-step VLA chunk). The prose fallback is retained as
 candidate metadata; any execution failure stops the episode. The candidate's
 65-step cooldown is frozen in its real input contract. This new bundle has
-passed offline compilation and tests; it has not been run on the robot.
+passed offline compilation and tests before its first live trial below.
+
+The first live retention trial on 2026-10-05 executed 40 steps and stopped at
+the gateway's right-gripper measured-arrival check, before any critic proposal
+or recovery. It did not pick up the tube. Both the controller and model service
+were stopped after the trial. See
+[the trial evidence and stop diagnosis](arx-real-retention-trial-20261005.md).
 
 ## Deployment commands
 
