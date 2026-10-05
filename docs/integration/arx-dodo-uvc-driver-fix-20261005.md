@@ -2,14 +2,25 @@
 
 ## Current state
 
-The robot controller remains stopped. No new robot commands or paired
-evolution rollouts were executed. The user requested no host reboot, and none
-was performed. The Model A inference service was not intentionally stopped.
+Before reboot authorization, the robot controller was verified stopped. No
+new robot commands or paired evolution rollouts were executed.
 
-**The repair is installed on disk but not active in the running kernel.** Both
+At 17:51 CST the user authorized reboot. `sudo systemctl reboot` returned
+success. The pre-reboot boot ID was `324f9e38-3519-4f46-b4d0-d00c62dcba48`.
+SSH first closed connections before authentication, then timed out; the old
+address `192.168.20.56` became unreachable. The operator's photograph showed
+the ASUS/Ubuntu boot splash, so boot had begun, but completion has not been
+verified. Esc did not expose logs. The operator was asked to test Ctrl+Alt+F3
+and Caps Lock to distinguish console access from an unresponsive keyboard or
+host. At 18:01 CST that response remained pending. A post-reboot kernel,
+loaded-module identity, process inventory and camera capture remain unverified.
+No instruction to start a robot controller was issued. Model-service status
+after reboot is also unverified.
+
+**The repair is installed on disk; post-reboot activation is unverified.** Both
 installed kernels, `7.0.0-31-generic` and `7.0.0-34-generic`, select the patched
 module for their next boot. Their initramfs images were regenerated. The
-currently loaded module still has original srcversion
+last checked module before reboot still had original srcversion
 `D122AF0B4E7F76517D3E4D6`; its deadlocked worker cannot finish or release the
 module. Fresh camera capture has not passed after this repair.
 
@@ -93,8 +104,8 @@ selects the overlays after `depmod`; both initramfs updates succeeded.
 
 ## Activation and acceptance
 
-Activation requires a separately authorized dodo reboot to clear the existing
-kernel deadlock. Restarting Python or reconnecting USB cannot unwind the
+The authorized reboot has been requested; successful boot and activation
+still require verification. Restarting Python or reconnecting USB cannot unwind the
 self-wait already in progress. Do not restart the robot controller as part of
 camera recovery. No robot-related system service was found in the system
 unit inventory; this is not proof that arbitrary user startup hooks are absent.

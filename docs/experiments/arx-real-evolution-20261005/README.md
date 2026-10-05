@@ -87,6 +87,13 @@ for evidence, reproduction, next-boot verification and rollback. The camera
 USB reconnection also affected ARX USB2CAN enumeration; restore and verify CAN
 mapping before a later authorized controller start.
 
+The user subsequently authorized reboot. At 17:51 CST `systemctl reboot`
+accepted the request; the operator's photograph showed an Ubuntu boot splash.
+SSH later timed out, and the original address became unreachable. Esc did not
+show logs; console/Caps Lock checks are pending. Successful boot, loaded-driver
+identity and camera acceptance have not been verified. The robot-stop request
+remains in effect; no controller-start instruction was issued.
+
 ## Resume and evaluate
 
 After camera-driver recovery, inspect effective exposure/white-balance settings
