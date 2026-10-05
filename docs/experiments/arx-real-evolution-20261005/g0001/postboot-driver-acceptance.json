@@ -1,0 +1,37 @@
+{
+  "schema_version": "arx.uvc.driver.acceptance.v1",
+  "date": "2026-10-05",
+  "host": "dodo",
+  "reboot_authorized": true,
+  "reboot_command_accepted_at": "2026-10-05T17:51:04+08:00",
+  "before_boot_id": "324f9e38-3519-4f46-b4d0-d00c62dcba48",
+  "after_boot_id": "85334a63-6482-4fa4-8905-418bddc46ee7",
+  "verified_at": "2026-10-05T18:15:14+08:00",
+  "kernel_release": "7.0.0-34-generic",
+  "loaded_uvc_srcversion": "481BFC00E4FD5950221E0B9",
+  "uvc_repair_active": true,
+  "camera_and_label_audit_passed": true,
+  "fresh_observations": 5,
+  "max_age_ms": 44.390232,
+  "max_skew_ms": 38.166487,
+  "min_front_valid_depth_fraction": 0.793203125,
+  "max_front_valid_depth_fraction": 0.8081770833333334,
+  "label_depth_mm_range": [
+    411.0,
+    412.0
+  ],
+  "label_visual_identity_reviewed": true,
+  "camera_manual_baseline_confirmed": true,
+  "d_state_processes_found": false,
+  "robot_controller_running": false,
+  "model_a_server_running": false,
+  "can_interfaces_present": false,
+  "new_robot_commands_sent": false,
+  "new_parent_candidate_rollouts_started": false,
+  "artifacts_sha256": {
+    "postboot-camera-audit.json": "8dec6f947ec4254509aa1e1edeb5068d25dabca3e63be425c1ef7b5cb6f7791b",
+    "postboot-camera-options.json": "318900f20e1b8ca4b76c07b8a1f9472ec0e444ae22514ba3a134476ee64b1ee9",
+    "postboot-exposure-readback.json": "8d9dd889b0d9890bde3e5343dd0e7085ac1a1ff02fe5f85d546f85b34c8e0909",
+    "postboot-exposure-restore.py": "489298353d1ad98ce7ee9a635163e258c77fe28a09af2cf6b93fd987e2626bf2"
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "cameras": [
+    {
+      "aligned_depth": true,
+      "capture": "640x480@15",
+      "name": "front_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "serial": "260422272500"
+    },
+    {
+      "aligned_depth": false,
+      "capture": "640x480@15",
+      "name": "left_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "serial": "260422271945"
+    },
+    {
+      "aligned_depth": false,
+      "capture": "640x480@15",
+      "name": "right_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+      "serial": "260422275847"
+    }
+  ],
+  "clock": "host_monotonic_ns",
+  "front_extrinsic_sha256": "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10",
+  "observations": [
+    {
+      "front_valid_depth_fraction": 0.8042447916666666,
+      "host_monotonic_ns": {
+        "front_rgb": 839641783258,
+        "left_rgb": 839679911264,
+        "right_rgb": 839678023640
+      },
+      "index": 0,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 411.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4216208968350392,
+          -0.2282745818964603,
+          -0.03621459950306494
+        ],
+        "valid_depth_pixels": 60
+      },
+      "sensor_age_ms": 39.090396,
+      "sensor_skew_ms": 38.128006
+    },
+    {
+      "front_valid_depth_fraction": 0.7979817708333333,
+      "host_monotonic_ns": {
+        "front_rgb": 839708617015,
+        "left_rgb": 839746642215,
+        "right_rgb": 839744709411
+      },
+      "index": 1,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 412.0,
+        "found": true,
+        "pixel_320x240": [
+          158.5,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4226368267459807,
+          -0.2293039509279492,
+          -0.03660190405860472
+        ],
+        "valid_depth_pixels": 58
+      },
+      "sensor_age_ms": 44.390232,
+      "sensor_skew_ms": 38.0252
+    },
+    {
+      "front_valid_depth_fraction": 0.793203125,
+      "host_monotonic_ns": {
+        "front_rgb": 839775245580,
+        "left_rgb": 839813329653,
+        "right_rgb": 839811372599
+      },
+      "index": 2,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 411.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4216208968350392,
+          -0.2282745818964603,
+          -0.03621459950306494
+        ],
+        "valid_depth_pixels": 59
+      },
+      "sensor_age_ms": 40.288882,
+      "sensor_skew_ms": 38.084073
+    },
+    {
+      "front_valid_depth_fraction": 0.8081770833333334,
+      "host_monotonic_ns": {
+        "front_rgb": 839841805774,
+        "left_rgb": 839879972261,
+        "right_rgb": 839878051964
+      },
+      "index": 3,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 411.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4216208968350392,
+          -0.2282745818964603,
+          -0.03621459950306494
+        ],
+        "valid_depth_pixels": 59
+      },
+      "sensor_age_ms": 43.818503,
+      "sensor_skew_ms": 38.166487
+    },
+    {
+      "front_valid_depth_fraction": 0.8044010416666667,
+      "host_monotonic_ns": {
+        "front_rgb": 839908488365,
+        "left_rgb": 839946654018,
+        "right_rgb": 839944721163
+      },
+      "index": 4,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 411.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4216208968350392,
+          -0.2282745818964603,
+          -0.03621459950306494
+        ],
+        "valid_depth_pixels": 60
+      },
+      "sensor_age_ms": 40.440766,
+      "sensor_skew_ms": 38.165653
+    }
+  ],
+  "passed": true,
+  "robot_commands_sent": false,
+  "robot_status_used": false,
+  "schema_version": "arx.live.camera.audit.v1"
+}

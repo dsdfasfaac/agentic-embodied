@@ -1,33 +1,57 @@
-# Dodo D405 UVC deadlock and staged repair — 2026-10-05
+# Dodo D405 UVC deadlock repair and acceptance — 2026-10-05
 
 ## Current state
 
-Before reboot authorization, the robot controller was verified stopped. No
-new robot commands or paired evolution rollouts were executed.
+**Reboot completed, the patched driver is active, and camera acceptance passed.**
+At 18:15 CST dodo reported boot ID
+`85334a63-6482-4fa4-8905-418bddc46ee7`, kernel `7.0.0-34-generic`, and loaded
+UVC srcversion `481BFC00E4FD5950221E0B9`. No D-state processes were found after
+camera capture, parameter restoration and stream closure. The robot controller
+is verified stopped; the Model A inference service is not running. No new robot
+commands or paired evolution rollouts were executed. CAN interfaces `can1` and
+`can3` are still absent, so their mapping must be restored before a later
+authorized controller start.
+
+The final five-frame camera audit passed: all three calibrated RGB streams were
+fresh (maximum age 44.40 ms), maximum skew was 38.17 ms, and front valid depth
+fraction was 79.3–80.8%. All five frames located the pink label on the left tube
+in the rack, not the background sticker. Label depth was 411–412 mm, with 1 mm
+MAD and 58–60 valid depth pixels. This is camera/label acceptance, not a grasp,
+lift, robot tracking or task-success result.
+
+On reboot the cameras reverted to auto exposure with readback 33000 μs/gain16.
+That capture produced RGB/depth but failed label acquisition in all five frames.
+An immediate sequential restoration returned SDK `Device or resource busy`;
+bounded retries outside streaming also failed to confirm a right-camera write.
+Both processes exited normally, without a kernel deadlock. Opening the matching
+RGB streams (plus front depth), waiting for frames and configuring against the
+active profile restored and confirmed manual exposure=25000 μs, gain16 and
+auto-exposure=0 for all three cameras, with zero busy responses. Auto white
+balance remains enabled, readback4600; brightness0 and saturation64 are unchanged.
+Reopening the production camera source then produced the passing final audit.
+Future restoration should use the validated streaming sequence, not the failed
+unopened-sensor sequence. Sources and readbacks are saved with the experiment.
+
+## Reboot chronology
 
 At 17:51 CST the user authorized reboot. `sudo systemctl reboot` returned
 success. The pre-reboot boot ID was `324f9e38-3519-4f46-b4d0-d00c62dcba48`.
 SSH first closed connections before authentication, then timed out; the old
 address `192.168.20.56` became unreachable. The operator's photograph showed
-the ASUS/Ubuntu boot splash, so boot had begun, but completion has not been
-verified. Esc did not expose logs. The operator was asked to test Ctrl+Alt+F3
+the ASUS/Ubuntu boot splash. Esc did not expose logs. The operator was asked to test Ctrl+Alt+F3
 and Caps Lock to distinguish console access from an unresponsive keyboard or
-host. At 18:01 CST that response remained pending. A post-reboot kernel,
-loaded-module identity, process inventory and camera capture remain unverified.
-No instruction to start a robot controller was issued. Model-service status
-after reboot is also unverified.
+host. At 18:01 CST that response remained pending. SSH subsequently recovered,
+and the changed boot ID and loaded driver confirmed successful boot. No forced
+power cycle or second reboot was performed.
 
-**The repair is installed on disk; post-reboot activation is unverified.** Both
-installed kernels, `7.0.0-31-generic` and `7.0.0-34-generic`, select the patched
-module for their next boot. Their initramfs images were regenerated. The
-last checked module before reboot still had original srcversion
-`D122AF0B4E7F76517D3E4D6`; its deadlocked worker cannot finish or release the
-module. Fresh camera capture has not passed after this repair.
+Both installed kernels, `7.0.0-31-generic` and `7.0.0-34-generic`, select the
+patched module. Their initramfs images were regenerated before reboot. The old
+srcversion `D122AF0B4E7F76517D3E4D6` was recorded before the reboot request.
 
 ## Root cause and evidence
 
-The running kernel is Ubuntu `7.0.0-31.31~24.04.1-generic`, upstream `7.0.14`.
-Worker1390108 holds the UVC control/status locks and has this kernel stack:
+Before reboot the kernel was Ubuntu `7.0.0-31.31~24.04.1-generic`, upstream
+`7.0.14`. Worker1390108 held the UVC control/status locks with this kernel stack:
 
 ```text
 __flush_work
@@ -104,8 +128,8 @@ selects the overlays after `depmod`; both initramfs updates succeeded.
 
 ## Activation and acceptance
 
-The authorized reboot has been requested; successful boot and activation
-still require verification. Restarting Python or reconnecting USB cannot unwind the
+The authorized reboot and camera acceptance are now complete. For the original
+deadlock, restarting Python or reconnecting USB could not unwind the
 self-wait already in progress. Do not restart the robot controller as part of
 camera recovery. No robot-related system service was found in the system
 unit inventory; this is not proof that arbitrary user startup hooks are absent.

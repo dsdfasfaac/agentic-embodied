@@ -1,0 +1,53 @@
+{
+  "read_only": true,
+  "devices": [
+    {
+      "serial": "260422271945",
+      "firmware": "5.17.0.10",
+      "sensors": [
+        {
+          "name": "Stereo Module",
+          "enable_auto_exposure": 0.0,
+          "exposure": 25000.0,
+          "gain": 16.0,
+          "enable_auto_white_balance": 1.0,
+          "white_balance": 4600.0,
+          "brightness": 0.0,
+          "saturation": 64.0
+        }
+      ]
+    },
+    {
+      "serial": "260422275847",
+      "firmware": "5.17.0.10",
+      "sensors": [
+        {
+          "name": "Stereo Module",
+          "enable_auto_exposure": 0.0,
+          "exposure": 25000.0,
+          "gain": 16.0,
+          "enable_auto_white_balance": 1.0,
+          "white_balance": 4600.0,
+          "brightness": 0.0,
+          "saturation": 64.0
+        }
+      ]
+    },
+    {
+      "serial": "260422272500",
+      "firmware": "5.17.0.10",
+      "sensors": [
+        {
+          "name": "Stereo Module",
+          "enable_auto_exposure": 0.0,
+          "exposure": 25000.0,
+          "gain": 16.0,
+          "enable_auto_white_balance": 1.0,
+          "white_balance": 4600.0,
+          "brightness": 0.0,
+          "saturation": 64.0
+        }
+      ]
+    }
+  ]
+}

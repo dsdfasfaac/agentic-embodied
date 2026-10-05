@@ -11,7 +11,9 @@ One physical comparison cannot establish held-out generalization or promotion.
 Generation `g0001` completed the evidence, diagnosis, proposal, static contract
 and shadow phases. **Neither new comparison arm has executed.** Camera-driver
 failure prevented startup; it is not candidate rejection or a task failure.
-The robot controller is stopped. The Model A inference service remains running.
+The robot controller is stopped. Following the authorized reboot and camera
+repair, the Model A inference service is not running and CAN mapping still
+requires restoration. Camera/label acceptance has now passed; see below.
 
 ## Evidence and frozen candidate
 
@@ -79,10 +81,8 @@ The subsequent investigation identified the exact UVC status-worker
 self-deadlock fixed by Linux commit `6d27f92`. Both original installed
 `7.0.0-31` and `7.0.0-34` modules lacked the fix. Patched modules were built
 from checksum-pinned Ubuntu source and installed as separate overlays for
-both kernels; both initramfs images were updated. **Disk deployment is complete,
-but activation and camera acceptance remain pending an authorized host reboot.**
-The loaded old driver still deadlocks, and the robot-stop/no-reboot requests
-remain in force. See `docs/integration/arx-dodo-uvc-driver-fix-20261005.md`
+both kernels; both initramfs images were updated. Disk deployment preceded the
+subsequently authorized reboot. See `docs/integration/arx-dodo-uvc-driver-fix-20261005.md`
 for evidence, reproduction, next-boot verification and rollback. The camera
 USB reconnection also affected ARX USB2CAN enumeration; restore and verify CAN
 mapping before a later authorized controller start.
@@ -90,9 +90,20 @@ mapping before a later authorized controller start.
 The user subsequently authorized reboot. At 17:51 CST `systemctl reboot`
 accepted the request; the operator's photograph showed an Ubuntu boot splash.
 SSH later timed out, and the original address became unreachable. Esc did not
-show logs; console/Caps Lock checks are pending. Successful boot, loaded-driver
-identity and camera acceptance have not been verified. The robot-stop request
-remains in effect; no controller-start instruction was issued.
+show logs. SSH subsequently recovered and confirmed a changed boot ID,
+`7.0.0-34-generic`, and patched UVC srcversion `481BFC00E4FD5950221E0B9`.
+The robot-stop request remains in effect; no controller-start instruction was issued.
+
+All three cameras reverted to automatic exposure on reboot. Restoring the
+recorded manual 25000 μs/gain16 baseline required active video streams;
+outside-stream attempts returned SDK busy responses but no kernel deadlock.
+With verified manual settings, `g0001/postboot-camera-audit.json` passed all five
+observations: maximum age44.40ms, maximum skew38.17ms, actual rack-tube label
+depth411–412mm and depth MAD1mm. Visual review confirmed the selected label's
+identity. Parameters are in `g0001/postboot-camera-options.json`, and the exact
+restoration sequence is preserved in `g0001/postboot-exposure-restore.py`.
+This accepts camera/label acquisition only. It does not establish a robot
+distance, grasp, lift or task success. No new parent/candidate rollout ran.
 
 ## Resume and evaluate
 

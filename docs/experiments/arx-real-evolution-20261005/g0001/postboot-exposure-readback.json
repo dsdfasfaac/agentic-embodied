@@ -1,0 +1,33 @@
+{
+  "restored_recorded_baseline": true,
+  "streams_active_during_configuration": true,
+  "devices": [
+    {
+      "serial": "260422272500",
+      "verified": {
+        "enable_auto_exposure": 0.0,
+        "exposure": 25000.0,
+        "gain": 16.0
+      },
+      "busy_responses": 0
+    },
+    {
+      "serial": "260422271945",
+      "verified": {
+        "enable_auto_exposure": 0.0,
+        "exposure": 25000.0,
+        "gain": 16.0
+      },
+      "busy_responses": 0
+    },
+    {
+      "serial": "260422275847",
+      "verified": {
+        "enable_auto_exposure": 0.0,
+        "exposure": 25000.0,
+        "gain": 16.0
+      },
+      "busy_responses": 0
+    }
+  ]
+}
