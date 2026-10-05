@@ -153,7 +153,16 @@ Run `scripts/deployment/audit_arx_live_observation.py` for a read-only
 camera/depth/14D/start-state check. The staging script
 `scripts/deployment/stage_arx_picktube_start.py` sends bounded steps to the
 empty arms and grippers and verifies measured tracking. It is a motion
-operation. Stop the controller on any unexpected motion or failed arrival.
+operation. An ordinary rollout end stops new policy commands while keeping
+the controller enabled. The supervised experiment wrapper then runs
+`finish_arx_real_episode.py`: check for a held tube, return empty arms/grippers
+to the frozen PickTube start with bounded measured steps, verify the live
+start state, and only then disable the controller. Homing has its own
+`post_episode` evidence and is outside the critic/rollout budget. A homing or
+observation failure leaves the controller enabled. A detected held tube
+requires operator unloading; the subsequent explicit `--unloaded` flag records
+that confirmation. Recoverable critic interruptions execute recovery without
+homing or disabling. Immediate emergency disable remains a separate action.
 
 The gateway `--check-config` validates the bundle schema, semantic and file
 SHA, task, model, camera serials/calibrations, 14D channel names, feature

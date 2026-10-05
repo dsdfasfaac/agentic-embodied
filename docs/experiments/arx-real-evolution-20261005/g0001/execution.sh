@@ -50,7 +50,7 @@ case "${1:-check}" in
   "$PY" scripts/deployment/stage_arx_picktube_start.py --hardware-sha256 "$HW_SHA" --execute-steps "${2}" --max-joint-step-rad "${ARX_STAGE_JOINT_STEP_RAD:-0.015}" --output "runs/arx_live_readonly_20261005/${3}.json"
   ;;
  run)
-  "$PY" scripts/deployment/run_arx_real_bundle.py \
+  if "$PY" scripts/deployment/run_arx_real_bundle.py \
    --output "$TRIAL_OUTPUT" \
    --python "$PY" \
    --hardware-config robots/arx/manifests/real/dodo_picktube_hardware.json \
@@ -66,7 +66,27 @@ case "${1:-check}" in
    --feature-provider robots/arx/deployment/picktube_rgbd_provider.py \
    --feature-provider-sha256 "$PROVIDER_SHA" \
    --kinematics-calibration robots/arx/manifests/real/dodo_right_controller_ee_fk.json \
-   --zeva-host 127.0.0.1 --zeva-port 5583 --listen-port 8091
+   --zeva-host 127.0.0.1 --zeva-port 5583 --listen-port 8091; then
+   rollout_status=0
+  else
+   rollout_status=$?
+  fi
+  if [[ -f "$TRIAL_OUTPUT/result.json" ]]; then
+   if "$PY" scripts/deployment/finish_arx_real_episode.py --execute \
+    --trial "$TRIAL_OUTPUT" --output "$TRIAL_OUTPUT/post_episode" \
+    --hardware-config robots/arx/manifests/real/dodo_picktube_hardware.json \
+    --hardware-sha256 "$HW_SHA" --task robots/arx/manifests/pickup_test_tube.yaml \
+    --model-contract robots/arx/manifests/task7_model_a.yaml \
+    --controller scripts/deployment/manage_arx_dodo_controller.sh; then
+    cleanup_status=0
+   else
+    cleanup_status=$?
+   fi
+  else
+   cleanup_status=2
+  fi
+  if [[ "$rollout_status" != 0 ]]; then exit "$rollout_status"; fi
+  exit "$cleanup_status"
   ;;
  *) exit 2 ;;
 esac

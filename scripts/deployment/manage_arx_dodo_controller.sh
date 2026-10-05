@@ -3,6 +3,8 @@ set -euo pipefail
 
 # Manage dodo's two ARX remote_slave ROS2 controllers as one process group.
 # Starting this service can enable motors; use only with an on-site observer.
+# stop disables the motors; it does not home. For ordinary completed rollouts,
+# use finish_arx_real_episode.py to verify homing before invoking this action.
 ACTION="${1:-status}"
 ROOT="${ARX_DODO_ROOT:-/home/dodo/chenfu/Agentic-Embodied}"
 ARX_WS="${ARX_DODO_WS:-/home/dodo/chenfu/ARX_X5/ROS2/X5_ws}"

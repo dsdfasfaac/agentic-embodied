@@ -227,6 +227,30 @@ def test_unsettled_or_open_gripper_cannot_satisfy_closing_command():
     assert not backend._arrival_status(measured, hardware, target)[0]
 
 
+def test_measured_closed_band_can_settle_for_intermediate_closed_target():
+    # Real g0001 stopped despite a 19% command and stable 23% measured opening.
+    # Both are inside the calibrated closed band; raw errors remain auditable.
+    backend = closure_backend()
+    target = np.zeros(14)
+    target[13] = -0.659932971
+    measured = np.zeros(14)
+    measured[13] = -0.786412239
+    hardware = {"state_monotonic_ns": 1_000_000_000}
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    hardware["state_monotonic_ns"] += 250_000_000
+    arrived, reference, details = backend._arrival_status(measured, hardware, target)
+    assert arrived and details["13"]["mode"] == "closed_settled"
+    assert reference[13] == target[13]  # only overdrive clamps its reference
+    measured[7] = 0.1
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    measured[7] = 0
+    target[13] = -1.1  # outside the closed band: exact position gate remains
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    target[13] = -0.659932971
+    measured[13] = -1.1
+    assert not backend._arrival_status(measured, hardware, target)[0]
+
+
 def test_stale_camera_prevents_motion_observation():
     backend, arm, _ = make_backend(stale=True)
     backend.reset()

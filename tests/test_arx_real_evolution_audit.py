@@ -3,10 +3,10 @@ from copy import deepcopy
 from scripts.evolution import audit_arx_real_evolution as audit
 
 
-def pair(monkeypatch, *, success=False, mismatched=False):
+def pair(monkeypatch, *, success=False, mismatched=False, changed_backend=False):
     parent = {
         "identities": {name: name for name in (
-            "hardware", "feature_provider", "catalog", "task", "model_contract", "runtime_limits")},
+            "hardware", "feature_provider", "catalog", "task", "model_contract", "runtime_limits", "backend_implementation")},
         "initial_state": [0.0] * 14,
         "initial_camera_calibration_sha256": {"front_rgb": "calibration"},
         "initial_budget": {"steps": 600, "recoveries": 4, "decisions": 64},
@@ -21,6 +21,8 @@ def pair(monkeypatch, *, success=False, mismatched=False):
     candidate["verified_task_success"] = success
     if mismatched:
         candidate["initial_budget"]["steps"] = 1200
+    if changed_backend:
+        candidate["identities"]["backend_implementation"] = "changed"
     monkeypatch.setattr(audit, "read_trial", lambda path: (parent if path == "parent" else candidate, []))
     return audit.compare("parent", "candidate")
 
@@ -42,3 +44,9 @@ def test_changed_execution_budget_invalidates_comparison(monkeypatch):
     result = pair(monkeypatch, success=True, mismatched=True)
     assert result["decision"] == "inconclusive"
     assert result["attributed_task_rescue"] is False
+
+
+def test_changed_backend_invalidates_comparison(monkeypatch):
+    result = pair(monkeypatch, success=True, changed_backend=True)
+    assert result["decision"] == "inconclusive"
+    assert result["checks"]["same_backend_implementation"] is False

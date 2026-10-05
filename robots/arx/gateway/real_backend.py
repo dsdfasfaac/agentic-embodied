@@ -189,8 +189,9 @@ class RealBackend:
         for spec in self.config.gripper_closures:
             index = spec.index
             span = spec.open_feedback_policy - spec.closed_feedback_policy
-            closing = (commanded_feedback[index] - spec.closed_feedback_policy) / span <= 0
-            if closing:
+            commanded_fraction = (commanded_feedback[index] - spec.closed_feedback_policy) / span
+            closing = commanded_fraction <= spec.max_closed_open_fraction
+            if commanded_fraction <= 0:
                 # Tightening beyond the closed endpoint applies preload; it
                 # does not create an additional reachable position.
                 reference[index] = spec.closed_feedback_policy
@@ -207,6 +208,7 @@ class RealBackend:
                 settled = False
             details[str(index)] = {
                 "mode": "position", "closing_command": bool(closing),
+                "commanded_open_fraction": float(commanded_fraction),
                 "measured_open_fraction": fraction, "settled": settled,
                 "current": observed.get("auxiliary_feedback", {}).get(spec.current_channel),
             }

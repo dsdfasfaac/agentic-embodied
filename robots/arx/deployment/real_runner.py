@@ -98,6 +98,8 @@ class RealBundleRunner(RolloutRunner):
             "task": file_sha256(Path(self.trial.environment.task)),
             "model_contract": file_sha256(self.model_contract),
             "runtime_limits": file_sha256(self.runtime_config),
+            "backend_implementation": file_sha256(
+                Path(__file__).resolve().parents[1] / "gateway/real_backend.py"),
         })
 
     def start(self):

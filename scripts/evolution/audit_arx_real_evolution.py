@@ -96,6 +96,7 @@ def compare(parent_path, candidate_path):
     tolerances[12] = .06
     checks = {
         "same_hardware": parent["identities"]["hardware"] == candidate["identities"]["hardware"],
+        "same_backend_implementation": bool(parent["identities"].get("backend_implementation")) and parent["identities"].get("backend_implementation") == candidate["identities"].get("backend_implementation"),
         "same_provider": parent["identities"]["feature_provider"] == candidate["identities"]["feature_provider"],
         "same_catalog": parent["identities"]["catalog"] == candidate["identities"]["catalog"],
         "same_task": parent["identities"].get("task") == candidate["identities"].get("task") and "task" in parent["identities"],
