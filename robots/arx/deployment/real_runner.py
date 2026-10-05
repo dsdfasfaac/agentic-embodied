@@ -95,6 +95,9 @@ class RealBundleRunner(RolloutRunner):
             "bundle": bundle.sha256, "real_input": self.real_input_sha256,
             "hardware": self.hardware_sha256, "feature_provider": self.feature_provider_sha256,
             "catalog": contract.tool_catalog_sha256,
+            "task": file_sha256(Path(self.trial.environment.task)),
+            "model_contract": file_sha256(self.model_contract),
+            "runtime_limits": file_sha256(self.runtime_config),
         })
 
     def start(self):

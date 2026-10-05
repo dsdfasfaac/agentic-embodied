@@ -1,0 +1,113 @@
+{
+  "distance_m": {
+    "final": 0.422925687121113,
+    "initial": 0.40599909082032754,
+    "minimum": 0.3457503296663597
+  },
+  "event_counts": {
+    "ObservationPublished": 601,
+    "arrival_observed": 600,
+    "artifact_finalization": 1,
+    "baseline_initialized": 1,
+    "command_dispatch_started": 600,
+    "command_sent": 600,
+    "critic_assessment": 600,
+    "critic_lifecycle": 1,
+    "dispatch_intent": 38,
+    "effective_arguments": 38,
+    "exposure": 38,
+    "private_evaluation": 600,
+    "real_feature_evidence": 601,
+    "step_commit": 600,
+    "step_intent": 600,
+    "tool_result": 38
+  },
+  "feature_observations": 601,
+  "first_closed_distance_m": 0.4132361051855477,
+  "first_closed_step": 26,
+  "identities": {
+    "bundle": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+    "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+    "feature_provider": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b",
+    "hardware": "f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836",
+    "real_input": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34"
+  },
+  "initial_budget": {
+    "decisions": 64,
+    "recoveries": 4,
+    "steps": 600
+  },
+  "initial_camera_calibration_sha256": {
+    "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+    "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+    "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+  },
+  "initial_state": [
+    0.032235145568847656,
+    0.00476837158203125,
+    0.00324249267578125,
+    -0.037957191467285156,
+    -0.02422332763671875,
+    0.01468658447265625,
+    -2.92191219329834,
+    0.01621246337890625,
+    0.00133514404296875,
+    0.00362396240234375,
+    -0.03108978271484375,
+    -0.00476837158203125,
+    0.01888275146484375,
+    -2.4813079833984375
+  ],
+  "journal_sha256": "36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74",
+  "max_lift_m": 0.0023185743786969804,
+  "predicate_counts": {
+    "grasped": 0,
+    "gripper_closed": 575,
+    "gripper_contact": 0,
+    "success": 0
+  },
+  "result": {
+    "artifact_paths": {
+      "events": "events",
+      "identities": "identities.json",
+      "invocations": "invocations",
+      "tools": "tools"
+    },
+    "attempt_id": "45e8d04408634aa6918745c505c7f3e0",
+    "cleanup_status": "complete",
+    "counts": {
+      "agent_calls": 0,
+      "physical_steps": 600,
+      "recoveries": 0,
+      "rejected_tools": 0,
+      "tool_attempts": 38
+    },
+    "episode_id": "3a2027b946e84883a3f05aa9d645557a",
+    "error": null,
+    "identities": {
+      "bootstrap": "24a62a0bebc73216e57c5ba174f67f86c5c49b5b1c99814d5512c122ece8770b",
+      "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+      "contract": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34"
+    },
+    "last_operation": {
+      "request_id": "a52b4b6297ca49b994d31c45660be1d9",
+      "status": "completed",
+      "write_certainty": "completed"
+    },
+    "mode": "candidate",
+    "outcome": {
+      "evaluator_id": null,
+      "recovery_attempted": false,
+      "reentry_completed": false,
+      "task_success": null
+    },
+    "package_sha256": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+    "schema_version": "arx.rollout.result.v1",
+    "status": "completed",
+    "termination_reason": "environment_ended",
+    "trial_id": "real-arx_real_picktube_20261005_retention_trial02"
+  },
+  "result_sha256": "95b4e79b75683d543f43a779ff4195e2aa379aacb52906bb894fcfd10289b4e8",
+  "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_picktube_20261005_retention_trial02",
+  "verified_task_success": false
+}

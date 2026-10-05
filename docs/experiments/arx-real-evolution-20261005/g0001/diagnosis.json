@@ -1,0 +1,30 @@
+{
+  "alternatives": [
+    "VLA input or deployment mismatch",
+    "scene shift or insufficient base-policy approach capability",
+    "geometry observation bias"
+  ],
+  "author": "Codex learner in this chat",
+  "certainty": "provisional; temporal association does not establish causality",
+  "cluster": "far-target empty-gripper closure without acquisition",
+  "evidence_ids": [
+    "trial02-obs26",
+    "trial02-obs600",
+    "trial02-journal-36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74"
+  ],
+  "falsifier": "After verified opening and reentry, candidate still fails pickup relative to matched parent.",
+  "generation": 1,
+  "hypothesis": "Premature empty-gripper closure maintains a deficient end-effector configuration that may prevent nominal reacquisition. Reopening before fresh VLA inference may restore approach.",
+  "intervention": "Change only when to apply the existing reopen-then-fresh-inference recovery; no new spatial command.",
+  "motion_commands_issued_by_diagnosis": false,
+  "observations": {
+    "closed_observations": 575,
+    "contact_observations": 0,
+    "first_closed_distance_m": 0.4132361051855477,
+    "first_closed_step": 26,
+    "minimum_distance_m": 0.3457503296663597,
+    "success_observations": 0
+  },
+  "schema_version": "arx.real.diagnosis.v1",
+  "source_evidence_sha256": "6052984a9c1f9a0e0196ecfd496e9931434ca2cd7721b483a4b75a59c8db1834"
+}

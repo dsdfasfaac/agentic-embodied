@@ -1,0 +1,30 @@
+{
+  "author_mode": "Codex acts as learner; legacy ARX campaign scaffold is not running unattended.",
+  "candidate_bundle_sha256": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+  "candidate_file_sha256": "9c129f7dd4dd63a4e4e93b34a413d30ff6a8323b1420aa62cc0c59e8e390b60c",
+  "diagnosis_sha256": "7490c24ec7b9b9419cc8a79465db653e351d3cbe146ff52a779ad20838020ddd",
+  "execution_budget": {
+    "max_recoveries": 4,
+    "max_steps": 600
+  },
+  "generation": 1,
+  "hardware_sha256": "f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836",
+  "matching": "same fixture and approximate measured start state; not exact simulator same-seed",
+  "model_package_checksum_list_sha256": "cd8af4d2eff284cc2c139c5951b6e328ad18adb9e03da2f6d667d44637b0c5e6",
+  "model_service": "dodo Model A iter5000; immutable package; deterministic seed42",
+  "parent_bundle_sha256": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+  "primary_outcome": "verified right grasp + 1cm tube lift held five fresh frames",
+  "promotion_allowed": false,
+  "schema_version": "arx.real.evolution.pilot.v1",
+  "secondary_outcome": "minimum target/tool distance; no promotion based on this alone",
+  "source_trial": "arx_real_picktube_20261005_retention_trial02",
+  "stages": [
+    "collect",
+    "cluster",
+    "diagnose",
+    "propose",
+    "shadow",
+    "physical_parent_candidate_gate",
+    "reject_or_continue_validation"
+  ]
+}
