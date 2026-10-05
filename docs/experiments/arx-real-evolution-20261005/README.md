@@ -75,6 +75,18 @@ module-in-use condition persisted. Robot controller absence was verified
 again; no new motion or comparison rollout was started. The no-reboot request
 remains in effect.
 
+The subsequent investigation identified the exact UVC status-worker
+self-deadlock fixed by Linux commit `6d27f92`. Both original installed
+`7.0.0-31` and `7.0.0-34` modules lacked the fix. Patched modules were built
+from checksum-pinned Ubuntu source and installed as separate overlays for
+both kernels; both initramfs images were updated. **Disk deployment is complete,
+but activation and camera acceptance remain pending an authorized host reboot.**
+The loaded old driver still deadlocks, and the robot-stop/no-reboot requests
+remain in force. See `docs/integration/arx-dodo-uvc-driver-fix-20261005.md`
+for evidence, reproduction, next-boot verification and rollback. The camera
+USB reconnection also affected ARX USB2CAN enumeration; restore and verify CAN
+mapping before a later authorized controller start.
+
 ## Resume and evaluate
 
 After camera-driver recovery, inspect effective exposure/white-balance settings

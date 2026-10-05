@@ -1,0 +1,39 @@
+{
+  "schema_version": "arx.uvc.driver.repair.v1",
+  "date": "2026-10-05",
+  "host": "dodo",
+  "cause": "uvc_status_stop cancels its own executing async_ctrl work",
+  "upstream_fix": "6d27f92c54ce28cfbd2a8a479a96d6f4a781b7d2",
+  "source_package": "linux-hwe-7.0 7.0.0-31.31~24.04.1",
+  "modules": [
+    {
+      "kernel": "7.0.0-31-generic",
+      "path": "/home/dodo/chenfu/.deps/uvc-repair-20261005/staged-v2/7.0.0-31-generic/patched/uvcvideo.ko",
+      "sha256": "7a8c9dc496ee713dfb10b5edef9d67887c53c3cc7f23afef12efb4eeddfb20d3",
+      "srcversion": "481BFC00E4FD5950221E0B9",
+      "vermagic": "7.0.0-31-generic SMP preempt mod_unload modversions"
+    },
+    {
+      "kernel": "7.0.0-34-generic",
+      "path": "/home/dodo/chenfu/.deps/uvc-repair-20261005/staged-v2/7.0.0-34-generic/patched/uvcvideo.ko",
+      "sha256": "5b14bd4f9596087af1e3d6ac39de9e9dfc96c9d10c19ad91cc630b0cf74113ff",
+      "srcversion": "481BFC00E4FD5950221E0B9",
+      "vermagic": "7.0.0-34-generic SMP preempt mod_unload modversions"
+    }
+  ],
+  "disk_install_verified": true,
+  "initramfs_updates_completed": [
+    "7.0.0-31-generic",
+    "7.0.0-34-generic"
+  ],
+  "loaded_srcversion": "D122AF0B4E7F76517D3E4D6",
+  "disk_srcversion": "481BFC00E4FD5950221E0B9",
+  "activation_pending": true,
+  "camera_acceptance_pending": true,
+  "reboot_performed": false,
+  "robot_controller_stopped": true,
+  "new_robot_commands_sent": false,
+  "paired_rollouts_started": false,
+  "can_mapping_recheck_required": true,
+  "details": "docs/integration/arx-dodo-uvc-driver-fix-20261005.md"
+}

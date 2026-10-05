@@ -1,0 +1,35 @@
+{
+  "source_repository": "https://git.launchpad.net/~ubuntu-kernel/ubuntu/+source/linux/+git/noble",
+  "source_commit": "cc909f9a3d277832d246c6493bbc06e0955cde2e",
+  "source_tag": "Ubuntu-hwe-7.0-7.0.0-31.31_24.04.1",
+  "source_directory": "drivers/media/usb/uvc",
+  "source_files": {
+    "Kconfig": "dddf99fdf1b365f6638c1ea4c604a48336139f8003e4bcc9db551fc743989db8",
+    "Makefile": "a577b4a0b1bcad08052a7542f8331169ed9d523693ed32ebe99ea6eb53793ef3",
+    "uvc_ctrl.c": "dc64a31b9ce89513e8213a5fb783da78f5b4b56139ffca237020d10f402ec097",
+    "uvc_debugfs.c": "1ccfa71b30f96f379a04d0d5630127acaac88cbbc70aab73ab1e3b60675a1f86",
+    "uvc_driver.c": "74f222ad677c376bad7626a7d4051219c86f3ee8bd742cb8df6d844142f800ca",
+    "uvc_entity.c": "b95b92a804471a0f0553dbe6926b3a2623fa4bf78c248af2cb2855aa09f9e85a",
+    "uvc_isight.c": "410052c97e113b08279af9b7b851e7ba034948646b3c17262c04b3762941d8b2",
+    "uvc_metadata.c": "a4277c19073ba3fdbcc1f5fe9412f0c48323351a8f9b74dc81391c207d7eebc2",
+    "uvc_queue.c": "83484e8fd4c080c49630949e38d49dcbd04076a776d8d8ef4bbde7819c564555",
+    "uvc_status.c": "ebd2a46e08b048a59975e1030ad3d2d01d5cff84c8cfb14c13652f89a5440269",
+    "uvc_v4l2.c": "8ad289a6e9329fc4f8a0149e66ea468496097e7a840471a8cf0a64665a5e47c5",
+    "uvc_video.c": "7778076961788dce50e19f243a5c11c29ce9da1fd2097c46a1895294d71ee770",
+    "uvcvideo.h": "070c73c15a429d21ab510c6345a0f2edb8c3ef6e3fe6218d981bdb35b28e1c9a"
+  },
+  "patch_commit": "6d27f92c54ce28cfbd2a8a479a96d6f4a781b7d2",
+  "patch_sha256": "fd8402728a0021ec737a94b6c46aa82c3c76f3222f8537f0f05ad3038d113d2a",
+  "kernels": [
+    "7.0.0-31-generic",
+    "7.0.0-34-generic"
+  ],
+  "expected_original_srcversion": "D122AF0B4E7F76517D3E4D6",
+  "ubuntu_source_package": "linux-hwe-7.0 7.0.0-31.31~24.04.1",
+  "ubuntu_source_url": "https://launchpad.net/ubuntu/+archive/primary/+sourcefiles/linux-hwe-7.0/7.0.0-31.31~24.04.1/",
+  "ubuntu_archives_sha256": {
+    "linux-hwe-7.0_7.0.0.orig.tar.gz": "c6343795c8c7e4feff55f5b309365c8e0eaf49cd6abcb412e32315313f149536",
+    "linux-hwe-7.0_7.0.0-31.31~24.04.1.diff.gz": "574df9711c77273cd70ca600605b436d3557cebc62abef3cdb846cc2910b127c"
+  },
+  "expected_baseline_srcversion": "73560DC28F5DF37F5F32893"
+}
