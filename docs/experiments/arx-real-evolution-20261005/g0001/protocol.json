@@ -15,6 +15,7 @@
   "parent_bundle_sha256": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
   "primary_outcome": "verified right grasp + 1cm tube lift held five fresh frames",
   "promotion_allowed": false,
+  "real_input_contract_sha256": "840a439dcba616f2de1016d7ac0e4ffad2c964295e98d662e49a3b68a760dac7",
   "schema_version": "arx.real.evolution.pilot.v1",
   "secondary_outcome": "minimum target/tool distance; no promotion based on this alone",
   "source_trial": "arx_real_picktube_20261005_retention_trial02",

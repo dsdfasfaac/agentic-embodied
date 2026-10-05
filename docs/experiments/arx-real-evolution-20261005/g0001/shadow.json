@@ -1,0 +1,220 @@
+{
+  "bundle_file_sha256": "9c129f7dd4dd63a4e4e93b34a413d30ff6a8323b1420aa62cc0c59e8e390b60c",
+  "bundle_sha256": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+  "proposals": [
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "observed_value": true,
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "observed_value": 0.0010458270819694027,
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "environment_write": false,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observation_id": "obs-41",
+      "observed_value": 0.39266481389934876,
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "step_index": 41
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "observed_value": true,
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "observed_value": 0.0014514093625550284,
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "environment_write": false,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observation_id": "obs-153",
+      "observed_value": 0.41052286133864596,
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "step_index": 153
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "observed_value": true,
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "observed_value": 0.00188499631470479,
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "environment_write": false,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observation_id": "obs-265",
+      "observed_value": 0.4249582557021605,
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "step_index": 265
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "observed_value": true,
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "observed_value": 0.0010458270819694027,
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "environment_write": false,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observation_id": "obs-377",
+      "observed_value": 0.4153967529662007,
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "step_index": 377
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "observed_value": true,
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "observed_value": false,
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "observed_value": 0.0014607162057883316,
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "environment_write": false,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observation_id": "obs-489",
+      "observed_value": 0.40231451664160156,
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "step_index": 489
+    }
+  ],
+  "robot_commands_sent": false,
+  "schema_version": "arx.real.shadow.v1",
+  "scope": "trigger replay only; no intervention outcome inferred",
+  "source_journal_sha256": "36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74"
+}
