@@ -126,6 +126,8 @@ class RealBackendConfig:
     position_tolerance: tuple[float, ...]
     depth_cameras: tuple[str, ...] = ()
     gripper_closures: tuple[GripperClosureSpec, ...] = ()
+    # Left six joints followed by right six joints, in controller radians.
+    joint_command_bounds: tuple[tuple[float, float], ...] = ()
 
     def __post_init__(self):
         if tuple(camera.name for camera in self.cameras) != CAMERAS:
@@ -152,6 +154,11 @@ class RealBackendConfig:
             raise ValueError("sensor skew limit must be below age limit")
         if len({spec.index for spec in self.gripper_closures}) != len(self.gripper_closures):
             raise ValueError("duplicate gripper closure channels")
+        if self.joint_command_bounds and (len(self.joint_command_bounds) != 12 or any(
+            len(pair) != 2 or not all(math.isfinite(v) for v in pair) or pair[0] >= pair[1]
+            for pair in self.joint_command_bounds
+        )):
+            raise ValueError("twelve finite ordered joint command bounds required")
 
 
 class RealBackend:
@@ -370,6 +377,20 @@ class RealBackend:
         if self._processor is None:
             raise RuntimeError("real task control processor is unavailable")
         target, _ = self._processor.process(raw)
+        if self.config.joint_command_bounds:
+            axes = np.asarray([0, 1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12])
+            bounds = np.asarray(self.config.joint_command_bounds, dtype=np.float32)
+            filtered_target = target.copy()
+            target[axes] = np.clip(target[axes], bounds[:, 0], bounds[:, 1])
+            limited = np.flatnonzero(target != filtered_target)
+            if limited.size:
+                self._emit("joint_command_limited", {
+                    "channels": limited.tolist(), "raw_target": raw.tolist(),
+                    "filtered_target": filtered_target.tolist(), "bounded_target": target.tolist(),
+                })
+            # Do not integrate an unreachable filter state behind a saturated
+            # joint. Gripper preprocessing and +0.9 preload stay unchanged.
+            self._processor.previous = target.copy()
         now = time.monotonic_ns()
         if self._next_send_ns is not None and now < self._next_send_ns:
             time.sleep((self._next_send_ns - now) / 1e9)

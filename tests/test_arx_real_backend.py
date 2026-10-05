@@ -177,6 +177,29 @@ def closure_backend():
     return backend
 
 
+def test_joint_targets_are_bounded_without_filter_windup_or_gripper_clipping():
+    backend, arm, _ = make_backend()
+    limits = [(-3.0, 3.0)] * 12
+    limits[6] = (-0.1, 0.025)  # right joint 1
+    backend.config = replace(backend.config, joint_command_bounds=tuple(limits))
+    events = []
+    backend.set_event_sink(lambda kind, payload: events.append((kind, payload)))
+    backend.reset()
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] = 2.0
+    raw[13] = 0.0
+    for _ in range(3):
+        commit = backend.step(raw)
+        assert commit.command[7] == pytest.approx(0.025)
+        assert backend._processor.previous[7] == pytest.approx(0.025)
+        assert commit.hardware.arrival_verified
+    assert len([event for event in events if event[0] == "joint_command_limited"]) == 3
+    assert arm.sent[-1][13] > TASK.start_state[13]
+    raw[7] = -1.0
+    commit = backend.step(raw)
+    assert commit.command[7] == pytest.approx(-0.01)  # immediately leaves bound, 0.035 step
+
+
 def test_tightening_overdrive_references_physical_closed_position():
     backend = closure_backend()
     target = np.zeros(14)

@@ -215,6 +215,10 @@ def build_real_backend(
         arrival_timeout_s=timing.arrival_timeout_s,
         feedback_poll_s=timing.feedback_poll_s,
         position_tolerance=timing.position_tolerance,
+        joint_command_bounds=tuple(zip(
+            config.left.joint_min_rad + config.right.joint_min_rad,
+            config.left.joint_max_rad + config.right.joint_max_rad,
+        )),
         depth_cameras=tuple(camera.name for camera in config.cameras if camera.depth_enabled),
         gripper_closures=tuple(spec.specification() for spec in config.gripper_closures),
     )
