@@ -1,0 +1,30 @@
+{
+  "execution_steps": {
+    "gateway": 16,
+    "original": 32
+  },
+  "gateway_right_gripper_start": -3.4,
+  "gripper_offsets": {
+    "gateway": [
+      0.0,
+      0.9
+    ],
+    "original": [
+      0.0,
+      0.9
+    ]
+  },
+  "instruction_equal": true,
+  "maximum_filter_difference_with_common_initial_command": 0.0,
+  "maximum_model_state_difference": 0.0,
+  "observations": 601,
+  "original_right_gripper_start": -3.42,
+  "raw_targets": 600,
+  "robot_commands_sent": false,
+  "schema_version": "arx.original.control.audit.v1",
+  "scope": "offline state/filter comparison; not a full RGB/preprocessing/checkpoint equivalence proof",
+  "source_file_sha256": {
+    "/home/dodo/chenfu/cosmos3_edge_arx5_inference_bundle/cosmos3_edge/control.py": "c30bb6ffa4bc7edd6c638a28a918a7c62ce607f1e02741a575423654edae445c",
+    "/home/dodo/chenfu/cosmos3_edge_arx5_inference_bundle/cosmos3_edge/tasks/pickup_test_tube.py": "5bf98093164515ff156771bc812ef7832a1c8c2e4c87700b01fa1542905178d2"
+  }
+}
