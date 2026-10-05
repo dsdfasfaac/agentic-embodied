@@ -88,9 +88,11 @@ case "$ACTION" in
       set -euo pipefail
       echo $$ > "$1"
       cd "$2"
+      # jsonschema imports rfc3987_syntax after Cosmos has initialized other
+      # packages; preloading its Lark grammar avoids an import-order crash.
       exec env -u PYTHONPATH -u LD_LIBRARY_PATH \
         CUDA_VISIBLE_DEVICES="$3" TORCHDYNAMO_DISABLE=1 COSMOS_TRAINING=0 \
-        "$4" -m cosmos_framework.scripts.action_policy_server_arx_task7_edge \
+        "$4" -c '\''import rfc3987_syntax, runpy; runpy.run_module("cosmos_framework.scripts.action_policy_server_arx_task7_edge", run_name="__main__")'\'' \
           --checkpoint-path "$5" --config-file "$6" \
           --output-dir "$7" --host "$8" --port "$9" \
           --seed 42 --deterministic-seed --action-chunk-size 32 \
