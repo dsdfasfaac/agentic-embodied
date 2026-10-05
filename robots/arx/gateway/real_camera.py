@@ -144,19 +144,23 @@ class RealSenseCameraSpec:
 
 
 class RealSenseCameraSource:
-    """Three D405 RGB streams selected by serial, synchronized by host dequeue time."""
+    """Serial-selected D405 RGB streams, with startup photometric warmup."""
 
-    def __init__(self, specs: tuple[RealSenseCameraSpec, ...], *, max_skew_ms: float):
+    def __init__(self, specs: tuple[RealSenseCameraSpec, ...], *, max_skew_ms: float,
+                 warmup_s: float = 4.0):
         if tuple(spec.identity.name for spec in specs) != CAMERAS:
             raise ValueError("three ordered RealSense camera specs are required")
         if len({spec.serial for spec in specs}) != 3:
             raise ValueError("RealSense camera serials must be unique")
         if max_skew_ms <= 0:
             raise ValueError("camera skew limit must be positive")
+        if not math.isfinite(warmup_s) or warmup_s < 0:
+            raise ValueError("camera warmup must be finite and nonnegative")
         import cv2
         import pyrealsense2 as rs
 
         self._cv2, self._rs = cv2, rs
+        self._warmup_s = warmup_s
         self._max_skew_ns = round(max_skew_ms * 1e6)
         self._lock = threading.Lock()
         self._closed = threading.Event()
@@ -230,6 +234,7 @@ class RealSenseCameraSource:
     def _read_loop(self, spec: RealSenseCameraSpec):
         name = spec.identity.name
         pipeline = self._pipelines[name]
+        publish_after_ns = time.monotonic_ns() + round(self._warmup_s * 1e9)
         while not self._closed.is_set():
             try:
                 frames = pipeline.wait_for_frames(1000)
@@ -239,6 +244,11 @@ class RealSenseCameraSource:
                 stamp = time.monotonic_ns()
                 if not color:
                     raise RuntimeError("missing RGB frame")
+                # D405 startup frames can be dark and blue while automatic
+                # white balance/exposure settle. Drain them without exposing
+                # them to VLA, target acquisition or the critic reset baseline.
+                if stamp < publish_after_ns:
+                    continue
                 rgb = np.asarray(color.get_data())
                 if rgb.shape != (spec.capture_height, spec.capture_width, 3):
                     raise ValueError("RealSense returned unexpected RGB geometry")
