@@ -8,12 +8,87 @@ comparison → reject or continue validation. Codex is acting as the learner in
 this chat. The legacy ARX campaign scaffold is not claimed to run unattended.
 One physical comparison cannot establish held-out generalization or promotion.
 
-Generation `g0001` completed the evidence, diagnosis, proposal, static contract
-and shadow phases. **Neither new comparison arm has executed.** Camera-driver
-failure prevented startup; it is not candidate rejection or a task failure.
-The robot controller is stopped. Following the authorized reboot and camera
-repair, the Model A inference service is not running and CAN mapping still
-requires restoration. Camera/label acceptance has now passed; see below.
+Generation `g0001` completed the physical pilot. The final matched pair is
+`parent-retry03` / `candidate-retry03`. All 14 comparison checks passed, including
+the same backend implementation, hardware, model, budgets, calibration, measured
+start state, verified arrivals and actual candidate intervention. **The gate
+rejects this candidate for promotion: neither arm achieved verified pickup.**
+The candidate did complete four real gripper reopen/review/VLA reentry sequences.
+The robot has returned to the frozen PickTube start and is disabled. Model A
+remains available locally on dodo. Earlier infrastructure interruptions are
+preserved separately and are excluded from the final comparison.
+
+## Completed physical comparison
+
+| Result | Parent | Candidate |
+| --- | --- | --- |
+| Physical rollout steps | 600 | 391 |
+| Verified arrivals | 600/600 | 391/391 |
+| Recovery / accepted reentry | 0 / 0 | 4 / 4 |
+| Minimum measured target distance | 0.238488 m | 0.107362 m |
+| Maximum observed tube lift | 0.002765 m | 0.003161 m |
+| Contact / grasp / success observations | 0 / 0 / 0 | 0 / 0 / 0 |
+| Termination | 600-step limit | Critic proposal after recovery budget exhausted |
+| Post-episode home / disable | Verified / completed | Verified / completed |
+
+Candidate interruption steps were 41, 133, 219, 305 and 391. The first four
+ran the compiled program: gripper opening in 51 bounded physical steps,
+read-only measured reentry review, and fresh VLA continuation. Each review
+passed at observations92,184,270,356. The fifth proposal caused
+`RECOVERY_BUDGET_EXHAUSTED`; no assistant motion stop caused this termination.
+The standard Zetta critic resets cooldown state when activation gates become
+false (the gripper opens), so the configured cooldown is not a guaranteed
+96-step separation across recovery. This pilot preserves that behavior.
+
+The candidate's closer approach is a diagnostic observation, not demonstrated
+task rescue or a generalized improvement. The reopened gripper was again
+closed before target contact after each continuation. Reopening alone does
+not repair the remaining approach/grasp behavior. The next learner diagnosis
+should examine the observed target/tool geometry, approach direction, and
+closure timing before authoring a new recovery mechanism. Keep the current
+parent; this candidate is not promoted.
+
+Artifacts:
+
+- `g0001/pilot-gate-retry03.json`: final gate, identities, budgets and outcomes.
+- `g0001/paired-execution-audit-retry03.json`: interruption steps, actual opening
+  results, all reentry checks, post-episode observations, full SQLite-export SHA
+  and ordered-record SHA (including records still present in WAL).
+- `g0001/parent-retry03-home.json`, `g0001/candidate-retry03-home.json`: verified
+  homing before controller disable. Home movements are separate from rollout.
+- `g0001/frames/`: original front start/end frames. Visual review confirmed the
+  same pink rack tube in both starts and the tube remaining in the rack at end.
+- Raw journals, RGB, receipts and per-step feedback remain on dodo under
+  `runs/arx_real_evolution_20261005/g0001/{parent,candidate}-retry03`.
+
+## Deployment corrections and excluded attempts
+
+The original `parent` stopped at step516 because an operator hand obscured the
+yellow rack. Its error was an observation/critic execution fault, not a critic
+rule proposal. `parent-aborted-evidence.json` preserves it. After operator scene
+clearance, `parent-retry01` completed600 steps. The initial `candidate` completed
+three recoveries before a gripper arrival failure at step297: target and feedback
+were both within the calibrated closed band, but the backend accepted stable
+closure only for commands beyond the zero endpoint. `pilot-gate.json` therefore
+correctly reports that older comparison as inconclusive.
+
+The backend now accepts stable measured closure for any target in the calibrated
+closed band while retaining position errors, fresh feedback, arm arrival gates,
+and position requirements for opening. `parent-retry02` exposed a different issue:
+the VLA predicted a joint target beyond the frozen deployment envelope, rejected
+before SDK publication. The backend now limits joint commands to that existing
+envelope before dispatch and records `joint_command_limited`; the filter keeps
+the bounded command as its state to avoid saturation windup. No joint envelope
+or gripper preload was widened. The final pair uses the same corrected code.
+
+The operator requested homing before disable. The wrapper now invokes
+`finish_arx_real_episode.py` after a terminal runner result: check current
+observations, home empty arms/grippers in measured bounded steps, independently
+verify the start state, then disable. A possible held tube waits for operator
+unloading; a failed home/observation leaves the controller enabled. Recoverable
+critic interruptions retain motor control. The final parent used113 home steps
+and candidate81, all with verified feedback. The23 focused backend, comparison
+and post-episode tests passed on dodo using the existing runtime dependencies.
 
 ## Evidence and frozen candidate
 
@@ -42,7 +117,10 @@ deployment equivalence. Original source uses a 32-action prefix; this gateway
 uses 16. Both proposed pilot arms keep the same 16-action prefix. The source
 gripper start values differ by 0.02; both use the +0.9 outgoing offset.
 
-## Camera startup and infrastructure failure
+## Camera startup and infrastructure history
+
+The paragraphs below record the earlier failures and authorizations; the
+completed experiment and current controller state are summarized above.
 
 Cold startup images were dark/blue and did not expose a reliable pink label.
 Waiting approximately four seconds restored normal color, consistent with
@@ -129,9 +207,9 @@ After both arms finish, source the deployment environment and run:
 
 ```bash
 python scripts/evolution/audit_arx_real_evolution.py compare \
-  --parent-trial runs/arx_real_evolution_20261005/g0001/parent \
-  --candidate-trial runs/arx_real_evolution_20261005/g0001/candidate \
-  --output runs/arx_real_evolution_20261005/g0001/pilot-gate.json
+  --parent-trial runs/arx_real_evolution_20261005/g0001/parent-retry03 \
+  --candidate-trial runs/arx_real_evolution_20261005/g0001/candidate-retry03 \
+  --output runs/arx_real_evolution_20261005/g0001/new-independent-gate.json
 ```
 
 The gate checks configuration identities, equal initial budgets, approximate

@@ -1,0 +1,268 @@
+{
+  "attributed_task_rescue": false,
+  "candidate": {
+    "distance_m": {
+      "final": 0.11650552679013577,
+      "initial": 0.40058669045942963,
+      "minimum": 0.10736226651662101
+    },
+    "event_counts": {
+      "ObservationPublished": 392,
+      "arrival_observed": 391,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 391,
+      "command_sent": 391,
+      "critic_assessment": 391,
+      "critic_lifecycle": 9,
+      "critic_proposal": 5,
+      "dispatch_intent": 23,
+      "effective_arguments": 23,
+      "exposure": 23,
+      "interrupt": 5,
+      "private_evaluation": 391,
+      "real_feature_evidence": 392,
+      "recovery_acknowledged": 4,
+      "reentry_accepted": 4,
+      "reentry_token": 4,
+      "step_commit": 391,
+      "step_intent": 391,
+      "tool_result": 23
+    },
+    "feature_observations": 392,
+    "first_closed_distance_m": 0.4058687532610188,
+    "first_closed_step": 26,
+    "identities": {
+      "backend_implementation": "51e294411f2353f642e367c956704c8a0b1603c4001b8a6d25b8a71779a1a5b8",
+      "bundle": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+      "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+      "feature_provider": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b",
+      "hardware": "f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836",
+      "model_contract": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+      "real_input": "840a439dcba616f2de1016d7ac0e4ffad2c964295e98d662e49a3b68a760dac7",
+      "runtime_limits": "36c68f11e61dd6643ffdb4cd57ee2a4bd031bbde40758dc5fef77a9d05e1c061",
+      "task": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56"
+    },
+    "initial_budget": {
+      "decisions": 64,
+      "recoveries": 4,
+      "steps": 600
+    },
+    "initial_camera_calibration_sha256": {
+      "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+    },
+    "initial_state": [
+      0.032235145568847656,
+      0.00476837158203125,
+      0.00362396240234375,
+      -0.038720130920410156,
+      -0.02689361572265625,
+      -0.00858306884765625,
+      -2.92648983001709,
+      0.01659393310546875,
+      0.00171661376953125,
+      0.00438690185546875,
+      -0.03070831298828125,
+      -0.00667572021484375,
+      0.057030677795410156,
+      -2.47406005859375
+    ],
+    "journal_sha256": "681a878fd9ed63f8ae368507137ca010ad71a6f9709601faf186c73f0ea021e6",
+    "max_lift_m": 0.0031613730354915215,
+    "predicate_counts": {
+      "grasped": 0,
+      "gripper_closed": 146,
+      "gripper_contact": 0,
+      "success": 0
+    },
+    "result": {
+      "artifact_paths": {
+        "events": "events",
+        "identities": "identities.json",
+        "invocations": "invocations",
+        "tools": "tools"
+      },
+      "attempt_id": "623928b7516d408b87d7fc1d3db9e579",
+      "cleanup_status": "complete",
+      "counts": {
+        "agent_calls": 0,
+        "physical_steps": 391,
+        "recoveries": 4,
+        "rejected_tools": 0,
+        "tool_attempts": 23
+      },
+      "episode_id": "25064f1f42ff4ba28c36e4f239ba3567",
+      "error": null,
+      "identities": {
+        "bootstrap": "24a62a0bebc73216e57c5ba174f67f86c5c49b5b1c99814d5512c122ece8770b",
+        "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+        "contract": "840a439dcba616f2de1016d7ac0e4ffad2c964295e98d662e49a3b68a760dac7"
+      },
+      "last_operation": {
+        "request_id": "bb44292115314992913f2438975ca2c2",
+        "status": "interrupted",
+        "write_certainty": "known_partial"
+      },
+      "mode": "candidate",
+      "outcome": {
+        "evaluator_id": null,
+        "recovery_attempted": true,
+        "reentry_completed": true,
+        "task_success": null
+      },
+      "package_sha256": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+      "schema_version": "arx.rollout.result.v1",
+      "status": "completed",
+      "termination_reason": "recovery_budget_exhausted",
+      "trial_id": "real-candidate-retry03"
+    },
+    "result_sha256": "390033afeb61bf3f5479895e168317dea32f897a6d0ebc8ad6f0206c7e7d5f96",
+    "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_evolution_20261005/g0001/candidate-retry03",
+    "verified_task_success": false
+  },
+  "checks": {
+    "candidate_intervened": true,
+    "initial_distance_within_2cm": true,
+    "no_execution_error": true,
+    "same_backend_implementation": true,
+    "same_camera_calibrations": true,
+    "same_catalog": true,
+    "same_hardware": true,
+    "same_initial_budget": true,
+    "same_model_contract": true,
+    "same_provider": true,
+    "same_runtime_limits": true,
+    "same_task": true,
+    "start_state_within_tolerance": true,
+    "verified_arrivals": true
+  },
+  "decision": "reject",
+  "limitations": [
+    "one physical pair",
+    "no held-out or regression trials",
+    "live image placement matching requires visual review"
+  ],
+  "minimum_distance_gain_m": 0.1311259042561819,
+  "parent": {
+    "distance_m": {
+      "final": 0.24533638146627512,
+      "initial": 0.40061337284210286,
+      "minimum": 0.2384881707728029
+    },
+    "event_counts": {
+      "ObservationPublished": 601,
+      "arrival_observed": 600,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 600,
+      "command_sent": 600,
+      "critic_assessment": 600,
+      "critic_lifecycle": 1,
+      "dispatch_intent": 38,
+      "effective_arguments": 38,
+      "exposure": 38,
+      "private_evaluation": 600,
+      "real_feature_evidence": 601,
+      "step_commit": 600,
+      "step_intent": 600,
+      "tool_result": 38
+    },
+    "feature_observations": 601,
+    "first_closed_distance_m": 0.4038067268593344,
+    "first_closed_step": 26,
+    "identities": {
+      "backend_implementation": "51e294411f2353f642e367c956704c8a0b1603c4001b8a6d25b8a71779a1a5b8",
+      "bundle": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+      "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+      "feature_provider": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b",
+      "hardware": "f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836",
+      "model_contract": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+      "real_input": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34",
+      "runtime_limits": "36c68f11e61dd6643ffdb4cd57ee2a4bd031bbde40758dc5fef77a9d05e1c061",
+      "task": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56"
+    },
+    "initial_budget": {
+      "decisions": 64,
+      "recoveries": 4,
+      "steps": 600
+    },
+    "initial_camera_calibration_sha256": {
+      "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+    },
+    "initial_state": [
+      0.032235145568847656,
+      0.00438690185546875,
+      0.00362396240234375,
+      -0.038720130920410156,
+      -0.02689361572265625,
+      -0.00820159912109375,
+      -2.9230566024780273,
+      0.01659393310546875,
+      0.00133514404296875,
+      0.00438690185546875,
+      -0.03070831298828125,
+      -0.00667572021484375,
+      0.057030677795410156,
+      -2.4729156494140625
+    ],
+    "journal_sha256": "97a535ec1c8c7a338a200b06364d42d5d7c736470cfac115b321e73f42a4e7f1",
+    "max_lift_m": 0.0027647864329145566,
+    "predicate_counts": {
+      "grasped": 0,
+      "gripper_closed": 575,
+      "gripper_contact": 0,
+      "success": 0
+    },
+    "result": {
+      "artifact_paths": {
+        "events": "events",
+        "identities": "identities.json",
+        "invocations": "invocations",
+        "tools": "tools"
+      },
+      "attempt_id": "e958b724f5564c12b8b35e59076bfd6d",
+      "cleanup_status": "complete",
+      "counts": {
+        "agent_calls": 0,
+        "physical_steps": 600,
+        "recoveries": 0,
+        "rejected_tools": 0,
+        "tool_attempts": 38
+      },
+      "episode_id": "d3fb26e62f204c9282024c7d92bb1574",
+      "error": null,
+      "identities": {
+        "bootstrap": "24a62a0bebc73216e57c5ba174f67f86c5c49b5b1c99814d5512c122ece8770b",
+        "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+        "contract": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34"
+      },
+      "last_operation": {
+        "request_id": "e84c4cd21eb945acbc60fd0acb23ac57",
+        "status": "completed",
+        "write_certainty": "completed"
+      },
+      "mode": "candidate",
+      "outcome": {
+        "evaluator_id": null,
+        "recovery_attempted": false,
+        "reentry_completed": false,
+        "task_success": null
+      },
+      "package_sha256": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+      "schema_version": "arx.rollout.result.v1",
+      "status": "completed",
+      "termination_reason": "environment_ended",
+      "trial_id": "real-parent-retry03"
+    },
+    "result_sha256": "df5fe171e48f5a96c928fae0a6970f08bb5a66bc9d935f07a2fdf78c5e24cc56",
+    "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_evolution_20261005/g0001/parent-retry03",
+    "verified_task_success": false
+  },
+  "promoted": false,
+  "reset_matching": "approximate physical matching; not simulator same-seed replay",
+  "schema_version": "arx.real.pilot_gate.v1"
+}

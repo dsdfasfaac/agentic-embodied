@@ -1,0 +1,572 @@
+{
+  "arms": {
+    "candidate": {
+      "gripper_openings": [
+        {
+          "executed_steps": 51,
+          "from": "obs-41",
+          "measured_gripper": -2.469482421875,
+          "result": {
+            "command_target_reached": true,
+            "completion": "plan_exhausted",
+            "last_committed_step": 92,
+            "physical_arrival_verified": true
+          },
+          "status": "completed",
+          "to": "obs-92"
+        },
+        {
+          "executed_steps": 51,
+          "from": "obs-133",
+          "measured_gripper": -2.4698638916015625,
+          "result": {
+            "command_target_reached": true,
+            "completion": "plan_exhausted",
+            "last_committed_step": 184,
+            "physical_arrival_verified": true
+          },
+          "status": "completed",
+          "to": "obs-184"
+        },
+        {
+          "executed_steps": 51,
+          "from": "obs-219",
+          "measured_gripper": -2.4649038314819336,
+          "result": {
+            "command_target_reached": true,
+            "completion": "plan_exhausted",
+            "last_committed_step": 270,
+            "physical_arrival_verified": true
+          },
+          "status": "completed",
+          "to": "obs-270"
+        },
+        {
+          "executed_steps": 51,
+          "from": "obs-305",
+          "measured_gripper": -2.464522361755371,
+          "result": {
+            "command_target_reached": true,
+            "completion": "plan_exhausted",
+            "last_committed_step": 356,
+            "physical_arrival_verified": true
+          },
+          "status": "completed",
+          "to": "obs-356"
+        }
+      ],
+      "home_verification": {
+        "device_health": {
+          "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits",
+          "diagnostics_available": false,
+          "fault_codes": [],
+          "transport_responsive": true
+        },
+        "expected_feedback_start_state": [
+          0.0322351456,
+          0.0062942505,
+          0.0024795532,
+          -0.0402460098,
+          -0.0268936157,
+          -0.0192642212,
+          -2.98,
+          0.018119812,
+          -0.001335144,
+          0.0032424927,
+          -0.0310897827,
+          -0.0040054321,
+          0.0700006485,
+          -2.5
+        ],
+        "features": {
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.gripper_closed": false,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.420396091730128
+        },
+        "measured_state": [
+          0.032235145568847656,
+          0.00438690185546875,
+          0.00362396240234375,
+          -0.038720130920410156,
+          -0.02689361572265625,
+          -0.00820159912109375,
+          -2.959296226501465,
+          0.01621246337890625,
+          0.00171661376953125,
+          0.00438690185546875,
+          -0.03070831298828125,
+          -0.00667572021484375,
+          0.07076358795166016,
+          -2.4374380111694336
+        ],
+        "right_controller_ee_xyz_m": [
+          -0.00021946217342444507,
+          0.0017300723806040212,
+          -0.001533613566125358
+        ],
+        "robot_commands_sent": false,
+        "schema_version": "arx.live.observation.audit.v1",
+        "sensor_age_ms": 39.988147,
+        "sensor_skew_ms": 39.364519,
+        "status": "observed",
+        "task_start_eligible": true,
+        "task_start_error": [
+          -3.1152344592833003e-11,
+          -0.00190734864453125,
+          0.0011444092023437501,
+          0.0015258788795898467,
+          -2.265624840513958e-11,
+          0.01106262207890625,
+          0.02070377349853514,
+          -0.001907348621093749,
+          0.00305175776953125,
+          0.0011444091554687502,
+          0.00038146971171874877,
+          -0.00267028811484375,
+          0.0007629394516601579,
+          0.0625619888305664
+        ]
+      },
+      "homing_all_arrivals_verified": true,
+      "homing_steps": 81,
+      "interrupts": [
+        {
+          "code": null,
+          "rule": "far_empty_closed",
+          "sequence": 385,
+          "step": 41
+        },
+        {
+          "code": null,
+          "rule": "far_empty_closed",
+          "sequence": 1240,
+          "step": 133
+        },
+        {
+          "code": null,
+          "rule": "far_empty_closed",
+          "sequence": 2041,
+          "step": 219
+        },
+        {
+          "code": null,
+          "rule": "far_empty_closed",
+          "sequence": 2842,
+          "step": 305
+        },
+        {
+          "code": "RECOVERY_BUDGET_EXHAUSTED",
+          "rule": "far_empty_closed",
+          "sequence": 3643,
+          "step": 391
+        }
+      ],
+      "journal_export_sha256": "8392d5735a52101a769ebcb10393150cd807799fdbb8e0638d1a433622ac5bf0",
+      "ordered_records_sha256": "1c8f4097d9e2e33770cd8db02f802c8e4b3fc63fb2676bff80209fa6de162593",
+      "post_episode": {
+        "controller_disabled": true,
+        "controller_stop": {
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stopped pid=20210\n"
+        },
+        "homing_is_rollout_step": false,
+        "operator_confirmed_unloaded": false,
+        "schema_version": "arx.real.post_episode.v1",
+        "status": "homed_and_disabled",
+        "termination_reason": "recovery_budget_exhausted",
+        "trial": "runs/arx_real_evolution_20261005/g0001/candidate-retry03"
+      },
+      "reviews": [
+        {
+          "result": {
+            "assessment": {
+              "checks": [
+                {
+                  "check_id": "device-health",
+                  "evidence_ids": [
+                    "obs-92"
+                  ],
+                  "reason_code": "healthy",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "sensor-freshness",
+                  "evidence_ids": [
+                    "obs-92"
+                  ],
+                  "reason_code": "fresh",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "measured-arrival",
+                  "evidence_ids": [
+                    "obs-92"
+                  ],
+                  "reason_code": "arrived",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "far_empty_closed",
+                  "evidence_ids": [
+                    "obs-92"
+                  ],
+                  "reason_code": "rule_clear",
+                  "status": "pass"
+                }
+              ],
+              "observation_id": "obs-92",
+              "policy_id": "reopen_empty_then_fresh_approach",
+              "recovery_id": "recovery-1",
+              "schema_version": "arx.reentry.assessment.v1",
+              "status": "eligible"
+            },
+            "reentry_token": "a82d1f16a1a349018317c38c2de8b6a4"
+          },
+          "sequence": 856
+        },
+        {
+          "result": {
+            "assessment": {
+              "checks": [
+                {
+                  "check_id": "device-health",
+                  "evidence_ids": [
+                    "obs-184"
+                  ],
+                  "reason_code": "healthy",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "sensor-freshness",
+                  "evidence_ids": [
+                    "obs-184"
+                  ],
+                  "reason_code": "fresh",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "measured-arrival",
+                  "evidence_ids": [
+                    "obs-184"
+                  ],
+                  "reason_code": "arrived",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "far_empty_closed",
+                  "evidence_ids": [
+                    "obs-184"
+                  ],
+                  "reason_code": "rule_clear",
+                  "status": "pass"
+                }
+              ],
+              "observation_id": "obs-184",
+              "policy_id": "reopen_empty_then_fresh_approach",
+              "recovery_id": "recovery-2",
+              "schema_version": "arx.reentry.assessment.v1",
+              "status": "eligible"
+            },
+            "reentry_token": "48532752863246ecb12be90fc8c5e8cb"
+          },
+          "sequence": 1711
+        },
+        {
+          "result": {
+            "assessment": {
+              "checks": [
+                {
+                  "check_id": "device-health",
+                  "evidence_ids": [
+                    "obs-270"
+                  ],
+                  "reason_code": "healthy",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "sensor-freshness",
+                  "evidence_ids": [
+                    "obs-270"
+                  ],
+                  "reason_code": "fresh",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "measured-arrival",
+                  "evidence_ids": [
+                    "obs-270"
+                  ],
+                  "reason_code": "arrived",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "far_empty_closed",
+                  "evidence_ids": [
+                    "obs-270"
+                  ],
+                  "reason_code": "rule_clear",
+                  "status": "pass"
+                }
+              ],
+              "observation_id": "obs-270",
+              "policy_id": "reopen_empty_then_fresh_approach",
+              "recovery_id": "recovery-3",
+              "schema_version": "arx.reentry.assessment.v1",
+              "status": "eligible"
+            },
+            "reentry_token": "84993fce79e747a7a3d6f0f999f85cea"
+          },
+          "sequence": 2512
+        },
+        {
+          "result": {
+            "assessment": {
+              "checks": [
+                {
+                  "check_id": "device-health",
+                  "evidence_ids": [
+                    "obs-356"
+                  ],
+                  "reason_code": "healthy",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "sensor-freshness",
+                  "evidence_ids": [
+                    "obs-356"
+                  ],
+                  "reason_code": "fresh",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "measured-arrival",
+                  "evidence_ids": [
+                    "obs-356"
+                  ],
+                  "reason_code": "arrived",
+                  "status": "pass"
+                },
+                {
+                  "check_id": "far_empty_closed",
+                  "evidence_ids": [
+                    "obs-356"
+                  ],
+                  "reason_code": "rule_clear",
+                  "status": "pass"
+                }
+              ],
+              "observation_id": "obs-356",
+              "policy_id": "reopen_empty_then_fresh_approach",
+              "recovery_id": "recovery-4",
+              "schema_version": "arx.reentry.assessment.v1",
+              "status": "eligible"
+            },
+            "reentry_token": "2f1c4b246cac440583554da892a90914"
+          },
+          "sequence": 3313
+        }
+      ],
+      "scene_images": {
+        "end": {
+          "front_rgb": {
+            "content_id": "rgb-695c768f0361d70cba3f8d9d19f33acb92c759a1f200b858985f6cd71dfce4bc",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "695c768f0361d70cba3f8d9d19f33acb92c759a1f200b858985f6cd71dfce4bc",
+            "width": 320
+          },
+          "left_rgb": {
+            "content_id": "rgb-a8af6d61ce78f2760759b61bdd93ed98e3d74349dfa3a9ff38af86c5604ade9d",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "a8af6d61ce78f2760759b61bdd93ed98e3d74349dfa3a9ff38af86c5604ade9d",
+            "width": 320
+          },
+          "right_rgb": {
+            "content_id": "rgb-66d26cd21809a474ddc3614ccf0631f4afcd372bdd7b9d13e3f92a148c386bde",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "66d26cd21809a474ddc3614ccf0631f4afcd372bdd7b9d13e3f92a148c386bde",
+            "width": 320
+          }
+        },
+        "start": {
+          "front_rgb": {
+            "content_id": "rgb-f82c544627b6ec893e95323059de645a15a5c81aa1a251d4ee9c9af130a3fba7",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "f82c544627b6ec893e95323059de645a15a5c81aa1a251d4ee9c9af130a3fba7",
+            "width": 320
+          },
+          "left_rgb": {
+            "content_id": "rgb-9f20dd596d971914ea4cabff9ab4aef1f31a41b28457cc9a3495186af9a5a553",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "9f20dd596d971914ea4cabff9ab4aef1f31a41b28457cc9a3495186af9a5a553",
+            "width": 320
+          },
+          "right_rgb": {
+            "content_id": "rgb-394e2ab98993df788fc45e83d8e2294655ce22ed762dba115451db660bbab1ed",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "394e2ab98993df788fc45e83d8e2294655ce22ed762dba115451db660bbab1ed",
+            "width": 320
+          }
+        }
+      },
+      "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_evolution_20261005/g0001/candidate-retry03"
+    },
+    "parent": {
+      "gripper_openings": [],
+      "home_verification": {
+        "device_health": {
+          "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits",
+          "diagnostics_available": false,
+          "fault_codes": [],
+          "transport_responsive": true
+        },
+        "expected_feedback_start_state": [
+          0.0322351456,
+          0.0062942505,
+          0.0024795532,
+          -0.0402460098,
+          -0.0268936157,
+          -0.0192642212,
+          -2.98,
+          0.018119812,
+          -0.001335144,
+          0.0032424927,
+          -0.0310897827,
+          -0.0040054321,
+          0.0700006485,
+          -2.5
+        ],
+        "features": {
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.gripper_closed": false,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.4010379603958107
+        },
+        "measured_state": [
+          0.032235145568847656,
+          0.00476837158203125,
+          0.00362396240234375,
+          -0.038720130920410156,
+          -0.02689361572265625,
+          -0.00820159912109375,
+          -2.9596776962280273,
+          0.01659393310546875,
+          0.00133514404296875,
+          0.00438690185546875,
+          -0.03070831298828125,
+          -0.01010894775390625,
+          0.057412147521972656,
+          -2.4313344955444336
+        ],
+        "right_controller_ee_xyz_m": [
+          -0.00024373052597090328,
+          0.0018636043218549006,
+          -0.001504980649962795
+        ],
+        "robot_commands_sent": false,
+        "schema_version": "arx.live.observation.audit.v1",
+        "sensor_age_ms": 19.90014,
+        "sensor_skew_ms": 19.680311,
+        "status": "observed",
+        "task_start_eligible": true,
+        "task_start_error": [
+          -3.1152344592833003e-11,
+          -0.00152587891796875,
+          0.0011444092023437501,
+          0.0015258788795898467,
+          -2.265624840513958e-11,
+          0.01106262207890625,
+          0.02032230377197264,
+          -0.001525878894531249,
+          0.00267028804296875,
+          0.0011444091554687502,
+          0.00038146971171874877,
+          -0.00610351565390625,
+          -0.012588500978027342,
+          0.0686655044555664
+        ]
+      },
+      "homing_all_arrivals_verified": true,
+      "homing_steps": 113,
+      "interrupts": [],
+      "journal_export_sha256": "c5a0493e3a2640201fb086c06e83ec65fa2482f1b44c0ee3f3bd7f91737cc0b6",
+      "ordered_records_sha256": "8c54762ee53e024394ac8a50f55e5586ae76c67f794b84a5399475cc2975cef0",
+      "post_episode": {
+        "controller_disabled": true,
+        "controller_stop": {
+          "returncode": 0,
+          "stderr": "",
+          "stdout": "stopped pid=18501\n"
+        },
+        "homing_is_rollout_step": false,
+        "operator_confirmed_unloaded": false,
+        "schema_version": "arx.real.post_episode.v1",
+        "status": "homed_and_disabled",
+        "termination_reason": "environment_ended",
+        "trial": "runs/arx_real_evolution_20261005/g0001/parent-retry03"
+      },
+      "reviews": [],
+      "scene_images": {
+        "end": {
+          "front_rgb": {
+            "content_id": "rgb-8944b7bb8a8edccc255032c9d16f9aae4d4735c4edcd679eb4e8e240f6c67030",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "8944b7bb8a8edccc255032c9d16f9aae4d4735c4edcd679eb4e8e240f6c67030",
+            "width": 320
+          },
+          "left_rgb": {
+            "content_id": "rgb-08f5c005d1fe8329ccc683df9c178971ae095973a1acba0a1a38f07f8110c844",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "08f5c005d1fe8329ccc683df9c178971ae095973a1acba0a1a38f07f8110c844",
+            "width": 320
+          },
+          "right_rgb": {
+            "content_id": "rgb-c8846c38385eafcafaf8f03f44bc387c2d6e3e6d648b40d0fa6445dd4890a591",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "c8846c38385eafcafaf8f03f44bc387c2d6e3e6d648b40d0fa6445dd4890a591",
+            "width": 320
+          }
+        },
+        "start": {
+          "front_rgb": {
+            "content_id": "rgb-1ea6e8f58e5b4b285d2c2b97eb11b4e85d8755f1cc0f0354711f71569f27c1a2",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "1ea6e8f58e5b4b285d2c2b97eb11b4e85d8755f1cc0f0354711f71569f27c1a2",
+            "width": 320
+          },
+          "left_rgb": {
+            "content_id": "rgb-c2f2771af05639f7d62507075a9c5ee9de5e44ae24bb8031bae9abd34d08f8c3",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "c2f2771af05639f7d62507075a9c5ee9de5e44ae24bb8031bae9abd34d08f8c3",
+            "width": 320
+          },
+          "right_rgb": {
+            "content_id": "rgb-c71c80dee2278e6ec16b4191c4bf807e194c4b3422e89e7d1bba09276f76c84e",
+            "encoding": "png",
+            "height": 240,
+            "sha256": "c71c80dee2278e6ec16b4191c4bf807e194c4b3422e89e7d1bba09276f76c84e",
+            "width": 320
+          }
+        }
+      },
+      "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_evolution_20261005/g0001/parent-retry03"
+    }
+  },
+  "schema_version": "arx.real.paired_execution.v1"
+}
