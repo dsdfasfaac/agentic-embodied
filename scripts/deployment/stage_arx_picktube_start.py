@@ -92,8 +92,11 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         output.write_text(json.dumps(report, indent=2, sort_keys=True) + "\n")
         if execute_steps == 0:
             return report
-        tolerance = np.asarray([0.02] * 6 + [0.04] + [0.02] * 6 + [0.04])
         start_tolerance = np.asarray(config.timing.position_tolerance)
+        # Use the same measured arrival tolerance as the deployed backend.
+        # Progress checks below still reject unchanged feedback, and every
+        # subsequent target is bounded from the latest measurement.
+        tolerance = start_tolerance
         for index in range(1, execute_steps + 1):
             if np.all(np.abs(current - goal) <= start_tolerance):
                 break
