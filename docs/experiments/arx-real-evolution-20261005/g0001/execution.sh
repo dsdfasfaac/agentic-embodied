@@ -43,7 +43,7 @@ case "${1:-check}" in
   "$PY" scripts/deployment/audit_arx_live_observation.py --hardware-sha256 "$HW_SHA" --output "runs/arx_live_readonly_20261005/${2}.json"
   ;;
  stage)
-  "$PY" scripts/deployment/stage_arx_picktube_start.py --hardware-sha256 "$HW_SHA" --execute-steps "${2}" --output "runs/arx_live_readonly_20261005/${3}.json"
+  "$PY" scripts/deployment/stage_arx_picktube_start.py --hardware-sha256 "$HW_SHA" --execute-steps "${2}" --max-joint-step-rad "${ARX_STAGE_JOINT_STEP_RAD:-0.015}" --output "runs/arx_live_readonly_20261005/${3}.json"
   ;;
  run)
   "$PY" scripts/deployment/run_arx_real_bundle.py \

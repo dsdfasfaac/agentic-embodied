@@ -39,7 +39,9 @@ def _read_fresh(device: ArxRos2Device, deadline: float):
 
 
 def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
-          execute_steps: int, output: Path) -> dict:
+          execute_steps: int, output: Path, max_joint_step_rad: float = 0.015) -> dict:
+    if not math.isfinite(max_joint_step_rad) or not 0 < max_joint_step_rad <= 0.035:
+        raise ValueError("joint staging step must be finite and in (0, 0.035] rad")
     config = load_real_hardware_config(hardware_path, hardware_sha)
     task = load_task_manifest(task_path)
     if config.arm_transport != "arx_ros2" or config.timing.control_hz != 15:
@@ -57,6 +59,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         "hardware_sha256": hardware_sha,
         "task": task.name,
         "requested_execute_steps": execute_steps,
+        "joint_step_limit_rad": max_joint_step_rad,
         "command_log": [],
         "status": "initializing",
     }
@@ -72,7 +75,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         ):
             device._native_target(chunk, calibration)
         delta = goal - current
-        arm_steps = np.abs(delta[[i for i in range(14) if i not in (6, 13)]]) / 0.015
+        arm_steps = np.abs(delta[[i for i in range(14) if i not in (6, 13)]]) / max_joint_step_rad
         gripper_steps = np.abs(delta[[6, 13]]) / 0.07
         planned = max(1, math.ceil(float(max(np.max(arm_steps), np.max(gripper_steps)))))
         if planned > 150:
@@ -96,7 +99,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                 break
             # Replan from measured feedback each time. A fixed interpolation
             # accumulates gripper tracking lag even when every step passes.
-            step = np.clip(goal - current, -0.015, 0.015)
+            step = np.clip(goal - current, -max_joint_step_rad, max_joint_step_rad)
             step[[6, 13]] = np.clip((goal - current)[[6, 13]], -0.07, 0.07)
             target = current + step
             active_joints = [axis for axis in range(14) if axis not in (6, 13)
@@ -176,13 +179,15 @@ def main() -> None:
     parser.add_argument("--task", type=Path, default=root /
                         "robots/arx/manifests/pickup_test_tube.yaml")
     parser.add_argument("--execute-steps", type=int, default=0)
+    parser.add_argument("--max-joint-step-rad", type=float, default=0.015,
+                        help="Measured staging increment; at most the deployed 0.035 rad VLA limit")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if not 0 <= args.execute_steps <= 150:
         parser.error("execute-steps must be 0..150")
     try:
         result = stage(args.hardware_config, args.hardware_sha256,
-                       args.task, args.execute_steps, args.output)
+                       args.task, args.execute_steps, args.output, args.max_joint_step_rad)
     except Exception as exc:
         print(json.dumps({"status": "failed", "error": str(exc),
                           "report": str(args.output)}, sort_keys=True))
