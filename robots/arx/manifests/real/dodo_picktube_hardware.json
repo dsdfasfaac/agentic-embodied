@@ -119,21 +119,21 @@
   },
   "right_gripper_closed_policy": 0.0,
   "right_gripper_open_policy": -3.4,
-  "gripper_closures": [
-    {
-      "channel": "right_gripper_policy",
-      "closed_feedback_policy": 0.0,
-      "open_feedback_policy": -3.4,
-      "max_closed_open_fraction": 0.30,
-      "settle_time_s": 0.20,
-      "settle_tolerance_policy": 0.04,
-      "current_channel": "right_gripper_current_native"
-    }
-  ],
   "ros2_topics": {
     "left_status": "/arm_slave_l_status",
     "right_status": "/arm_slave_r_status",
     "left_command": "/arm_master_l_status",
     "right_command": "/arm_master_r_status"
-  }
+  },
+  "gripper_closures": [
+    {
+      "channel": "right_gripper_policy",
+      "closed_feedback_policy": 0.0,
+      "open_feedback_policy": -3.4,
+      "max_closed_open_fraction": 0.3,
+      "settle_time_s": 0.2,
+      "settle_tolerance_policy": 0.04,
+      "current_channel": "right_gripper_current_native"
+    }
+  ]
 }

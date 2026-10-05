@@ -14,7 +14,7 @@ The current frozen inputs are:
 
 | Input | Tracked path | SHA-256 |
 | --- | --- | --- |
-| Hardware | `robots/arx/manifests/real/dodo_picktube_hardware.json` | `4578b5abf38262b59e8a85d6cae1026ba4517e50b284d0275499983f8b1e5ccf` |
+| Hardware | `robots/arx/manifests/real/dodo_picktube_hardware.json` | `f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836` |
 | CandidateBundle file | `robots/arx/manifests/real/sample_picktube_candidate_bundle.json` | `d3549226cd19d571684978171803ee689535aad3e80663e7dfe89551909d309e` |
 | CandidateBundle semantic identity | same file | `4ca69f3260760bf8d0df54bcd907023df2c86a2c3c4d5d80f7b32958a63a3e7a` |
 | Sample real input contract | `robots/arx/manifests/real/dodo_picktube_real_input_contract.json` | `a20a488bf7b6b1eaf828ab769e43f4d49cde97a5724fc83e7bead04a9e549c23` |
@@ -33,6 +33,16 @@ from 50 recorded PickTube episodes plus a small margin, not mechanical hard
 stops. The SDK's type-2 URDF uses broad `[-10, 10]` rad bounds; the AC one CAD
 URDF is in a different, unverified coordinate system. The command envelope
 and per-step tracking gates are enforced before each send.
+
+Right-gripper commands beyond the calibrated closed endpoint apply tightening
+preload. Arrival uses that reachable endpoint rather than the positive preload
+target. A gripper within 30% of the open span that remains within 0.04 native
+units for 0.20 s can also be recorded as `closed_settled`. This accepts closure
+against an object without claiming contact or grasp. The raw command target,
+raw feedback error, arrival reference and acceptance mode remain in the journal.
+Arm tracking, fresh feedback and device health checks remain enforced. Task
+interrupts, recovery and successful termination are decided by the bundle
+monitor and its real features; small accepted gripper errors do not end a trial.
 
 The provider computes `privileged.interaction.gripper_closed` from fresh
 right-gripper feedback, and target distance from front D405 aligned metric
