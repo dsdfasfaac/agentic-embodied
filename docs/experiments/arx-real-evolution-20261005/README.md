@@ -68,6 +68,12 @@ Host reboot requires separate authorization because it interrupts other dodo
 jobs; it has not been performed.
 The user subsequently requested no reboot and that robot control remain
 stopped. Physical comparison is deferred until the camera driver is recovered.
+After a second operator-confirmed reconnection, a bounded read-only camera
+retry produced no observation. Its process1395764 also remained in
+`uvc_ctrl_cleanup_fh` after timeout termination. The original kernel waits and
+module-in-use condition persisted. Robot controller absence was verified
+again; no new motion or comparison rollout was started. The no-reboot request
+remains in effect.
 
 ## Resume and evaluate
 
