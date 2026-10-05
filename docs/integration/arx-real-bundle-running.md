@@ -130,6 +130,15 @@ or recovery. It did not pick up the tube. Both the controller and model service
 were stopped after the trial. See
 [the trial evidence and stop diagnosis](arx-real-retention-trial-20261005.md).
 
+With the gripper preload fix, retention trial 02 completed all 600 physical
+steps with 600 verified arrivals and 600 critic assessments. It ended on the
+existing step budget, with zero critic proposals, recoveries or successes.
+The closest observed target-to-tool distance was 0.3458 m. This confirms that
+the current retention rule does not cover the nominal policy's failure to
+approach the tube. The controller and model service were left running after
+the runner closed; no manual interruption occurred in this trial. Detailed
+measurements are in the same trial report above.
+
 ## Deployment commands
 
 The dodo environment is `/home/dodo/chenfu/.venv_arx_real`; prepend

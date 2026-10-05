@@ -80,3 +80,56 @@ The supplied retention rule requires a prior positive lift and nearby target,
 so it did not cover this initial empty closure far from the tube. Any additional
 acquisition recovery must be supplied as an explicit bundle rule and bounded
 program rather than silently added to this retention candidate.
+
+## Trial 02: measured closure accepted, full budget completed
+
+Following the user's instruction to let the critic govern task interruptions,
+code `9426384` added explicit gripper closure calibration and preload arrival
+semantics. Code `1f03015` froze the regenerated hardware and provenance; its
+hardware SHA is
+`f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836`.
+The bundle, feature provider, real input contract, model and execution budgets
+are unchanged. All 45 relevant tests passed, including the trial-01 gripper
+feedback regression; the bundle's no-hardware preflight passed on dodo.
+
+Trial directory:
+`/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_picktube_20261005_retention_trial02`.
+One staging step, then 75 staging steps, passed. The final start-state audit
+was eligible, with sensor age 17.6 ms and skew 16.8 ms. The same supervised
+experiment authorization was used.
+
+| Result | Recorded value |
+| --- | --- |
+| Physical steps / verified arrivals | 600 / 600 |
+| VLA tool attempts | 38 |
+| Feature observations / critic assessments | 601 / 600 |
+| Arrival failures / critic proposals / recoveries | 0 / 0 / 0 |
+| Distance initial / minimum / final | 0.4060 / 0.3458 / 0.4229 m |
+| Maximum tube-label height change | 0.00232 m |
+| Contact / grasp / success observations | 0 / 0 / 0 |
+| Closed-gripper observations | 575 |
+
+All arrivals used position acceptance against the physical closed endpoint;
+the `closed_settled` fallback was not needed in this trial. Raw preload target
+errors remained recorded; for example the last gripper error was -0.8275 while
+measured feedback was -0.0326, within 0.1 of the physical closed endpoint.
+
+The runner returned `status: completed`, `termination_reason:
+environment_ended`, `physical_steps: 600`, and `task_success: null`. Inspection
+of the execution limit establishes the actual end cause as exhaustion of the
+existing 600-step budget. No manual interruption, critic interruption, or task
+success occurred. `completed` denotes execution completion, not successful
+pickup. The final front image shows the tube remaining in the yellow rack;
+the wrist image shows no tube held in the gripper.
+
+After this trial the gateway/runner closed their publishers automatically.
+The ROS2 controller and Model A service were left running; the assistant did
+not stop them. This differs from trial 01's explicit controller shutdown.
+
+This trial validates removal of the preload-related arrival failure. It does
+not validate task success or retention recovery. The nominal policy did not
+reach the target: even its closest observed tool point remained 34.6 cm away.
+The supplied retention rule requires distance at most 3 cm and positive lift,
+so it cannot diagnose this acquisition failure. A task-level no-progress rule
+and an explicit acquisition recovery program would be needed to cover it;
+neither is silently added to the supplied candidate.
