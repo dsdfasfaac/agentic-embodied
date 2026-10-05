@@ -1,0 +1,120 @@
+{
+  "distance_m": {
+    "final": 0.286976260452043,
+    "initial": 0.3980372931737976,
+    "minimum": 0.23625768938434138
+  },
+  "event_counts": {
+    "ObservationPublished": 517,
+    "arrival_observed": 516,
+    "artifact_finalization": 1,
+    "baseline_initialized": 1,
+    "command_dispatch_started": 516,
+    "command_sent": 516,
+    "critic_assessment": 515,
+    "critic_lifecycle": 1,
+    "dispatch_intent": 33,
+    "effective_arguments": 33,
+    "execution_error": 1,
+    "exposure": 33,
+    "private_evaluation": 516,
+    "real_feature_evidence": 516,
+    "step_commit": 516,
+    "step_intent": 516,
+    "tool_result": 33
+  },
+  "feature_observations": 516,
+  "first_closed_distance_m": 0.4061863486476057,
+  "first_closed_step": 26,
+  "identities": {
+    "bundle": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+    "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+    "feature_provider": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b",
+    "hardware": "f47a5847219cb3d83b0c1de12d902adb0461f475d65508efc165f1764ccea836",
+    "model_contract": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+    "real_input": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34",
+    "runtime_limits": "36c68f11e61dd6643ffdb4cd57ee2a4bd031bbde40758dc5fef77a9d05e1c061",
+    "task": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56"
+  },
+  "initial_budget": {
+    "decisions": 64,
+    "recoveries": 4,
+    "steps": 600
+  },
+  "initial_camera_calibration_sha256": {
+    "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+    "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+    "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+  },
+  "initial_state": [
+    0.031853675842285156,
+    0.00476837158203125,
+    0.00324249267578125,
+    -0.037575721740722656,
+    -0.02689361572265625,
+    -0.00782012939453125,
+    -2.918097496032715,
+    0.01621246337890625,
+    0.00133514404296875,
+    0.00400543212890625,
+    -0.03032684326171875,
+    -0.00667572021484375,
+    0.057030677795410156,
+    -2.4698638916015625
+  ],
+  "journal_sha256": "65025e1651f0f6608dc7922d282c19f90e2f7e6e2562ae12db97262fa7508a95",
+  "max_lift_m": 0.002772710762719399,
+  "predicate_counts": {
+    "grasped": 0,
+    "gripper_closed": 490,
+    "gripper_contact": 0,
+    "success": 0
+  },
+  "result": {
+    "artifact_paths": {
+      "events": "events",
+      "identities": "identities.json",
+      "invocations": "invocations",
+      "tools": "tools"
+    },
+    "attempt_id": "230fed3001a940b8b6a9b37e816cfb91",
+    "cleanup_status": "complete",
+    "counts": {
+      "agent_calls": 0,
+      "physical_steps": 516,
+      "recoveries": 0,
+      "rejected_tools": 0,
+      "tool_attempts": 33
+    },
+    "episode_id": "2188dc78e26e46dc90193f15d43583c5",
+    "error": {
+      "message": "critic_error",
+      "type": "RunnerError"
+    },
+    "identities": {
+      "bootstrap": "24a62a0bebc73216e57c5ba174f67f86c5c49b5b1c99814d5512c122ece8770b",
+      "catalog": "bab1863ee3326539b8a11b2043249bdf8428320efb634aa848d62eeafdbdf136",
+      "contract": "982a0ed0ca1f5b0ea5331b0d5a699d79efeaecc4d52b902fc520f569a5024d34"
+    },
+    "last_operation": {
+      "request_id": "1bb13160209f468e8abae6a885aadd51",
+      "status": "failed",
+      "write_certainty": "known_partial"
+    },
+    "mode": "candidate",
+    "outcome": {
+      "evaluator_id": null,
+      "recovery_attempted": false,
+      "reentry_completed": false,
+      "task_success": null
+    },
+    "package_sha256": "65cb030aa0efae17ad5deaddb268ee3791fd7dafd83611991284f8c08178fbb2",
+    "schema_version": "arx.rollout.result.v1",
+    "status": "infrastructure_error",
+    "termination_reason": "critic_error",
+    "trial_id": "real-parent"
+  },
+  "result_sha256": "5df874a1c48cbf04ae30e8be7d71388e9823fcb8c4b4c7ec2f7241bbe8df7bd8",
+  "trial": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_real_evolution_20261005/g0001/parent",
+  "verified_task_success": false
+}

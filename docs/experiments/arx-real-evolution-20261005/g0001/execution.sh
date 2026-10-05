@@ -23,6 +23,10 @@ case "$ARX_EVOLUTION_ARM" in
   ;;
  *) exit 2 ;;
 esac
+if [[ -n "${ARX_EVOLUTION_ATTEMPT_SUFFIX:-}" ]]; then
+ [[ "$ARX_EVOLUTION_ATTEMPT_SUFFIX" =~ ^-[a-z0-9][a-z0-9-]*$ ]] || exit 2
+ TRIAL_OUTPUT="${TRIAL_OUTPUT}${ARX_EVOLUTION_ATTEMPT_SUFFIX}"
+fi
 case "${1:-check}" in
  check)
   "$PY" scripts/deployment/serve_arx_real_gateway.py --check-config \
