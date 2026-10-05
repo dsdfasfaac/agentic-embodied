@@ -84,6 +84,12 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
         },
         "right_gripper_closed_policy": 0.0,
         "right_gripper_open_policy": -3.4,
+        "gripper_closures": [{
+            "channel": "right_gripper_policy", "closed_feedback_policy": 0.0,
+            "open_feedback_policy": -3.4, "max_closed_open_fraction": 0.30,
+            "settle_time_s": 0.20, "settle_tolerance_policy": 0.04,
+            "current_channel": "right_gripper_current_native",
+        }],
         "ros2_topics": {
             "left_status": "/arm_slave_l_status",
             "right_status": "/arm_slave_r_status",
@@ -106,6 +112,7 @@ def freeze(raw_root: Path, output: Path, provenance_path: Path) -> dict:
         "raw_data_sha256": {path.parent.name: file_sha256(path) for path in files},
         "joint_limit_scope": "recorded PickTube controller feedback envelope plus 0.05 rad; not mechanical hard stops",
         "gripper_scope": "feedback remains controller native; PickTube right actions add +0.9 native for firmer grip as frozen in the task manifest; right command range extends to +0.95",
+        "gripper_arrival_scope": "close overdrive is referenced to the measured closed endpoint; closure within 30% of open span stable within 0.04 for 0.20 s is recorded as closed_settled, not as contact or grasp",
         "motion_tested": False,
     }
     provenance_path.parent.mkdir(parents=True, exist_ok=True)

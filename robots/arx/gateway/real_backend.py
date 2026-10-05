@@ -87,6 +87,31 @@ class ArmDevice(Protocol):
 
 
 @dataclass(frozen=True)
+class GripperClosureSpec:
+    index: int
+    closed_feedback_policy: float
+    open_feedback_policy: float
+    max_closed_open_fraction: float = 0.30
+    settle_time_s: float = 0.20
+    settle_tolerance_policy: float = 0.04
+    current_channel: str | None = None
+
+    def __post_init__(self):
+        if self.index not in (6, 13):
+            raise ValueError("gripper closure index must be a gripper channel")
+        if not all(math.isfinite(v) for v in (
+            self.closed_feedback_policy, self.open_feedback_policy,
+            self.max_closed_open_fraction, self.settle_time_s,
+            self.settle_tolerance_policy,
+        )) or self.closed_feedback_policy == self.open_feedback_policy:
+            raise ValueError("invalid gripper closure calibration")
+        if not 0 < self.max_closed_open_fraction <= 0.5 or min(
+            self.settle_time_s, self.settle_tolerance_policy
+        ) <= 0:
+            raise ValueError("invalid gripper closure settlement limits")
+
+
+@dataclass(frozen=True)
 class RealBackendConfig:
     cameras: tuple[CameraIdentity, CameraIdentity, CameraIdentity]
     # Each arm: six revolute joints in radians, then one calibrated gripper
@@ -100,6 +125,7 @@ class RealBackendConfig:
     feedback_poll_s: float
     position_tolerance: tuple[float, ...]
     depth_cameras: tuple[str, ...] = ()
+    gripper_closures: tuple[GripperClosureSpec, ...] = ()
 
     def __post_init__(self):
         if tuple(camera.name for camera in self.cameras) != CAMERAS:
@@ -124,6 +150,8 @@ class RealBackendConfig:
                 raise ValueError("real backend timing limits must be finite and positive")
         if self.max_sensor_skew_ms >= self.max_sensor_age_ms:
             raise ValueError("sensor skew limit must be below age limit")
+        if len({spec.index for spec in self.gripper_closures}) != len(self.gripper_closures):
+            raise ValueError("duplicate gripper closure channels")
 
 
 class RealBackend:
@@ -146,6 +174,7 @@ class RealBackend:
         self._last_state_ns = -1
         self._event_sink = None
         self._closed = False
+        self._closure_history = {}
 
     def set_event_sink(self, sink):
         self._event_sink = sink
@@ -153,6 +182,41 @@ class RealBackend:
     def _emit(self, kind: str, payload: dict):
         if self._event_sink is not None:
             self._event_sink(kind, payload)
+
+    def _arrival_status(self, state, observed, commanded_feedback):
+        reference = commanded_feedback.copy()
+        details = {}
+        for spec in self.config.gripper_closures:
+            index = spec.index
+            span = spec.open_feedback_policy - spec.closed_feedback_policy
+            closing = (commanded_feedback[index] - spec.closed_feedback_policy) / span <= 0
+            if closing:
+                # Tightening beyond the closed endpoint applies preload; it
+                # does not create an additional reachable position.
+                reference[index] = spec.closed_feedback_policy
+            fraction = (float(state[index]) - spec.closed_feedback_policy) / span
+            stamp = observed["state_monotonic_ns"]
+            if closing and 0 <= fraction <= spec.max_closed_open_fraction:
+                anchor, since = self._closure_history.get(index, (float(state[index]), stamp))
+                if abs(float(state[index]) - anchor) > spec.settle_tolerance_policy:
+                    anchor, since = float(state[index]), stamp
+                self._closure_history[index] = (anchor, since)
+                settled = (stamp - since) / 1e9 >= spec.settle_time_s
+            else:
+                self._closure_history.pop(index, None)
+                settled = False
+            details[str(index)] = {
+                "mode": "position", "closing_command": bool(closing),
+                "measured_open_fraction": fraction, "settled": settled,
+                "current": observed.get("auxiliary_feedback", {}).get(spec.current_channel),
+            }
+        accepted = np.abs(state - reference) <= np.asarray(self.config.position_tolerance)
+        for spec in self.config.gripper_closures:
+            detail = details[str(spec.index)]
+            if not accepted[spec.index] and detail["closing_command"] and detail["settled"]:
+                accepted[spec.index] = True
+                detail["mode"] = "closed_settled"
+        return bool(np.all(accepted)), reference, details
 
     def _observe(self, *, after_ns: int | None = None) -> tuple[PolicyObservation, dict, dict, int]:
         expected = {camera.name: camera for camera in self.config.cameras}
@@ -329,27 +393,28 @@ class RealBackend:
         period_ns = round(1e9 / self.config.control_hz)
         self._next_send_ns = max(time.monotonic_ns(), receipt.sent_monotonic_ns) + period_ns
         deadline = time.monotonic() + self.config.arrival_timeout_s
-        tolerances = np.asarray(self.config.position_tolerance, dtype=np.float32)
         # The final synchronized feedback, rather than SDK return, decides arrival.
         policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
-        arrived = (
-            observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
-            and bool(np.all(np.abs(policy.state - arrival_target) <= tolerances))
+        arrived, arrival_reference, gripper_arrival = self._arrival_status(
+            policy.state, observed, arrival_target,
         )
         while not arrived and time.monotonic() < deadline:
             time.sleep(min(self.config.feedback_poll_s, max(0, deadline - time.monotonic())))
             policy, observed, feature_frames, observation_ns = self._observe(after_ns=receipt.sent_monotonic_ns)
-            arrived = (
-                observed["state_monotonic_ns"] > receipt.sent_monotonic_ns
-                and bool(np.all(np.abs(policy.state - arrival_target) <= tolerances))
+            arrived, arrival_reference, gripper_arrival = self._arrival_status(
+                policy.state, observed, arrival_target,
             )
         observed["position_error"] = (policy.state - arrival_target).tolist()
         observed["expected_feedback_target"] = arrival_target.tolist()
+        observed["arrival_reference_target"] = arrival_reference.tolist()
+        observed["gripper_arrival"] = gripper_arrival
         self._emit("arrival_observed" if arrived else "arrival_unverified", {
             "command_id": command_id,
             "state_monotonic_ns": observed["state_monotonic_ns"],
             "measured_state": policy.state.tolist(),
             "position_error": observed["position_error"],
+            "arrival_reference_target": observed["arrival_reference_target"],
+            "gripper_arrival": gripper_arrival,
             "verified": arrived,
         })
         hardware = HardwareEvidence(

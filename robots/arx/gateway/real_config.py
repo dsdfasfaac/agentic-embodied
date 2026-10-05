@@ -16,7 +16,7 @@ from zetta.evolution.jsonio import file_sha256
 from .arx_ros2_device import ArxRos2Device, Ros2Topics
 from .arx_x5_device import ArmCalibration, ArxX5Device
 from .contracts import StrictModel
-from .real_backend import CameraIdentity, RealBackend, RealBackendConfig
+from .real_backend import CameraIdentity, GripperClosureSpec, RealBackend, RealBackendConfig
 from .real_camera import RealSenseCameraSource, RealSenseCameraSpec
 
 REAL_JOINT_CHANNELS = tuple(
@@ -70,6 +70,22 @@ class TimingSettings(StrictModel):
     position_tolerance: tuple[float, ...] = Field(min_length=14, max_length=14)
 
 
+class GripperClosureSettings(StrictModel):
+    channel: Literal["left_gripper_policy", "right_gripper_policy"]
+    closed_feedback_policy: float
+    open_feedback_policy: float
+    max_closed_open_fraction: float = Field(gt=0, le=0.5)
+    settle_time_s: float = Field(gt=0)
+    settle_tolerance_policy: float = Field(gt=0)
+    current_channel: str | None = None
+
+    def specification(self):
+        return GripperClosureSpec(
+            index=REAL_JOINT_CHANNELS.index(self.channel),
+            **self.model_dump(exclude={"channel"}),
+        )
+
+
 class RealHardwareConfig(StrictModel):
     schema_version: Literal["arx.real.hardware.v1"]
     arm_transport: Literal["arx_ros2", "arx_sdk"]
@@ -83,6 +99,7 @@ class RealHardwareConfig(StrictModel):
     right_gripper_closed_policy: float
     right_gripper_open_policy: float
     ros2_topics: dict[str, str] | None = None
+    gripper_closures: list[GripperClosureSettings] = Field(default_factory=list)
 
     @model_validator(mode="after")
     def check(self):
@@ -96,6 +113,17 @@ class RealHardwareConfig(StrictModel):
             raise ValueError("at least one arm must be commandable")
         if self.right_gripper_closed_policy == self.right_gripper_open_policy:
             raise ValueError("right gripper endpoints must differ")
+        if len({spec.channel for spec in self.gripper_closures}) != len(self.gripper_closures):
+            raise ValueError("duplicate gripper closure channels")
+        for spec in self.gripper_closures:
+            spec.specification()
+            if not getattr(self, "command_" + spec.channel.split("_")[0]):
+                raise ValueError("gripper closure channel must be commandable")
+            if spec.channel == "right_gripper_policy" and (
+                spec.closed_feedback_policy != self.right_gripper_closed_policy
+                or spec.open_feedback_policy != self.right_gripper_open_policy
+            ):
+                raise ValueError("right gripper closure endpoints differ from calibrated endpoints")
         if self.ros2_topics is not None and set(self.ros2_topics) != {
             "left_status", "right_status", "left_command", "right_command"
         }:
@@ -188,6 +216,7 @@ def build_real_backend(
         feedback_poll_s=timing.feedback_poll_s,
         position_tolerance=timing.position_tolerance,
         depth_cameras=tuple(camera.name for camera in config.cameras if camera.depth_enabled),
+        gripper_closures=tuple(spec.specification() for spec in config.gripper_closures),
     )
     if config.arm_transport == "arx_ros2":
         arms = ArxRos2Device.from_ros2(

@@ -14,6 +14,7 @@ from robots.arx.gateway.real_backend import (
     CameraIdentity,
     CommandReceipt,
     DeviceHealth,
+    GripperClosureSpec,
     JointSample,
     RealBackend,
     RealBackendConfig,
@@ -162,6 +163,68 @@ def test_unverified_arrival_is_not_reported_as_acknowledgement():
     assert commit.hardware.arrival_verified is False
     assert "command_sent" in events and "arrival_unverified" in events
     assert not np.allclose(commit.command, commit.policy.state)
+
+
+def closure_backend():
+    backend, _, _ = make_backend()
+    backend.config = replace(
+        backend.config, position_tolerance=(0.05,) * 13 + (0.1,),
+        gripper_closures=(GripperClosureSpec(
+            index=13, closed_feedback_policy=0.0, open_feedback_policy=-3.4,
+            current_channel="right_gripper_current_native",
+        ),),
+    )
+    return backend
+
+
+def test_tightening_overdrive_references_physical_closed_position():
+    backend = closure_backend()
+    target = np.zeros(14)
+    target[13] = 0.0140459538
+    measured = np.zeros(14)
+    measured[13] = -0.0944156647
+    arrived, reference, details = backend._arrival_status(
+        measured, {"state_monotonic_ns": 1_000_000_000}, target,
+    )
+    assert arrived and reference[13] == 0.0
+    assert details["13"]["mode"] == "position"
+    assert target[13] == pytest.approx(0.0140459538)  # dispatch remains auditable
+
+
+def test_blocked_closure_requires_stable_near_closed_feedback_and_preserves_joint_gate():
+    backend = closure_backend()
+    target = np.zeros(14)
+    target[13] = 0.9
+    measured = np.zeros(14)
+    measured[13] = -0.85
+    hardware = {"state_monotonic_ns": 1_000_000_000,
+                "auxiliary_feedback": {"right_gripper_current_native": 0.20}}
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    hardware["state_monotonic_ns"] += 250_000_000
+    arrived, _, details = backend._arrival_status(measured, hardware, target)
+    assert arrived and details["13"]["mode"] == "closed_settled"
+    assert details["13"]["current"] == 0.20
+    measured[7] = 0.1
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    measured[7] = 0.0
+    target[13] = -2.5  # opening remains a position goal
+    assert not backend._arrival_status(measured, hardware, target)[0]
+
+
+def test_unsettled_or_open_gripper_cannot_satisfy_closing_command():
+    backend = closure_backend()
+    target = np.zeros(14)
+    target[13] = 0.9
+    measured = np.zeros(14)
+    measured[13] = -0.85
+    hardware = {"state_monotonic_ns": 1_000_000_000}
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    measured[13] = -0.7
+    hardware["state_monotonic_ns"] += 250_000_000
+    assert not backend._arrival_status(measured, hardware, target)[0]
+    measured[13] = -2.5
+    hardware["state_monotonic_ns"] += 500_000_000
+    assert not backend._arrival_status(measured, hardware, target)[0]
 
 
 def test_stale_camera_prevents_motion_observation():
