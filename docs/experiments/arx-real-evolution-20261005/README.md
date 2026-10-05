@@ -66,6 +66,8 @@ TERM, SDK reset, USB reset and physical reconnection did not clear these waits.
 shows the blocked V4L2 event-unsubscribe ioctl. No controller processes remain.
 Host reboot requires separate authorization because it interrupts other dodo
 jobs; it has not been performed.
+The user subsequently requested no reboot and that robot control remain
+stopped. Physical comparison is deferred until the camera driver is recovered.
 
 ## Resume and evaluate
 
