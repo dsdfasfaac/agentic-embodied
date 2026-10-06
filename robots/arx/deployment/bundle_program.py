@@ -49,6 +49,8 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
         calls, physical = [], 0
         reviewed = False
         resumed = False
+        proposed = False
+        grasp_review = None
         for step_index, step in enumerate(rule.steps):
             if resumed:
                 raise ValueError("no recovery step may follow VLA reentry")
@@ -75,6 +77,20 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
             elif step.tool == "arx.hold":
                 physical += args.get("steps", 0)
                 reviewed = False
+            elif step.tool == "arx.propose_grasp":
+                proposed = True
+                grasp_review = None
+            elif step.tool == "arx.review_grasp":
+                if not proposed or args.get("proposal_id") != "proposal-from-last":
+                    raise ValueError("grasp review must bind this recovery's proposal")
+                grasp_review = (args.get("phase", "pregrasp"), args.get("max_steps", 180))
+            elif step.tool == "arx.execute_grasp":
+                phase = (args.get("phase", "pregrasp"), args.get("max_steps", 180))
+                if grasp_review != phase or args.get("review_token") != "grasp-token-from-review":
+                    raise ValueError("grasp execution requires a matching immediately preceding review")
+                physical += phase[1]
+                grasp_review = None
+                reviewed = False
             elif step.tool == "arx.review_reentry":
                 if args.get("observation_ids") != ["post-recovery"]:
                     raise ValueError("review must bind the fresh post-recovery observation")
@@ -99,6 +115,8 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
             _TOOL_MODELS[step.tool].model_validate(args)
             for call_index in range(count):
                 calls.append(ProgramCall(step_index, call_index, step.tool, deepcopy(args), step.stop_when))
+            if step.tool not in ("arx.review_grasp", "arx.execute_grasp"):
+                grasp_review = None
         if not reviewed or not resumed:
             raise ValueError("recovery must review real evidence before VLA reentry")
         if len(calls) > max_tool_calls or (max_physical_steps is not None and physical > max_physical_steps):
@@ -114,7 +132,7 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
     return programs
 
 
-def resolve_call(call, observation_id, review_token):
+def resolve_call(call, observation_id, review_token, tool_outputs=None):
     args = deepcopy(call.arguments)
     if call.tool == "arx.review_reentry":
         args["observation_ids"] = [observation_id]
@@ -122,7 +140,28 @@ def resolve_call(call, observation_id, review_token):
         if not review_token:
             raise ValueError("reentry review did not grant a token")
         args["reentry_token"] = review_token
+    elif call.tool == "arx.review_grasp":
+        proposal = (tool_outputs or {}).get("proposal_id")
+        if not proposal:
+            raise ValueError("no target grasp proposal is available")
+        args["proposal_id"] = proposal
+    elif call.tool == "arx.execute_grasp":
+        token = (tool_outputs or {}).get("grasp_review_token")
+        if not token:
+            raise ValueError("no eligible grasp review token is available")
+        args["review_token"] = token
     return args
+
+
+def retain_tool_outputs(call, result, outputs):
+    value = result.get("result") or {}
+    if call.tool == "arx.propose_grasp":
+        outputs.clear()
+        outputs["proposal_id"] = value["proposal_id"]
+    elif call.tool == "arx.review_grasp":
+        outputs["grasp_review_token"] = value["review_token"]
+    elif call.tool == "arx.execute_grasp":
+        outputs.pop("grasp_review_token", None)
 
 
 def verify_call_result(call, result, *, real):
@@ -133,12 +172,16 @@ def verify_call_result(call, result, *, real):
         if real and output.get("physical_arrival_verified") is not True:
             raise ValueError("physical arrival unverified at task success")
         return None
-    if call.tool in ("arx.move_eef", "arx.set_gripper"):
+    if call.tool in ("arx.move_eef", "arx.set_gripper", "arx.execute_grasp"):
         if output.get("command_target_reached") is not True:
             raise ValueError(f"recovery target not reached: {call.tool}")
-    if call.tool in ("arx.move_eef", "arx.hold", "arx.set_gripper", "arx.zeva"):
+    if call.tool in ("arx.move_eef", "arx.hold", "arx.set_gripper", "arx.zeva", "arx.execute_grasp"):
         if real and output.get("physical_arrival_verified") is not True:
             raise ValueError(f"physical arrival unverified: {call.tool}")
+    if call.tool == "arx.propose_grasp" and (not output.get("candidates") or not output.get("proposal_id")):
+        raise ValueError("no valid target grasp proposal")
+    if call.tool == "arx.review_grasp" and (output.get("eligible") is not True or not output.get("review_token")):
+        raise ValueError("target grasp review rejected execution")
     if call.tool == "arx.review_reentry":
         if output.get("assessment", {}).get("status") != "eligible" or not output.get("reentry_token"):
             raise ValueError("real reentry conditions are not satisfied")

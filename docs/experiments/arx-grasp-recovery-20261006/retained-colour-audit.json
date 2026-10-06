@@ -1,0 +1,19 @@
+{
+  "bbox_xyxy": [
+    151,
+    41,
+    160,
+    47
+  ],
+  "live_motion_eligible": false,
+  "median_pixel_xy": [
+    155.0,
+    44.0
+  ],
+  "pixel_count": 61,
+  "robot_commands_sent": false,
+  "scope": "retained real RGB colour selection only; no paired depth or fresh state attested",
+  "source": "docs/experiments/arx-real-evolution-20261005/g0001/frames/candidate-start-front_rgb.png",
+  "source_sha256": "f82c544627b6ec893e95323059de645a15a5c81aa1a251d4ee9c9af130a3fba7",
+  "target_id": "pink_label"
+}

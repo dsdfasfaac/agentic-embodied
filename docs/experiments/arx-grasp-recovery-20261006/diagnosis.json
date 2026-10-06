@@ -1,0 +1,31 @@
+{
+  "established": {
+    "candidate_recoveries": 4,
+    "candidate_reentries": 4,
+    "candidate_success": false,
+    "existing_recovery": "open gripper and fresh VLA only",
+    "g0001_gate": "reject",
+    "parent_success": false
+  },
+  "evidence": [
+    {
+      "path": "docs/experiments/arx-real-evolution-20261005/g0001/pilot-gate-retry03.json",
+      "sha256": "b7931136526fab91d1cc1c7ba5843188d0ce19b38d77ca024fa4548607d17912"
+    },
+    {
+      "claim": "nominal policy selected an unsuitable tube colour",
+      "independently_verified": false,
+      "kind": "user_report"
+    }
+  ],
+  "hypothesis": "Target-conditioned measured pregrasp or reviewed grasp/lift can provide a spatial correction missing from reopen-only recovery.",
+  "promotion": "No promotion from software tests, distance improvement, or unverified user reports.",
+  "schema_version": 1,
+  "scope": "provisional real grasp recovery mechanism; no new real rollout",
+  "unresolved": [
+    "Actual local learned grasp inference and ARX gripper transfer.",
+    "Complete target segmentation beyond the visible label.",
+    "Whole arm/finger collision validation.",
+    "Colour-position-swap paired physical acceptance."
+  ]
+}

@@ -143,6 +143,27 @@ def test_real_backend_arrival_uses_firmer_grip_command_feedback():
     assert commit.hardware.observation["expected_feedback_target"][13] == pytest.approx(-2.5)
 
 
+def test_sensor_refresh_never_sends_a_command_and_rechecks_current_arrival():
+    backend, arm, _ = make_backend(command_offset=.9)
+    backend.reset()
+    refreshed = backend.observe()
+    assert arm.sent == []
+    assert refreshed.hardware.command_receipt is None
+    assert refreshed.hardware.arrival_verified is None
+    raw = np.asarray(TASK.start_state, np.float32)
+    raw[7] += .01
+    sent = backend.step(raw)
+    count = len(arm.sent)
+    refreshed = backend.observe()
+    assert len(arm.sent) == count
+    assert refreshed.hardware.command_receipt is None
+    assert refreshed.hardware.arrival_verified is True
+    assert refreshed.command == pytest.approx(sent.command)
+    arm.positions[7] += .1
+    assert backend.observe().hardware.arrival_verified is False
+    assert len(arm.sent) == count
+
+
 def test_real_backend_rejects_unlocked_arm_outside_frozen_start_state():
     backend, arm, _ = make_backend()
     arm.positions[13] += 0.5

@@ -88,6 +88,7 @@ class RolloutRunner:
         self.recovery_calls = {}
         self.bundle_cursors = {}
         self.bundle_tokens = {}
+        self.bundle_outputs = {}
         self.skill = ""
         self.stop_event = threading.Event()
         self.heartbeat_thread = None
@@ -666,7 +667,7 @@ class RolloutRunner:
                     {},
                 )
             elif state in ("INTERRUPTED", "RECOVERING") and getattr(self, "_structured_bundle", False):
-                from .bundle_program import resolve_call, verify_call_result
+                from .bundle_program import resolve_call, verify_call_result, retain_tool_outputs
                 rid = recovery["recovery_id"]
                 program = self.bundle_programs.get(recovery["binding_id"])
                 if program is None:
@@ -684,7 +685,8 @@ class RolloutRunner:
                 result = None
                 try:
                     arguments = resolve_call(
-                        call, before["observation_id"], self.bundle_tokens.get(rid)
+                        call, before["observation_id"], self.bundle_tokens.get(rid),
+                        self.bundle_outputs.setdefault(rid, {}),
                     )
                     result = self.dispatch(call.tool, arguments, "runner", {
                         "rationale": f"Frozen bundle {recovery['binding_id']} step {call.step_index}",
@@ -692,6 +694,8 @@ class RolloutRunner:
                     token = verify_call_result(call, result, real=getattr(self, "_real_bundle", False))
                     if token:
                         self.bundle_tokens[rid] = token
+                    if result.get("result", {}).get("completion") != "task_success":
+                        retain_tool_outputs(call, result, self.bundle_outputs[rid])
                     self.bundle_cursors[rid] = cursor + 1
                     after = self.client.observation()["observation"]
                     self._save(f"recovery/{rid}-{cursor:03d}.json", {

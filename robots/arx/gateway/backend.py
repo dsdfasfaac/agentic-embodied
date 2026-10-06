@@ -54,6 +54,12 @@ class Backend(Protocol):
     def close(self) -> None: ...
 
 
+class SensorBackend(Backend, Protocol):
+    """Hardware backend with fresh sensor reads that send no motor commands."""
+
+    def observe(self) -> StepCommit: ...
+
+
 class DirectBackend:
     """Construct this only inside the episode executor process."""
 

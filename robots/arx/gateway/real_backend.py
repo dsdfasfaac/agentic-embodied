@@ -182,6 +182,7 @@ class RealBackend:
         self._event_sink = None
         self._closed = False
         self._closure_history = {}
+        self._last_receipt = None
 
     def set_event_sink(self, sink):
         self._event_sink = sink
@@ -368,6 +369,23 @@ class RealBackend:
         )
         return StepCommit(policy, policy.state.copy(), 0.0, False, {}, hardware=hardware)
 
+    def observe(self) -> StepCommit:
+        """Read synchronized sensors without issuing or repeating a motor command."""
+        if self._started_ns is None or self._closed or self._processor is None:
+            raise RuntimeError("real backend is not ready")
+        policy, observed, frames, now = self._observe()
+        arrived = None
+        if self._last_receipt is not None:
+            reference = np.asarray(self._last_receipt.expected_feedback_target
+                                   if self._last_receipt.expected_feedback_target is not None
+                                   else self._processor.previous)
+            arrived, arrival_reference, details = self._arrival_status(policy.state, observed, reference)
+            observed.update(expected_feedback_target=reference.tolist(),
+                            arrival_reference_target=arrival_reference.tolist(), gripper_arrival=details)
+        return StepCommit(policy, self._processor.previous.copy(),
+                          (now - self._started_ns) / 1e9, False, {},
+                          hardware=HardwareEvidence(observed, None, arrived, frames))
+
     def step(self, raw_target: np.ndarray) -> StepCommit:
         if self._started_ns is None or self._closed:
             raise RuntimeError("real backend is not ready")
@@ -402,6 +420,7 @@ class RealBackend:
         receipt = self.arms.send(target.copy(), command_id)
         if receipt.command_id != command_id or receipt.sent_monotonic_ns <= 0:
             raise ValueError("arm device returned invalid command receipt")
+        self._last_receipt = receipt
         arrival_target = np.asarray(
             receipt.expected_feedback_target if receipt.expected_feedback_target is not None
             else target, dtype=np.float32,

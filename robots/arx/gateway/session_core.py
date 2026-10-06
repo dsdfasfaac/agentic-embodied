@@ -72,6 +72,8 @@ class ArxSessionCore:
         self.programs = programs or {}
         self.program_cursor = 0
         self.program_token = None
+        self.program_outputs = {}
+        self.read_samples = 0
         self.state, self.epoch, self.step_index = "READY", 0, 0
         self.decisions, self.incidents = 0, 0
         self.recovery, self.binding, self.token = None, None, None
@@ -146,12 +148,12 @@ class ArxSessionCore:
                 raise GatewayError("CRITIC_EXECUTION_ERROR")
             self._record("real_feature_evidence", deepcopy(evidence))
 
-    def _publish(self, commit, *, lifecycle):
+    def _publish(self, commit, *, lifecycle, observation_id=None):
         references, images = self.images.publish(commit.policy.images)
         self.current = {
             "schema_version": "arx.public.observation.v1",
             "episode_nonce": self.episode_id,
-            "observation_id": f"obs-{self.step_index}",
+            "observation_id": observation_id or f"obs-{self.step_index}",
             "step_index": self.step_index,
             "simulation_time_s": commit.simulation_time_s,
             "lifecycle": lifecycle,
@@ -203,7 +205,7 @@ class ArxSessionCore:
     def _context(self):
         command = self.commit.command.copy()
         command.flags.writeable = False
-        return ApprovedToolContext(command, deepcopy(self.current))
+        return ApprovedToolContext(command, deepcopy(self.current), self._images())
 
     def _critic_observation(self):
         observation = deepcopy(self.current)
@@ -268,7 +270,8 @@ class ArxSessionCore:
             if program is None or self.program_cursor >= len(program.calls):
                 raise GatewayError("BUNDLE_PLAN_EXHAUSTED")
             expected = program.calls[self.program_cursor]
-            values = resolve_call(expected, self.current["observation_id"], self.program_token)
+            values = resolve_call(expected, self.current["observation_id"], self.program_token,
+                                  self.program_outputs)
             if request.tool != expected.tool or args.model_dump() != entry.spec.input_model.model_validate(values).model_dump():
                 raise GatewayError("BUNDLE_STEP_MISMATCH")
         known = set(self.observations)
@@ -319,19 +322,30 @@ class ArxSessionCore:
         result = self._result(request)
         try:
             entry, args = self._validate(request)
+            if request.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"}:
+                self.phase_changed("observation")
+                # Fresh sensor acquisition sends no hold command and consumes no physical steps.
+                self.commit = self.backend.observe()
+                self.read_samples += 1
+                self._publish(self.commit, lifecycle="grasp-observation",
+                              observation_id=f"obs-{self.step_index}-read-{self.read_samples}")
+                self._retain_grasp_sensors()
+                self._save()
             prepared = (
                 entry.handler.prepare(args, self._context())
                 if entry.spec.kind == "execution"
                 else None
             )
-            if prepared is not None and request.tool == "arx.move_eef":
+            if prepared is not None and request.tool in {"arx.move_eef", "arx.execute_grasp"}:
                 remaining = self.limits.max_steps - self.step_index
                 if self.recovery:
                     remaining = min(remaining, self.recovery["remaining_steps"])
                 if prepared.limit > remaining:
                     raise GatewayError("PLAN_EXCEEDS_BUDGET")
         except Exception as exc:
-            result.update(status="rejected", error=self._error(exc, "validation"))
+            result.update(status="rejected", error=self._error(exc, "validation"),
+                          observation_id_after=self.current["observation_id"],
+                          control_epoch=self.epoch)
             self.journal.admit(request, result)
             self._record("attempt_rejected", result, public=True)
             self.journal.update(result, final=True)
@@ -358,14 +372,22 @@ class ArxSessionCore:
                     result={"closed": True, "finalization": "complete"},
                 )
             elif entry.spec.kind == "read_only":
-                self._review(entry.handler, args, result)
+                if request.tool == "arx.review_reentry":
+                    self._review(entry.handler, args, result)
+                else:
+                    self.phase_changed("review")
+                    value = entry.handler.inspect(args, {
+                        "observation": deepcopy(self.current), "images": self._images(),
+                        "command": self.commit.command.copy(),
+                    })
+                    result.update(status="completed", result=value)
             else:
                 self._admit_motion(request)
                 self.execute_targets(prepared, request, result)
             if result["result"] is not None:
                 entry.spec.output_model.model_validate(result["result"])
             if bundle_call is not None and result["status"] == "completed":
-                from robots.arx.deployment.bundle_program import verify_call_result
+                from robots.arx.deployment.bundle_program import verify_call_result, retain_tool_outputs
 
                 try:
                     next_token = verify_call_result(
@@ -376,6 +398,8 @@ class ArxSessionCore:
                     raise GatewayError("BUNDLE_STEP_FAILED") from exc
                 if next_token:
                     self.program_token = next_token
+                if result["result"].get("completion") != "task_success":
+                    retain_tool_outputs(bundle_call, result, self.program_outputs)
                 self.program_cursor += 1
         except Exception as exc:
             import traceback
@@ -429,6 +453,27 @@ class ArxSessionCore:
             if phase == "validation"
             else "Execution failed; consult harness diagnostics",
         }
+
+    def _retain_grasp_sensors(self):
+        """Keep the original aligned metric depth needed to replay proposal reviews."""
+        from .public import atomic_write
+        import io
+        import hashlib
+
+        frames = self._images()
+        stream = io.BytesIO()
+        np.savez_compressed(stream, **frames)
+        data = stream.getvalue()
+        # ImageStore already owns this episode's public output directory.
+        root = self.images.root.parent.parent
+        target = root / "grasp-sensors" / (self.current["observation_id"] + ".npz")
+        atomic_write(target, data)
+        self._record("grasp_sensor_evidence", {
+            "observation_id": self.current["observation_id"],
+            "path": str(target.relative_to(root)),
+            "sha256": hashlib.sha256(data).hexdigest(),
+            "depth_units": "mm", "observation": deepcopy(self.current),
+        })
 
     def _admit_motion(self, request):
         if self.recovery and request.tool == "arx.zeva":
@@ -691,6 +736,7 @@ class ArxSessionCore:
         self.binding = matches[0]
         self.program_cursor = 0
         self.program_token = None
+        self.program_outputs = {}
         self.incidents += 1
         self.state = "INTERRUPTED"
         self.recovery = {
@@ -724,6 +770,7 @@ class ArxSessionCore:
             ],
             "recovery_id": self.recovery["recovery_id"],
             "policy_id": self.binding.reentry_policy_id,
+            "tool_outputs": deepcopy(self.program_outputs),
         }
         assessment = handler.inspect(args, context)
         assessment = ReentryAssessment.model_validate(

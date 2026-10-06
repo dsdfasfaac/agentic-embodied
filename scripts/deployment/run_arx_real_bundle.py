@@ -22,6 +22,8 @@ def main():
                  "feature-provider", "feature-provider-sha256"):
         parser.add_argument("--" + name, required=True)
     parser.add_argument("--kinematics-calibration")
+    parser.add_argument("--grasp-config")
+    parser.add_argument("--grasp-config-sha256")
     parser.add_argument("--zeva-host", default="127.0.0.1")
     parser.add_argument("--zeva-port", type=int, default=5581)
     parser.add_argument("--listen-host", choices=("127.0.0.1", "::1"), default="127.0.0.1")

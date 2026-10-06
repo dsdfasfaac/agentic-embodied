@@ -77,6 +77,10 @@ def validate_decision(value, event):
         "arx.review_reentry": ReviewArgs,
         "arx.finish": FinishArgs,
     }
+    from robots.arx.gateway.grasp_contracts import ProposeGraspArgs, ReviewGraspArgs, ExecuteGraspArgs
+    models.update({"arx.propose_grasp": ProposeGraspArgs,
+                   "arx.review_grasp": ReviewGraspArgs,
+                   "arx.execute_grasp": ExecuteGraspArgs})
     if (
         specs[decision.tool]["input_schema"]
         != models[decision.tool].model_json_schema()

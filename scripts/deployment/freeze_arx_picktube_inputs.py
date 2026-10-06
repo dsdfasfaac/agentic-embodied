@@ -33,7 +33,7 @@ class _Unavailable:
         raise RuntimeError("catalog export does not execute tools")
 
 
-def freeze(bundle_path: Path, output_dir: Path) -> dict:
+def freeze(bundle_path: Path, output_dir: Path, *, grasp_config: Path | None = None) -> dict:
     root = Path(__file__).resolve().parents[2]
     task_path = root / "robots/arx/manifests/pickup_test_tube.yaml"
     model_path = root / "robots/arx/manifests/task7_model_a.yaml"
@@ -44,7 +44,10 @@ def freeze(bundle_path: Path, output_dir: Path) -> dict:
     model = load_model_contract(model_path)
     stub = _Unavailable()
     catalog = default_registry(zeva=stub, gripper=stub, eef=stub,
-                               reentry=stub).describe()
+                               reentry=stub, grasp=stub if grasp_config else None).describe()
+    if grasp_config:
+        from robots.arx.gateway.grasp_contracts import GraspRecoveryConfig
+        GraspRecoveryConfig.model_validate_json(grasp_config.read_text())
     cameras = []
     for spec, serial in zip(model.cameras,
                             ("260422272500", "260422271945", "260422275847")):
@@ -71,7 +74,7 @@ def freeze(bundle_path: Path, output_dir: Path) -> dict:
         "feature_sources": PickTubeRgbdProvider().feature_sources(),
         "max_critic_history_steps": 16,
         "max_critic_cooldown_steps": max(16, *(rule.cooldown_steps for rule in bundle.critic_rules)),
-        "max_recovery_tool_calls": 8,
+        "max_recovery_tool_calls": 16 if grasp_config else 8,
     })
     _catalog_tools(catalog, contract.tool_catalog_sha256)
     used_features = _check_rules(bundle, contract)
@@ -90,6 +93,7 @@ def freeze(bundle_path: Path, output_dir: Path) -> dict:
         "real_input_contract": str(contract_path),
         "real_input_contract_sha256": file_sha256(contract_path),
         "feature_provider_sha256": file_sha256(provider_path),
+        "grasp_config_sha256": file_sha256(grasp_config) if grasp_config else None,
         "used_features": used_features,
         "recovery_plans": recovery_plans,
         "audit_scope": "static declarations only; live joint feedback and EEF kinematics not attested",
@@ -102,8 +106,9 @@ def main() -> None:
     parser.add_argument("--bundle", type=Path, default=root /
                         "robots/arx/manifests/real/sample_picktube_candidate_bundle.json")
     parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--grasp-config", type=Path)
     args = parser.parse_args()
-    print(json.dumps(freeze(args.bundle, args.output_dir), indent=2, sort_keys=True))
+    print(json.dumps(freeze(args.bundle, args.output_dir, grasp_config=args.grasp_config), indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

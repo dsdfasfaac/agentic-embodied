@@ -1,0 +1,183 @@
+{
+  "candidate_id": "real-g0002-pink-grasp-lift-provisional",
+  "causal_hypothesis": "Reopening alone cannot supply a pink-target spatial correction. A measured pink-label RGB-D pregrasp may restore nominal acquisition.",
+  "critic_rules": [
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.lift_m",
+          "operator": "lt",
+          "threshold": 0.005
+        }
+      ],
+      "cooldown_steps": 96,
+      "dwell_steps": 16,
+      "evidence_ids": [
+        "trial02-obs26",
+        "trial02-obs600",
+        "trial02-journal-36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74"
+      ],
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "operator": "gt",
+      "proposal": "Interrupt sustained empty closure far from target; reopen then review fresh measurements before one bounded VLA chunk.",
+      "rule_id": "far_empty_closed",
+      "safety_only": false,
+      "threshold": 0.1,
+      "title": "Sustained empty closure before approach"
+    }
+  ],
+  "diagnosis_sha256": "781346201fb8825fc9733b19ca2e5472b91657ff7d565dbadc7c6fa62187cf7a",
+  "generation": 2,
+  "mechanism_change": "RGB-D target proposal, measured pregrasp and engage, target-specific loaded contact, bounded lift, five-frame success and reviewed fallback VLA reentry.",
+  "parent_sha256": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+  "recovery_rules": [
+    {
+      "evidence_ids": [
+        "g0001-paired-execution-audit-retry03",
+        "g0001-pilot-gate-retry03"
+      ],
+      "fallback": "Record failure and end the attempt. Use existing verified homing/unload cleanup; do not bypass review or silently switch engines.",
+      "precondition": "Frozen far-empty-closed critic gates; fresh current must not suggest an object is held before opening.",
+      "recovery_id": "pink_grasp_lift_then_vla",
+      "safety_constraints": [
+        "Only the gateway executes motor targets.",
+        "Fresh single-use tokens, joint limits and step budgets are enforced.",
+        "No automatic opening if current suggests an object may be held.",
+        "TCP clearance is not a full arm/finger collision certificate.",
+        "Supervised commissioning; delivered unvalidated configuration has motion disabled."
+      ],
+      "steps": [
+        {
+          "parameters": {
+            "engine": "tube_geometry",
+            "max_candidates": 8
+          },
+          "stop_when": "Fresh pink target cloud and metric proposal are recorded.",
+          "tool": "arx.propose_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "opening": 1.0
+          },
+          "stop_when": "Measured opening is verified.",
+          "tool": "arx.set_gripper"
+        },
+        {
+          "parameters": {
+            "max_steps": 240,
+            "phase": "pregrasp",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh same-target joint IK and TCP clearance are eligible.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 240,
+            "phase": "pregrasp",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches pregrasp; sent commands and feedback are recorded separately.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 90,
+            "phase": "engage",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh same-target engage review is eligible and gripper is observed open.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 90,
+            "phase": "engage",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches the reviewed target grasp position.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "opening": 0.0
+          },
+          "stop_when": "Measured closure is settled; keep existing +0.9 tightening offset.",
+          "tool": "arx.set_gripper"
+        },
+        {
+          "parameters": {
+            "max_steps": 90,
+            "phase": "lift",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Target-specific contact, completed engage and fresh lift path are verified.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 90,
+            "phase": "lift",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured bounded lift or real pink-target task success.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "steps": 5
+          },
+          "stop_when": "Five fresh observed frames maintain pink-target lift/contact, or runtime ends.",
+          "tool": "arx.hold"
+        },
+        {
+          "parameters": {
+            "observation_ids": [
+              "post-recovery"
+            ]
+          },
+          "stop_when": "Same-target measured pregrasp, healthy sensors and critic clearance permit reentry.",
+          "tool": "arx.review_reentry"
+        },
+        {
+          "parameters": {
+            "max_chunks": 1,
+            "reentry_token": "token-from-review"
+          },
+          "stop_when": "One bounded fresh VLA chunk or runtime terminal verdict.",
+          "tool": "arx.zeva"
+        }
+      ],
+      "stop_condition": "Pink-target 1cm lift held for five fresh frames ends success; honor runtime budgets.",
+      "title": "Reviewed pink-target acquisition and lift",
+      "trigger_rule_ids": [
+        "far_empty_closed"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "tool_plugin": null,
+  "validation_plan": "Retained RGB-D replay, then supervised matched parent/candidate rollouts with unchanged VLA and exposure, including colour-position swaps. Promotion requires pink-target lift of 1cm for five fresh frames and regression checks. No physical validation yet."
+}

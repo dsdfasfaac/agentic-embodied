@@ -21,7 +21,8 @@ class RealBundleRunner(RolloutRunner):
                  task, model_contract, runtime_config, runner_limits,
                  bundle, catalog, real_input_contract, real_input_sha256,
                  feature_provider, feature_provider_sha256,
-                 kinematics_calibration, zeva_host, zeva_port, listen_host, listen_port):
+                 kinematics_calibration, zeva_host, zeva_port, listen_host, listen_port,
+                 grasp_config=None, grasp_config_sha256=None):
         candidate = SimpleNamespace(package=str(bundle), package_sha256="",
                                     catalog_sha256="", contract_sha256=real_input_sha256)
         gateway = SimpleNamespace(python=str(python), host=listen_host,
@@ -44,6 +45,8 @@ class RealBundleRunner(RolloutRunner):
         self.feature_provider, self.feature_provider_sha256 = Path(feature_provider), feature_provider_sha256
         self.kinematics_calibration = Path(kinematics_calibration) if kinematics_calibration else None
         self.zeva_host, self.zeva_port = zeva_host, zeva_port
+        self.grasp_config = Path(grasp_config) if grasp_config else None
+        self.grasp_config_sha256 = grasp_config_sha256
 
     def preflight(self):
         from robots.arx.gateway.real_config import load_real_hardware_config, validate_real_hardware_config
@@ -82,6 +85,17 @@ class RealBundleRunner(RolloutRunner):
             max_physical_steps=limits.max_steps,
             nominal_chunk_steps=task.execution_steps,
         )
+        uses_grasp = any(call.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"}
+                         for p in self.bundle_programs.values() for call in p.calls)
+        if uses_grasp and self.grasp_config is None:
+            raise ValueError("grasp recovery requires a frozen grasp configuration")
+        if self.grasp_config:
+            from robots.arx.gateway.grasp_contracts import GraspRecoveryConfig
+            if file_sha256(self.grasp_config) != self.grasp_config_sha256:
+                raise ValueError("grasp configuration SHA mismatch")
+            grasp_settings = GraspRecoveryConfig.model_validate_json(self.grasp_config.read_text())
+            if uses_grasp and not grasp_settings.motion_enabled:
+                raise ValueError("grasp motion is disabled in the frozen configuration")
         if (any(call.tool == "arx.move_eef" for p in self.bundle_programs.values() for call in p.calls)
                 and self.kinematics_calibration is None):
             raise ValueError("EEF recovery requires kinematics calibration")
@@ -100,6 +114,15 @@ class RealBundleRunner(RolloutRunner):
             "runtime_limits": file_sha256(self.runtime_config),
             "backend_implementation": file_sha256(
                 Path(__file__).resolve().parents[1] / "gateway/real_backend.py"),
+            "grasp_config": self.grasp_config_sha256,
+            "grasp_implementation": file_sha256(
+                Path(__file__).resolve().parents[1] / "gateway/grasp_recovery.py") if uses_grasp else None,
+            "grasp_sources": {name: file_sha256(Path(__file__).resolve().parents[3] / name)
+                              for name in (
+                                  "robots/manipulation/grasp_proposals.py",
+                                  "robots/arx/deployment/picktube_grasp_observer.py",
+                                  "robots/arx/gateway/grasp_contracts.py",
+                              )} if self.grasp_config else None,
         })
 
     def start(self):
@@ -121,6 +144,9 @@ class RealBundleRunner(RolloutRunner):
         ]
         if self.kinematics_calibration:
             args += ["--kinematics-calibration", str(self.kinematics_calibration)]
+        if self.grasp_config:
+            args += ["--grasp-config", str(self.grasp_config),
+                     "--expected-grasp-config-sha256", self.grasp_config_sha256]
         log = (self.output / "private/gateway-process.log").open("wb")
         child_env = os.environ.copy()
         for key in list(child_env):

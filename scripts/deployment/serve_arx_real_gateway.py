@@ -46,6 +46,8 @@ class RealCoreFactory:
     feature_provider: str | None = None
     expected_feature_provider_sha256: str | None = None
     preflight_only: bool = False
+    grasp_config: str | None = None
+    expected_grasp_config_sha256: str | None = None
 
     def __call__(self, cancelled, phase_changed):
         from robots.arx.gateway.journal import Journal
@@ -118,6 +120,21 @@ class RealCoreFactory:
                 max_sensor_skew_ms=config.timing.max_sensor_skew_ms,
                 monitor=monitor,
             ) if bundle else None)
+            grasp = None
+            if self.grasp_config:
+                from zetta.evolution.jsonio import file_sha256
+                from robots.arx.gateway.grasp_contracts import GraspRecoveryConfig
+                from robots.arx.gateway.grasp_recovery import GraspRecovery, GraspReentry
+                from robots.arx.deployment.picktube_grasp_observer import PickTubeGraspObserver
+                if file_sha256(Path(self.grasp_config)) != self.expected_grasp_config_sha256:
+                    raise ValueError("grasp configuration SHA mismatch")
+                settings = GraspRecoveryConfig.model_validate_json(Path(self.grasp_config).read_text())
+                if provider is None or task.name != "pickup_test_tube":
+                    raise ValueError("PickTube grasp tools require the real PickTube observer")
+                grasp = GraspRecovery(settings, PickTubeGraspObserver(provider.impl),
+                    closed_policy=config.right_gripper_closed_policy,
+                    open_policy=config.right_gripper_open_policy, control_hz=config.timing.control_hz)
+                reentry = GraspReentry(reentry, grasp)
             registry = default_registry(
                 zeva=zeva,
                 gripper=PolicyGripperPlanner(
@@ -125,7 +142,7 @@ class RealCoreFactory:
                     open_policy=config.right_gripper_open_policy,
                     max_policy_step=task.control.max_gripper_step,
                 ),
-                eef=eef, reentry=reentry,
+                eef=eef, reentry=reentry, grasp=grasp,
             )
             if bundle:
                 catalog = registry.freeze()
@@ -160,7 +177,13 @@ class RealCoreFactory:
                 if set(programs) != {p["recovery_id"] for p in report["recovery_plans"]}:
                     raise ValueError("compiled recovery plan differs from preflight")
                 if self.preflight_only:
+                    if grasp is not None:
+                        report["grasp_motion_enabled"] = grasp.config.motion_enabled
                     return report
+                if grasp is not None and not grasp.config.motion_enabled and any(
+                    call.tool == "arx.execute_grasp" for program in programs.values() for call in program.calls
+                ):
+                    raise ValueError("grasp motion is disabled; complete commissioning and freeze an enabled configuration")
                 Path(self.output, "bundle-preflight.json").write_text(json.dumps(report, sort_keys=True))
             backend = build_real_backend(
                 config=config, task_path=task_path, model_path=model_path
@@ -201,6 +224,8 @@ def main():
     parser.add_argument("--expected-real-input-sha256")
     parser.add_argument("--feature-provider", type=Path)
     parser.add_argument("--expected-feature-provider-sha256")
+    parser.add_argument("--grasp-config", type=Path)
+    parser.add_argument("--expected-grasp-config-sha256")
     parser.add_argument("--zeva-host", default="127.0.0.1")
     parser.add_argument("--zeva-port", type=int, default=5581)
     parser.add_argument("--listen-host", choices=("127.0.0.1", "::1"), default="127.0.0.1")
@@ -229,6 +254,8 @@ def main():
                 str(args.feature_provider) if args.feature_provider else None,
                 args.expected_feature_provider_sha256,
                 True,
+                str(args.grasp_config) if args.grasp_config else None,
+                args.expected_grasp_config_sha256,
             )(lambda: False, lambda _: None)
             print(json.dumps(dict(report, hardware_opened=False), sort_keys=True))
             return
@@ -270,6 +297,8 @@ def main():
         args.expected_real_input_sha256,
         str(args.feature_provider) if args.feature_provider else None,
         args.expected_feature_provider_sha256,
+        grasp_config=str(args.grasp_config) if args.grasp_config else None,
+        expected_grasp_config_sha256=args.expected_grasp_config_sha256,
     )
     import uvicorn
     from robots.arx.gateway.service import create_app

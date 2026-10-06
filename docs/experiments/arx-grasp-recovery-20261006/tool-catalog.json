@@ -1,0 +1,936 @@
+{
+  "catalog_sha256": "efaa2d8b34f6e2300adeff8936e7ab69fa20ad50135ffc3e8fc6246537fee510",
+  "schema_version": "arx.tool.catalog.v1",
+  "tools": [
+    {
+      "allowed_states": [
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "grasp.execute_grasp"
+      ],
+      "description": "Execute one single-use reviewed grasp phase; verify measured TCP completion.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_steps": {
+            "default": 180,
+            "maximum": 240,
+            "minimum": 20,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "phase": {
+            "default": "pregrasp",
+            "enum": [
+              "pregrasp",
+              "engage",
+              "lift"
+            ],
+            "title": "Phase",
+            "type": "string"
+          },
+          "review_token": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Review Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "review_token"
+        ],
+        "title": "ExecuteGraspArgs",
+        "type": "object"
+      },
+      "kind": "execution",
+      "name": "arx.execute_grasp",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "command_target_reached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Target Reached"
+          },
+          "completion": {
+            "enum": [
+              "plan_exhausted",
+              "budget_exhausted",
+              "critic_interrupted",
+              "environment_ended",
+              "task_success",
+              "cancelled",
+              "error"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "last_committed_step": {
+            "minimum": 0,
+            "title": "Last Committed Step",
+            "type": "integer"
+          },
+          "physical_arrival_verified": {
+            "default": false,
+            "title": "Physical Arrival Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion",
+          "last_committed_step",
+          "command_target_reached"
+        ],
+        "title": "ExecutionOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "public_frames"
+      ],
+      "requires_reobservation": true,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "READY",
+        "RUNNING_NOMINAL",
+        "INTERRUPTED",
+        "RECOVERING",
+        "ENDED"
+      ],
+      "capabilities": [
+        "episode.finish"
+      ],
+      "description": "Close this episode without asserting success.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "reason": {
+            "maxLength": 2048,
+            "minLength": 1,
+            "title": "Reason",
+            "type": "string"
+          }
+        },
+        "required": [
+          "reason"
+        ],
+        "title": "FinishArgs",
+        "type": "object"
+      },
+      "kind": "episode_control",
+      "name": "arx.finish",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "closed": {
+            "const": true,
+            "default": true,
+            "title": "Closed",
+            "type": "boolean"
+          },
+          "finalization": {
+            "enum": [
+              "complete",
+              "incomplete"
+            ],
+            "title": "Finalization",
+            "type": "string"
+          }
+        },
+        "required": [
+          "finalization"
+        ],
+        "title": "FinishOutput",
+        "type": "object"
+      },
+      "requirements": [],
+      "requires_reobservation": false,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "READY",
+        "RUNNING_NOMINAL",
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "motion.hold"
+      ],
+      "description": "Hold the committed command while physics advances.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "steps": {
+            "maximum": 15,
+            "minimum": 1,
+            "title": "Steps",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "steps"
+        ],
+        "title": "HoldArgs",
+        "type": "object"
+      },
+      "kind": "execution",
+      "name": "arx.hold",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "command_target_reached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Target Reached"
+          },
+          "completion": {
+            "enum": [
+              "plan_exhausted",
+              "budget_exhausted",
+              "critic_interrupted",
+              "environment_ended",
+              "task_success",
+              "cancelled",
+              "error"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "last_committed_step": {
+            "minimum": 0,
+            "title": "Last Committed Step",
+            "type": "integer"
+          },
+          "physical_arrival_verified": {
+            "default": false,
+            "title": "Physical Arrival Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion",
+          "last_committed_step",
+          "command_target_reached"
+        ],
+        "title": "ExecutionOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "command_state"
+      ],
+      "requires_reobservation": true,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "READY",
+        "RUNNING_NOMINAL",
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "motion.move_eef"
+      ],
+      "description": "Plan a bounded relative right TCP command; arrival is not measured.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "delta_rotvec_rad": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Delta Rotvec Rad",
+            "type": "array"
+          },
+          "delta_xyz_m": {
+            "items": {
+              "type": "number"
+            },
+            "maxItems": 3,
+            "minItems": 3,
+            "title": "Delta Xyz M",
+            "type": "array"
+          },
+          "frame": {
+            "default": "tool",
+            "enum": [
+              "world",
+              "tool"
+            ],
+            "title": "Frame",
+            "type": "string"
+          },
+          "speed_m_s": {
+            "default": 0.01,
+            "exclusiveMinimum": 0,
+            "maximum": 0.03,
+            "title": "Speed M S",
+            "type": "number"
+          }
+        },
+        "required": [
+          "delta_xyz_m"
+        ],
+        "title": "EefArgs",
+        "type": "object"
+      },
+      "kind": "execution",
+      "name": "arx.move_eef",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "command_target_reached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Target Reached"
+          },
+          "completion": {
+            "enum": [
+              "plan_exhausted",
+              "budget_exhausted",
+              "critic_interrupted",
+              "environment_ended",
+              "task_success",
+              "cancelled",
+              "error"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "last_committed_step": {
+            "minimum": 0,
+            "title": "Last Committed Step",
+            "type": "integer"
+          },
+          "physical_arrival_verified": {
+            "default": false,
+            "title": "Physical Arrival Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion",
+          "last_committed_step",
+          "command_target_reached"
+        ],
+        "title": "ExecutionOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "command_state"
+      ],
+      "requires_reobservation": true,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "grasp.propose_grasp"
+      ],
+      "description": "Propose target-labelled RGB-D grasps without sending commands.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "engine": {
+            "default": "tube_geometry",
+            "enum": [
+              "tube_geometry",
+              "contact_graspnet",
+              "graspgen"
+            ],
+            "title": "Engine",
+            "type": "string"
+          },
+          "max_candidates": {
+            "default": 8,
+            "maximum": 32,
+            "minimum": 1,
+            "title": "Max Candidates",
+            "type": "integer"
+          }
+        },
+        "title": "ProposeGraspArgs",
+        "type": "object"
+      },
+      "kind": "read_only",
+      "name": "arx.propose_grasp",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "candidates": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "maxItems": 32,
+            "title": "Candidates",
+            "type": "array"
+          },
+          "engine": {
+            "title": "Engine",
+            "type": "string"
+          },
+          "environment_advanced": {
+            "const": false,
+            "default": false,
+            "title": "Environment Advanced",
+            "type": "boolean"
+          },
+          "evidence": {
+            "additionalProperties": true,
+            "title": "Evidence",
+            "type": "object"
+          },
+          "observation_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "proposal_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "proposal_only": {
+            "const": true,
+            "default": true,
+            "title": "Proposal Only",
+            "type": "boolean"
+          },
+          "target_id": {
+            "title": "Target Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "observation_id",
+          "target_id",
+          "engine",
+          "candidates",
+          "evidence"
+        ],
+        "title": "GraspProposalOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "public_frames"
+      ],
+      "requires_reobservation": false,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "grasp.review_grasp"
+      ],
+      "description": "Review fresh target identity, joint IK, budget and observed TCP clearance.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_steps": {
+            "default": 180,
+            "maximum": 240,
+            "minimum": 20,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "phase": {
+            "default": "pregrasp",
+            "enum": [
+              "pregrasp",
+              "engage",
+              "lift"
+            ],
+            "title": "Phase",
+            "type": "string"
+          },
+          "proposal_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Proposal Id",
+            "type": "string"
+          }
+        },
+        "required": [
+          "proposal_id"
+        ],
+        "title": "ReviewGraspArgs",
+        "type": "object"
+      },
+      "kind": "read_only",
+      "name": "arx.review_grasp",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "certificate_level": {
+            "const": "sensor_tcp_clearance_and_joint_ik",
+            "title": "Certificate Level",
+            "type": "string"
+          },
+          "checks": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "title": "Checks",
+            "type": "array"
+          },
+          "eligible": {
+            "title": "Eligible",
+            "type": "boolean"
+          },
+          "limitations": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Limitations",
+            "type": "array"
+          },
+          "observation_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Observation Id",
+            "type": "string"
+          },
+          "phase": {
+            "title": "Phase",
+            "type": "string"
+          },
+          "proposal_id": {
+            "maxLength": 128,
+            "minLength": 1,
+            "pattern": "^[A-Za-z0-9_-]+$",
+            "title": "Proposal Id",
+            "type": "string"
+          },
+          "review_token": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Review Token"
+          }
+        },
+        "required": [
+          "proposal_id",
+          "observation_id",
+          "phase",
+          "eligible",
+          "review_token",
+          "checks",
+          "certificate_level",
+          "limitations"
+        ],
+        "title": "GraspReviewOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "public_frames"
+      ],
+      "requires_reobservation": false,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "review.reentry"
+      ],
+      "description": "Review public evidence for reentry.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "observation_ids": {
+            "items": {
+              "maxLength": 128,
+              "minLength": 1,
+              "pattern": "^[A-Za-z0-9_-]+$",
+              "type": "string"
+            },
+            "maxItems": 30,
+            "minItems": 1,
+            "title": "Observation Ids",
+            "type": "array"
+          }
+        },
+        "required": [
+          "observation_ids"
+        ],
+        "title": "ReviewArgs",
+        "type": "object"
+      },
+      "kind": "read_only",
+      "name": "arx.review_reentry",
+      "output_schema": {
+        "$defs": {
+          "ReentryAssessment": {
+            "additionalProperties": false,
+            "properties": {
+              "checks": {
+                "items": {
+                  "$ref": "#/$defs/ReentryCheck"
+                },
+                "minItems": 1,
+                "title": "Checks",
+                "type": "array"
+              },
+              "observation_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Observation Id",
+                "type": "string"
+              },
+              "policy_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Policy Id",
+                "type": "string"
+              },
+              "recovery_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Recovery Id",
+                "type": "string"
+              },
+              "schema_version": {
+                "const": "arx.reentry.assessment.v1",
+                "default": "arx.reentry.assessment.v1",
+                "title": "Schema Version",
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "eligible",
+                  "ineligible",
+                  "unknown"
+                ],
+                "title": "Status",
+                "type": "string"
+              }
+            },
+            "required": [
+              "recovery_id",
+              "observation_id",
+              "policy_id",
+              "status",
+              "checks"
+            ],
+            "title": "ReentryAssessment",
+            "type": "object"
+          },
+          "ReentryCheck": {
+            "additionalProperties": false,
+            "properties": {
+              "check_id": {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Check Id",
+                "type": "string"
+              },
+              "evidence_ids": {
+                "items": {
+                  "maxLength": 128,
+                  "minLength": 1,
+                  "pattern": "^[A-Za-z0-9_-]+$",
+                  "type": "string"
+                },
+                "title": "Evidence Ids",
+                "type": "array"
+              },
+              "reason_code": {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "title": "Reason Code",
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "pass",
+                  "fail",
+                  "unknown"
+                ],
+                "title": "Status",
+                "type": "string"
+              }
+            },
+            "required": [
+              "check_id",
+              "status",
+              "evidence_ids",
+              "reason_code"
+            ],
+            "title": "ReentryCheck",
+            "type": "object"
+          }
+        },
+        "additionalProperties": false,
+        "properties": {
+          "assessment": {
+            "$ref": "#/$defs/ReentryAssessment"
+          },
+          "reentry_token": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Reentry Token"
+          }
+        },
+        "required": [
+          "assessment",
+          "reentry_token"
+        ],
+        "title": "ReviewOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "public_frames"
+      ],
+      "requires_reobservation": false,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "READY",
+        "RUNNING_NOMINAL",
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "motion.set_gripper"
+      ],
+      "description": "Set right gripper opening in command space.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_steps": {
+            "maximum": 60,
+            "minimum": 1,
+            "title": "Max Steps",
+            "type": "integer"
+          },
+          "opening": {
+            "maximum": 1,
+            "minimum": 0,
+            "title": "Opening",
+            "type": "number"
+          }
+        },
+        "required": [
+          "opening",
+          "max_steps"
+        ],
+        "title": "GripperArgs",
+        "type": "object"
+      },
+      "kind": "execution",
+      "name": "arx.set_gripper",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "command_target_reached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Target Reached"
+          },
+          "completion": {
+            "enum": [
+              "plan_exhausted",
+              "budget_exhausted",
+              "critic_interrupted",
+              "environment_ended",
+              "task_success",
+              "cancelled",
+              "error"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "last_committed_step": {
+            "minimum": 0,
+            "title": "Last Committed Step",
+            "type": "integer"
+          },
+          "physical_arrival_verified": {
+            "default": false,
+            "title": "Physical Arrival Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion",
+          "last_committed_step",
+          "command_target_reached"
+        ],
+        "title": "ExecutionOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "command_state"
+      ],
+      "requires_reobservation": true,
+      "version": 1
+    },
+    {
+      "allowed_states": [
+        "READY",
+        "RUNNING_NOMINAL",
+        "INTERRUPTED",
+        "RECOVERING"
+      ],
+      "capabilities": [
+        "motion.zeva"
+      ],
+      "description": "Infer fresh bounded Zeva targets.",
+      "input_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "max_chunks": {
+            "maximum": 4,
+            "minimum": 1,
+            "title": "Max Chunks",
+            "type": "integer"
+          },
+          "reentry_token": {
+            "anyOf": [
+              {
+                "maxLength": 128,
+                "minLength": 1,
+                "pattern": "^[A-Za-z0-9_-]+$",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Reentry Token"
+          }
+        },
+        "required": [
+          "max_chunks"
+        ],
+        "title": "ZevaArgs",
+        "type": "object"
+      },
+      "kind": "execution",
+      "name": "arx.zeva",
+      "output_schema": {
+        "additionalProperties": false,
+        "properties": {
+          "command_target_reached": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command Target Reached"
+          },
+          "completion": {
+            "enum": [
+              "plan_exhausted",
+              "budget_exhausted",
+              "critic_interrupted",
+              "environment_ended",
+              "task_success",
+              "cancelled",
+              "error"
+            ],
+            "title": "Completion",
+            "type": "string"
+          },
+          "last_committed_step": {
+            "minimum": 0,
+            "title": "Last Committed Step",
+            "type": "integer"
+          },
+          "physical_arrival_verified": {
+            "default": false,
+            "title": "Physical Arrival Verified",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "completion",
+          "last_committed_step",
+          "command_target_reached"
+        ],
+        "title": "ExecutionOutput",
+        "type": "object"
+      },
+      "requirements": [
+        "policy_observation"
+      ],
+      "requires_reobservation": true,
+      "version": 1
+    }
+  ]
+}

@@ -31,6 +31,7 @@ RECOVERY = ("INTERRUPTED", "RECOVERING")
 class ApprovedToolContext:
     command: np.ndarray
     observation: dict
+    images: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -198,7 +199,7 @@ class EefPlanner:
         return ArrayPlan(targets, convergence_target=targets[-1])
 
 
-def default_registry(*, zeva, gripper=None, eef=None, reentry=None):
+def default_registry(*, zeva, gripper=None, eef=None, reentry=None, grasp=None):
     motion_states = ("READY", "RUNNING_NOMINAL", *RECOVERY)
     dependencies = {"command_state", "policy_observation", "public_frames"}
     registry = ArxToolRegistry(dependencies)
@@ -274,6 +275,23 @@ def default_registry(*, zeva, gripper=None, eef=None, reentry=None):
             ),
             reentry,
         )
+    if grasp is not None:
+        from .grasp_contracts import (
+            ProposeGraspArgs, ReviewGraspArgs, ExecuteGraspArgs,
+            GraspProposalOutput, GraspReviewOutput,
+        )
+        from .grasp_recovery import ProposeHandler, ReviewHandler
+        for name, kind, model, output, handler, description in (
+            ("propose_grasp", "read_only", ProposeGraspArgs, GraspProposalOutput,
+             ProposeHandler(grasp), "Propose target-labelled RGB-D grasps without sending commands."),
+            ("review_grasp", "read_only", ReviewGraspArgs, GraspReviewOutput,
+             ReviewHandler(grasp), "Review fresh target identity, joint IK, budget and observed TCP clearance."),
+            ("execute_grasp", "execution", ExecuteGraspArgs, ExecutionOutput,
+             grasp, "Execute one single-use reviewed grasp phase; verify measured TCP completion."),
+        ):
+            registry.register(ArxToolSpec(
+                "arx." + name, 1, description, kind, ("grasp." + name,),
+                model, output, RECOVERY, kind == "execution", ("public_frames",)), handler)
     registry.register(
         ArxToolSpec(
             "arx.finish",

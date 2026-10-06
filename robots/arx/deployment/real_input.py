@@ -32,6 +32,7 @@ from zetta.evolution.models import (
     RecoveryRule,
     RecoveryStep,
 )
+from robots.arx.gateway.grasp_contracts import ProposeGraspArgs, ReviewGraspArgs, ExecuteGraspArgs
 
 _TOOL_MODELS = {
     "arx.finish": FinishArgs,
@@ -40,6 +41,9 @@ _TOOL_MODELS = {
     "arx.review_reentry": ReviewArgs,
     "arx.set_gripper": GripperArgs,
     "arx.zeva": ZevaArgs,
+    "arx.propose_grasp": ProposeGraspArgs,
+    "arx.review_grasp": ReviewGraspArgs,
+    "arx.execute_grasp": ExecuteGraspArgs,
 }
 
 
@@ -361,7 +365,7 @@ def _check_recoveries(
                     if call_count > contract.max_recovery_tool_calls:
                         raise ValueError("EEF movement exceeds recovery call budget")
                     arguments["delta_xyz_m"] = [value / call_count for value in vector]
-            elif step.tool in ("arx.set_gripper", "arx.hold"):
+            elif step.tool in ("arx.set_gripper", "arx.hold", "arx.execute_grasp"):
                 review_seen = False
             try:
                 model.model_validate(arguments)
@@ -372,6 +376,8 @@ def _check_recoveries(
         if calls > contract.max_recovery_tool_calls:
             raise ValueError(f"recovery exceeds tool-call budget: {recovery.recovery_id}")
         plans.append({"recovery_id": recovery.recovery_id, "tool_calls": calls, "steps": steps})
+    from .bundle_program import compile_programs
+    compile_programs(bundle, max_tool_calls=contract.max_recovery_tool_calls)
     return plans
 
 
