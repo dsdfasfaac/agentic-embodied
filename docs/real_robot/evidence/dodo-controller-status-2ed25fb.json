@@ -1,0 +1,10 @@
+{
+  "schema_version": "arx.reorganization.controller-status.v1",
+  "source_commit": "2ed25fb",
+  "command": "bash scripts/deployment/manage_arx_dodo_controller.sh status",
+  "exit_code": 1,
+  "stdout": "not running\n",
+  "stderr": "",
+  "controller_running": false,
+  "robot_commands_sent_by_validation": false
+}

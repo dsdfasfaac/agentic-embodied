@@ -1,0 +1,207 @@
+{
+  "candidate_file_sha256": "60545edef75720945975823d46f59180208b28aaa19d05e39e77932b5a076244",
+  "candidate_id": "real-pink-no-lift-timing-20261007",
+  "candidate_sha256": "a0cf09480fc15f1b5fbd835bf6d519f8e63a20317cc67ce47fa96c0c894914f8",
+  "eligible": true,
+  "feature_sources": [
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_closed",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "right_gripper_policy"
+      ],
+      "source_kind": "joint_feedback",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_contact",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.lift_m",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "number",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_rgb",
+        "right_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "m"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.grasped",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.success",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.selected.target_gripper_distance_m",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "number",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "m"
+    }
+  ],
+  "grasp_motion_enabled": true,
+  "hardware_opened": false,
+  "model_contract_sha256": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+  "real_contract_sha256": "b37e6d78badb37b4e7e866154edee7d07a1cc8f82a51f20d66801768b400a044",
+  "recovery_plans": [
+    {
+      "recovery_id": "pink_engage_retention_then_vla",
+      "steps": [
+        {
+          "tool": "arx.set_gripper",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.set_gripper",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.hold",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_reentry",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.zeva",
+          "tool_calls": 1
+        }
+      ],
+      "tool_calls": 15
+    }
+  ],
+  "robot_id": "can1+can3",
+  "schema_version": "arx.real.preflight.v1",
+  "task_manifest_sha256": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56",
+  "tool_catalog_sha256": "b60a5187d7456e688ec9415093a51e8cc931dafa2a6b699f9fe0fa7a41b0f406"
+}
