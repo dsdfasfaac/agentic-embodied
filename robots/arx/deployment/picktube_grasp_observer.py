@@ -28,7 +28,8 @@ class PickTubeGraspObserver:
         if depth.dtype != np.uint16 or depth.shape != rgb.shape[:2]:
             raise ValueError("aligned front D405 depth must be uint16 millimetres")
         mask = sample["mask"]
-        valid = (depth >= 80) & (depth <= 1500)
+        # Use the same admitted physical range as the target observer.
+        valid = (depth >= sample.get("depth_min_mm", 80)) & (depth <= 1500)
         yy, xx = np.nonzero(mask & valid)
         if len(xx) < 12:
             raise ValueError("pink label requires at least 12 fresh depth points")

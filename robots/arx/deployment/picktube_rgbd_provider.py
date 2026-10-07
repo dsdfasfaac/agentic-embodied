@@ -35,6 +35,9 @@ NOMINAL_CHAIN_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_on
 NOMINAL_CHAIN_SHA256 = "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
 RIGHT_JOINT_IDS = [f"right_joint_{i}" for i in range(1, 7)]
 RIGHT_GRIPPER_CURRENT = "right_gripper_current_native"
+# The validated wrist D405 reaches 70 mm; contact observations were being
+# censored at 79 mm by the old generic 80 mm cutoff. Front range is unchanged.
+WRIST_DEPTH_MIN_MM = 70
 # The first 100 frames of 50 accepted PickTube recordings have a 99th
 # percentile empty/open right gripper current of 0.0904 native units.
 CONTACT_CURRENT_THRESHOLD = 0.16
@@ -264,7 +267,8 @@ class PickTubeRgbdProvider:
         if depth.dtype != np.uint16 or depth.shape != (240, 320):
             raise ValueError("aligned D405 millimetre depth required")
         mask = tracker._pink_component(rgb)
-        valid = mask & (depth >= 80) & (depth <= 1500)
+        depth_min_mm = WRIST_DEPTH_MIN_MM if camera == "right_rgb" else 80
+        valid = mask & (depth >= depth_min_mm) & (depth <= 1500)
         yy, xx = np.nonzero(valid)
         # Near an occluding gripper the few remaining depth pixels can land
         # on its edge. Require support over the label before trusting a 3D
@@ -286,6 +290,7 @@ class PickTubeRgbdProvider:
             raise ValueError("RGB-D identity timestamps differ")
         return {"camera": camera, "depth_key": depth_key, "stamp": stamp,
                 "mask": mask, "depth_support_fraction": len(xx) / np.count_nonzero(mask),
+                "depth_min_mm": depth_min_mm,
                 "transform_left": transform, "point_camera": point,
                 "point_left": (transform @ np.r_[point, 1.])[:3], "deproject": deproject}
 
@@ -375,6 +380,7 @@ class PickTubeRgbdProvider:
             "target_monotonic_ns": sample["stamp"], "cross_camera_error_m": cross_error,
             "cross_camera_disagreement": cross_error is not None and cross_error > .015,
             "depth_support_fraction": sample.get("depth_support_fraction"),
+            "depth_min_mm": sample.get("depth_min_mm", 80),
             "wrist_identity_validations": self.wrist_validations,
             "wrist_mount_sha256": getattr(self, "wrist_mount_sha", None),
         }

@@ -1,0 +1,44 @@
+{
+  "schema_version": "arx.real.full-rollout.v1",
+  "source_baseline": "c4e9474",
+  "trial": "contact-lift-full-rollout-14",
+  "bundle": "docs/experiments/arx-contact-lift-20261007/bundle.json",
+  "bundle_file_sha256": "74b46f2b78052b6194d1e2261793a719b2a8e72d7226979282ed1921ab3a4721",
+  "real_input_sha256": "7f75cb68818bb5375938ae5ade8872c506993c9907c7d75e7fbb035d5a25ff97",
+  "hardware_sha256": "d6c40cc4ccec4ee687bc485e5a7f9632db4dd5ed90b0f31ba5276bc63b2e66a0",
+  "grasp_config_sha256": "3ac60e7c67338394b1e57eafdf07bd8bffaccb59d7d0a3b4594927becb47a9a9",
+  "feature_provider_sha256": "ab17e3388502c344c431df9b44e7065ab082dfad92ddac8ba448cf36b646b90a",
+  "runtime_limits_sha256": "ed12e3cd8251f6f8aa9244c9ca18e0c5f2cdc3e811e39d028764e7768d35f1e6",
+  "runner_limits_sha256": "c946695d48cd307fc950a634294748ead7edfafc7fdd404a270a7b8517adb965",
+  "budget": {
+    "max_steps": 600,
+    "max_decisions": 64,
+    "max_recoveries": 4
+  },
+  "model_service": "dodo loopback5583 Model A iter5000 deterministic seed42",
+  "execution": "Full RealBundleRunner with retained-step RGB-D; bundle-defined opening admission, pregrasp, refine, engage, close, contact-gated lift, hold, fresh reentry and nominal VLA.",
+  "terminal_success": "verified pink target grasp and at least 1cm lift held five fresh frames",
+  "raw_step_sensors_retained": true,
+  "post_episode": "measured home before disable; unloading required if possibly holding a tube",
+  "promotion_allowed": false,
+  "limitations": [
+    "Geometric label-surface proxy, not learned GraspGen execution.",
+    "Empty-stop opening admission is scoped to the calibrated PickTube grip; unknown or contact-held states deny release.",
+    "Single revised rollout and retrospective replay cannot justify candidate promotion.",
+    "Full arm/finger collision is not certified."
+  ],
+  "gateway_sources_sha256": {
+    "robots/arx/gateway/contracts.py": "48052d14771a3a691e84ad3334cd6cef37ddb17fbc02da1dbcceb7a036c99dd0",
+    "robots/arx/gateway/session_core.py": "41a695acfa0e6e9e47ba05529f29058c00b3b2df90dad03c4828e7e9c106c3c0",
+    "robots/arx/gateway/grasp_contracts.py": "2ea84fc9c5cca0c9311c2c3076aae689da04d13ddd77516cce709786166afabb",
+    "robots/arx/gateway/grasp_recovery.py": "256f4240f9ad4394a4eafe3fa1e99d08b8222436a77448fa4f92229c22c5b4cf",
+    "scripts/deployment/serve_arx_real_gateway.py": "e41b3890fce6201fd4f4a9a50bfdec9bf5ccf9b7e8dc32237a858f987a9b3182",
+    "robots/arx/deployment/picktube_rgbd_provider.py": "ab17e3388502c344c431df9b44e7065ab082dfad92ddac8ba448cf36b646b90a",
+    "robots/arx/deployment/picktube_grasp_observer.py": "ba73f1b138f10d5a9c59e2ff0c187ba7a84c8eecbf45748661861d8afea9aa85"
+  },
+  "kinematics_calibration": "robots/arx/manifests/real/dodo_right_controller_ee_fk.json",
+  "kinematics_calibration_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+  "real_input_contract": "docs/experiments/arx-contact-lift-20261007/frozen/real-input-contract.json",
+  "observer_correction": "Right wrist D405 valid minimum is 70mm, matching the device range. The former 80mm cutoff rejected 79mm contact depth. Keep >=80% label depth support, >=12 points, timestamp and 3D continuity gates; front cutoff unchanged.",
+  "depth_range_source": "https://www.intel.com/content/www/us/en/products/sku/229218/intel-realsense-depth-camera-d405/specifications.html"
+}

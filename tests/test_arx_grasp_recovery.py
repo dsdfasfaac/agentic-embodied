@@ -328,6 +328,24 @@ def test_target_cloud_uses_only_pink_depth_and_correct_right_base_transform():
         PickTubeGraspObserver(provider).cloud(ctx["observation"], {"front_rgb": rgb, "front_depth_mm": depth})
 
 
+def test_grasp_cloud_preserves_wrist_points_in_admitted_contact_range():
+    from robots.arx.deployment.picktube_grasp_observer import PickTubeGraspObserver
+    from robots.arx.deployment.picktube_rgbd_provider import PickTubeRgbdProvider, RIGHT_SERIAL, RIGHT_INTRINSICS_SHA256
+    p=PickTubeRgbdProvider();p.wrist_mount_sha='a'*64
+    mask=np.zeros((240,320),bool);mask[40:50,100:110]=True
+    depth=np.full((240,320),79,np.uint16);rgb=np.zeros((240,320,3),np.uint8)
+    ctx=context();h=ctx['observation']['hardware'];stamp=h['state_monotonic_ns']
+    tcp,_,_=p.controller_fk.fk(np.asarray(h['measured_state'])[7:13])
+    h.update(right_tcp_xyz_m=tcp.tolist(),right_tcp_monotonic_ns=stamp,right_tcp_frame='right_arm_local_base',
+        camera_health={'right_rgb':{'device_id':RIGHT_SERIAL}},camera_calibration_sha256={'right_rgb':RIGHT_INTRINSICS_SHA256},
+        camera_monotonic_ns={'right_rgb':stamp},depth_monotonic_ns={'right_depth_mm':stamp})
+    p.target_sample=lambda images,hardware:{'camera':'right_rgb','depth_key':'right_depth_mm','depth_min_mm':70,
+        'mask':mask,'point_camera':np.array([.01,.01,.079]),'transform_left':np.eye(4),
+        'deproject':lambda x,y,z:np.array([x*.0001,y*.0001,z])}
+    cloud=PickTubeGraspObserver(p).cloud(ctx['observation'],{'right_rgb':rgb,'right_depth_mm':depth})
+    assert len(cloud.object_camera_m)==100 and np.all(cloud.object_camera_m[:,2]==.079)
+
+
 def test_local_graspgen_protocol_centres_only_target_points_and_checks_model_identity(monkeypatch):
     import io
     import json

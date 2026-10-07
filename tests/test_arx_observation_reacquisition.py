@@ -298,3 +298,26 @@ def test_established_wrist_identity_survives_front_edge_depth_disagreement(monke
     with pytest.raises(FeatureObservationUnavailable):
         p.observe({'observation_id':'obs-6','hardware':hardware_for_provider(p,6)},
                   {'front_rgb':None,'right_rgb':right+[.1,0.,0.]})
+
+
+def test_wrist_d405_contact_range_keeps_real_79mm_points_and_rejects_holes():
+    from robots.arx.deployment.picktube_rgbd_provider import PickTubeRgbdProvider
+    p=PickTubeRgbdProvider();p.wrist_intrinsics={'fx':400.,'fy':400.}
+    mask=np.zeros((240,320),dtype=bool);mask[40:50,100:110]=True
+    tracker=SimpleNamespace(_pink_component=lambda rgb:mask)
+    depth=np.zeros((240,320),dtype=np.uint16);depth[mask]=79
+    rgb=np.zeros((240,320,3),dtype=np.uint8)
+    hardware={'depth_monotonic_ns':{'right_depth_mm':1},'camera_monotonic_ns':{'right_rgb':1}}
+    deproject=lambda x,y,z:np.array([x*.0001,y*.0001,z])
+    sample=p._label_sample(rgb,depth,tracker,np.eye(4),deproject,'right_rgb',hardware)
+    assert sample['point_camera'][2]==.079 and sample['depth_min_mm']==70
+    assert sample['depth_support_fraction']==1.
+    # The correction is specific to the validated wrist camera.
+    with pytest.raises(ValueError,match='insufficient valid metric depth'):
+        p._label_sample(rgb,depth,tracker,np.eye(4),deproject,'front_rgb',{})
+    depth[mask]=69
+    with pytest.raises(ValueError,match='insufficient valid metric depth'):
+        p._label_sample(rgb,depth,tracker,np.eye(4),deproject,'right_rgb',hardware)
+    depth[mask]=79;depth[40:43,100:110]=0
+    with pytest.raises(ValueError,match='insufficient valid metric depth'):
+        p._label_sample(rgb,depth,tracker,np.eye(4),deproject,'right_rgb',hardware)
