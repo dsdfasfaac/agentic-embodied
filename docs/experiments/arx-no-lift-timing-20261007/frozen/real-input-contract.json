@@ -190,7 +190,7 @@
       "max_age_ms": 150
     }
   ],
-  "max_critic_history_steps": 16,
+  "max_critic_history_steps": 48,
   "max_critic_cooldown_steps": 96,
   "max_recovery_tool_calls": 16
 }

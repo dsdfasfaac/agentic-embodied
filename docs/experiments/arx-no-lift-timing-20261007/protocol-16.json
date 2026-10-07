@@ -4,7 +4,7 @@
   "trial": "contact14-continuation16",
   "bundle": "docs/experiments/arx-no-lift-timing-20261007/bundle.json",
   "bundle_file_sha256": "60545edef75720945975823d46f59180208b28aaa19d05e39e77932b5a076244",
-  "real_input_sha256": "85fee7a7b3b11619d5253704146745a6495321c1bf1d362269f2d253c66956a0",
+  "real_input_sha256": "b37e6d78badb37b4e7e866154edee7d07a1cc8f82a51f20d66801768b400a044",
   "hardware_sha256": "d6c40cc4ccec4ee687bc485e5a7f9632db4dd5ed90b0f31ba5276bc63b2e66a0",
   "grasp_config_sha256": "3ac60e7c67338394b1e57eafdf07bd8bffaccb59d7d0a3b4594927becb47a9a9",
   "feature_provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
