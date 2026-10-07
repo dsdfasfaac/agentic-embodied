@@ -1,0 +1,14 @@
+{
+  "controller_disabled": true,
+  "controller_stop": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "stopped pid=119319\n"
+  },
+  "homing_is_rollout_step": false,
+  "operator_confirmed_unloaded": true,
+  "schema_version": "arx.real.post_episode.v1",
+  "status": "homed_and_disabled",
+  "termination_reason": "task_success",
+  "trial": "/mnt/hdd16t/chenfu/grasp_recovery/contact14-continuation18-physical"
+}

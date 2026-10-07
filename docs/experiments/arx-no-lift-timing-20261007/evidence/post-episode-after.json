@@ -1,0 +1,140 @@
+{
+  "schema_version": "arx.live.observation.audit.v1",
+  "status": "observed",
+  "robot_commands_sent": false,
+  "observation_scope": "hardware_home",
+  "hardware": {
+    "clock_domain": "host_monotonic_ns",
+    "observation_completed_ns": 182045742622748,
+    "measured_state": [
+      0.032235145568847656,
+      0.00476837158203125,
+      0.00400543212890625,
+      -0.039101600646972656,
+      -0.02689361572265625,
+      -0.00820159912109375,
+      -2.953192710876465,
+      0.01621246337890625,
+      0.00171661376953125,
+      0.00438690185546875,
+      -0.03108978271484375,
+      -0.00514984130859375,
+      0.07114505767822266,
+      -2.4359121322631836
+    ],
+    "state_monotonic_ns": 182045742065197,
+    "state_acquisition_started_ns": 182045741972071,
+    "camera_monotonic_ns": {
+      "front_rgb": 182045693073637,
+      "left_rgb": 182045740948282,
+      "right_rgb": 182045729586478
+    },
+    "depth_monotonic_ns": {
+      "front_depth_mm": 182045693073637
+    },
+    "camera_calibration_sha256": {
+      "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+    },
+    "sensor_age_ms": 49.549111,
+    "sensor_skew_ms": 48.99156,
+    "device_health": {
+      "transport_responsive": true,
+      "fault_codes": [],
+      "diagnostics_available": false,
+      "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits"
+    },
+    "camera_health": {
+      "front_rgb": {
+        "responsive": true,
+        "device_id": "260422272500"
+      },
+      "left_rgb": {
+        "responsive": true,
+        "device_id": "260422271945"
+      },
+      "right_rgb": {
+        "responsive": true,
+        "device_id": "260422275847"
+      }
+    },
+    "right_tcp_xyz_m": [
+      -0.00021951597614415508,
+      0.001686655046732869,
+      -0.0015695404307686234
+    ],
+    "right_tcp_frame": "right_arm_local_base",
+    "right_tcp_monotonic_ns": 182045742065197,
+    "auxiliary_feedback": {
+      "right_gripper_current_native": -0.09523773193359375
+    },
+    "auxiliary_monotonic_ns": {
+      "right_gripper_current_native": 182045742065197
+    }
+  },
+  "measured_state": [
+    0.032235145568847656,
+    0.00476837158203125,
+    0.00400543212890625,
+    -0.039101600646972656,
+    -0.02689361572265625,
+    -0.00820159912109375,
+    -2.953192710876465,
+    0.01621246337890625,
+    0.00171661376953125,
+    0.00438690185546875,
+    -0.03108978271484375,
+    -0.00514984130859375,
+    0.07114505767822266,
+    -2.4359121322631836
+  ],
+  "expected_feedback_start_state": [
+    0.0322351456,
+    0.0062942505,
+    0.0024795532,
+    -0.0402460098,
+    -0.0268936157,
+    -0.0192642212,
+    -2.98,
+    0.018119812,
+    -0.001335144,
+    0.0032424927,
+    -0.0310897827,
+    -0.0040054321,
+    0.0700006485,
+    -2.5
+  ],
+  "task_start_error": [
+    -3.1152344592833003e-11,
+    -0.00152587891796875,
+    0.0015258789289062501,
+    0.0011444091530273467,
+    -2.265624840513958e-11,
+    0.01106262207890625,
+    0.02680728912353514,
+    -0.001907348621093749,
+    0.00305175776953125,
+    0.0011444091554687502,
+    -1.4843751228177382e-11,
+    -0.0011444092085937498,
+    0.0011444091782226579,
+    0.0640878677368164
+  ],
+  "task_start_eligible": true,
+  "features": null,
+  "sensor_age_ms": 49.549111,
+  "sensor_skew_ms": 48.99156,
+  "device_health": {
+    "transport_responsive": true,
+    "fault_codes": [],
+    "diagnostics_available": false,
+    "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits"
+  },
+  "right_controller_ee_xyz_m": [
+    -0.00021951597614415508,
+    0.001686655046732869,
+    -0.0015695404307686234
+  ],
+  "retained_snapshot": null
+}

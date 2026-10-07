@@ -29,4 +29,11 @@ Use the saved generation5 bundle, `grasp-config-held-tube.json`, frozen input/ca
 
 ## Controller cleanup
 
-Controller119319 remains enabled in hold pending onsite unloading. Once unloaded, verify home from live feedback before disabling; preserve the post-episode audit here.
+After the operator confirmed the pink tube removed and both grippers empty, measured staging completed in 107 steps. The first finish audit still required the removed target to be visible and refused to disable; its [failed result](evidence/post-episode-first-result.json) is preserved. Cleanup now uses hardware observation only after explicit unloading; normal task feature checks remain enabled by default. Six focused cleanup tests passed, including missing-target cleanup and hardware-fault refusal.
+
+The retry verified home from fresh synchronized 14D feedback (`task_start_eligible=true`, sensor age 49.55 ms, skew 48.99 ms), then stopped controller PID 119319. A separate controller status query returned `not running`. Available device health confirms responsive ROS status without reported faults; motor fault-bit diagnostics are unavailable. Homing is recorded outside the 336 rollout commands.
+
+- [Measured staging](evidence/post-episode-staging.json)
+- [Home recheck](evidence/post-episode-home-recheck.json)
+- [Fresh after-home observation](evidence/post-episode-after.json)
+- [Final homed-and-disabled result](evidence/post-episode-result.json)

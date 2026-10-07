@@ -1,0 +1,10 @@
+{
+  "controller_disabled": false,
+  "error": "pink tube label is not reliably visible in front RGB",
+  "homing_is_rollout_step": false,
+  "operator_confirmed_unloaded": true,
+  "schema_version": "arx.real.post_episode.v1",
+  "status": "failed_keep_enabled",
+  "termination_reason": "task_success",
+  "trial": "/mnt/hdd16t/chenfu/grasp_recovery/contact14-continuation18-physical"
+}
