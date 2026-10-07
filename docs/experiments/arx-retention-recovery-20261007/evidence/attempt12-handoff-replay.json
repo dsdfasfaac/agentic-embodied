@@ -1,0 +1,409 @@
+{
+  "schema_version": "arx.real.handoff-replay.v1",
+  "source_trial": "retention-full-rollout-12",
+  "robot_commands_sent": false,
+  "old_provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787",
+  "new_provider_sha256": "35d69c28a53778aca4ca7fa5aa00d1b7ecb91d3d337812f9653d932f0fd33cb5",
+  "old_unknown_count": 9,
+  "new_unknown_count": 0,
+  "new_wrist_count": 9,
+  "final_samples": [
+    {
+      "observation_id": "obs-151",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176070536486326,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.9874476987447699,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176070536486326
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12343426933763033
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.40394018219546357,
+            -0.22892346077716902,
+            -0.040490737838267996
+          ],
+          "centre": [
+            90.1673640167364,
+            85.65271966527196
+          ],
+          "pixels": 239,
+          "depth_valid": 236
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-5",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176070868724390,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176070868724390
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12249530843131218
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4041491499542169,
+            -0.230317636858108,
+            -0.040587366573783576
+          ],
+          "centre": [
+            92.30864197530865,
+            86.04938271604938
+          ],
+          "pixels": 243,
+          "depth_valid": 243
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-6",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176071070058166,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176071070058166
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12193627193824505
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4031841104319188,
+            -0.2298587694017682,
+            -0.04018306820432011
+          ],
+          "centre": [
+            91.84745762711864,
+            86.20338983050847
+          ],
+          "pixels": 236,
+          "depth_valid": 236
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-7",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176071403011919,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.9956140350877193,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176071403011919
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12122027363748383
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4027588011110178,
+            -0.23063713022463272,
+            -0.04096617272271848
+          ],
+          "centre": [
+            92.26315789473684,
+            86.57456140350877
+          ],
+          "pixels": 228,
+          "depth_valid": 227
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-8",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176071668927901,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.9839357429718876,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176071668927901
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12193627193824505
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4031841104319188,
+            -0.2298587694017682,
+            -0.04018306820432011
+          ],
+          "centre": [
+            92.02008032128514,
+            86.0160642570281
+          ],
+          "pixels": 249,
+          "depth_valid": 245
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-9",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176071935448480,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.9918367346938776,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176071935448480
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12193627193824505
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4031841104319188,
+            -0.2298587694017682,
+            -0.04018306820432011
+          ],
+          "centre": [
+            91.6938775510204,
+            86.06938775510204
+          ],
+          "pixels": 245,
+          "depth_valid": 243
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-10",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176072203614531,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176072203614531
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12271265695724938
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4036460782867689,
+            -0.229444678401752,
+            -0.041326823746378444
+          ],
+          "centre": [
+            92.13215859030836,
+            86.50660792951543
+          ],
+          "pixels": 227,
+          "depth_valid": 227
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-11",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176072470079492,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.9879032258064516,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176072470079492
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12249530843131218
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4041491499542169,
+            -0.230317636858108,
+            -0.040587366573783576
+          ],
+          "centre": [
+            92.27822580645162,
+            86.17338709677419
+          ],
+          "pixels": 248,
+          "depth_valid": 245
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    },
+    {
+      "observation_id": "obs-151-reacquire-12",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 176072736796898,
+        "cross_camera_error_m": null,
+        "cross_camera_disagreement": false,
+        "depth_support_fraction": 0.984375,
+        "wrist_identity_validations": 153,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 176072736796898
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12147043819937815
+      },
+      "raw": {
+        "right_rgb": {
+          "point": [
+            0.4032349700209803,
+            -0.23073073325428334,
+            -0.040219252597189864
+          ],
+          "centre": [
+            92.05078125,
+            85.99609375
+          ],
+          "pixels": 256,
+          "depth_valid": 252
+        }
+      },
+      "anchor": [
+        0.4050637985404335,
+        -0.22258768291482697,
+        -0.0348529611129727
+      ]
+    }
+  ],
+  "interpretation": "Recorded RGB-D re-evaluated without robot motion; validates the observer correction, not successful subsequent physical grasp."
+}

@@ -1,0 +1,10 @@
+{
+  "trial": "retention-full-rollout-13",
+  "source": "onsite_operator_user_message",
+  "observation": "夹住粉色试管，暂未取下",
+  "target_grasp_operator_verified": true,
+  "automated_task_success": null,
+  "lift_executed": false,
+  "cleared_for_homing": true,
+  "clearance_confirmation": "已取下，可归位"
+}
