@@ -45,7 +45,11 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
         if held and not operator_unloaded:
             report["status"] = "requires_unloading"
             return report
-        before = audit(hardware, hardware_sha, task, model)
+        # After explicit unloading, the target may have left the scene. Home
+        # still requires fresh synchronized hardware feedback and healthy
+        # devices, but target visibility is no longer a prerequisite.
+        before = audit(hardware, hardware_sha, task, model,
+                       require_features=not operator_unloaded)
         (output / "before.json").write_text(json.dumps(before, indent=2) + "\n")
         fresh = before["features"]
         if (not operator_unloaded and fresh[prefix + "gripper_closed"] and
@@ -55,7 +59,8 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
         homing = stage(hardware, hardware_sha, task, 150, output / "homing.json", 0.035)
         if homing["status"] != "complete":
             raise ValueError("homing incomplete; leave controller enabled")
-        after = audit(hardware, hardware_sha, task, model)
+        after = audit(hardware, hardware_sha, task, model,
+                      require_features=not operator_unloaded)
         (output / "after.json").write_text(json.dumps(after, indent=2) + "\n")
         if after["task_start_eligible"] is not True:
             raise ValueError("measured home verification failed; leave controller enabled")

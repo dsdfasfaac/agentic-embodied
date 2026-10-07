@@ -16,7 +16,7 @@ def setup_trial(tmp_path, monkeypatch, *, held=False, home="complete", arrived=T
         features = {"privileged.interaction.grasped": held}
         db.execute("INSERT INTO records VALUES(1,'real_feature_evidence',?)", (json.dumps({"features": features}),))
     calls = []
-    def audit(*args):
+    def audit(*args, **kwargs):
         calls.append("audit")
         return {"task_start_eligible": arrived,
                 "features": {"privileged.interaction.gripper_closed": False,
@@ -67,3 +67,30 @@ def test_held_tube_requires_unloading_before_home(tmp_path, monkeypatch):
     result = cleanup.finish(**{**args, "output": tmp_path / "after-unloading"}, operator_unloaded=True)
     assert result["status"] == "homed_and_disabled"
     assert result["operator_confirmed_unloaded"] is True
+
+
+def test_confirmed_unloading_does_not_require_target_visibility(tmp_path, monkeypatch):
+    args, calls = setup_trial(tmp_path, monkeypatch, held=True)
+    scopes = []
+    def hardware_audit(*args, require_features=True):
+        scopes.append(require_features)
+        if require_features:
+            raise ValueError("pink tube label is not reliably visible")
+        return {"task_start_eligible": True, "features": None,
+                "observation_scope": "hardware_home"}
+    monkeypatch.setattr(cleanup, "audit", hardware_audit)
+    result = cleanup.finish(**args, operator_unloaded=True)
+    assert scopes == [False, False]
+    assert calls == ["home", "disable"]
+    assert result["status"] == "homed_and_disabled"
+
+
+def test_hardware_failure_after_unloading_keeps_enabled(tmp_path, monkeypatch):
+    args, calls = setup_trial(tmp_path, monkeypatch, held=True)
+    def unavailable(*args, **kwargs):
+        raise RuntimeError("arm device is not healthy")
+    monkeypatch.setattr(cleanup, "audit", unavailable)
+    result = cleanup.finish(**args, operator_unloaded=True)
+    assert calls == []
+    assert result["status"] == "failed_keep_enabled"
+    assert result["controller_disabled"] is False

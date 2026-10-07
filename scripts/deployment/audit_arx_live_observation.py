@@ -27,16 +27,18 @@ from robots.arx.gateway.real_config import (
 
 
 def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
-          model_path: Path, snapshot_dir: Path | None = None) -> dict:
+          model_path: Path, snapshot_dir: Path | None = None, *,
+          require_features: bool = True) -> dict:
     config = load_real_hardware_config(hardware_path, hardware_sha)
     task = load_task_manifest(task_path)
-    provider = PickTubeRgbdProvider()
-    provider.validate_hardware(config)
+    provider = PickTubeRgbdProvider() if require_features else None
+    if provider is not None:
+        provider.validate_hardware(config)
     backend = build_real_backend(config=config, task_path=task_path,
                                  model_path=model_path)
     try:
         policy, evidence, feature_frames, _ = backend._observe()
-        features = provider.observe(
+        features = None if provider is None else provider.observe(
             {"hardware": evidence}, {**policy.images, **feature_frames},
         )
         retained = None
@@ -58,6 +60,8 @@ def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
             "schema_version": "arx.live.observation.audit.v1",
             "status": "observed",
             "robot_commands_sent": False,
+            "observation_scope": "task_features" if require_features else "hardware_home",
+            "hardware": evidence,
             "measured_state": policy.state.tolist(),
             "expected_feedback_start_state": expected.tolist(),
             "task_start_error": error.tolist(),
