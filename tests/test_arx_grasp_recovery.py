@@ -394,3 +394,25 @@ def test_frozen_real_candidate_catalog_and_contract_pass_static_preflight():
         live_capabilities=live, expected_real_contract_sha256=file_sha256(path))
     assert result["eligible"]
     assert result["recovery_plans"][0]["tool_calls"] == 6
+
+
+def test_held_tube_upper_volume_only_applies_to_contact_admitted_lift():
+    rec=recovery(held_target_upper_extent_m=.04,speed_m_s=.03)
+    ctx,proposal,_=proposed_review(rec);pid=proposal['proposal_id']
+    state=np.array(ctx['observation']['hardware']['measured_state']);state[7:10]=rec.observer.target+[.015,0,0];state[13]=0
+    ctx['observation']['hardware']['measured_state']=state.tolist();ctx['command']=state
+    rec.completed_phases[pid]={'pregrasp','engage'}
+    wall=rec.observer.target+[.015,0,.025]
+    rec.observer.scene=np.r_[np.repeat([[0.,.2,0.]],64,axis=0),wall[None]]
+    args=ReviewGraspArgs(proposal_id=pid,phase='lift',max_steps=60)
+    # Geometry alone cannot authorize lifting an unverified object.
+    assert not rec.review(args,ctx)['eligible']
+    ctx['observation']['hardware']['contact']=True
+    assert rec.review(args,ctx)['eligible']
+    default=rec.config.model_copy(update={'held_target_upper_extent_m':None});previous=rec.config;rec.config=default
+    assert not rec.review(args,ctx)['eligible']
+    rec.config=previous
+    # A nearby point outside the selected target column still blocks motion.
+    rec.observer.scene=np.r_[rec.observer.scene,(rec.observer.target+[.025,0,.02])[None]]
+    denied=rec.review(args,ctx)
+    assert not denied['eligible'] and 'intersects' in denied['checks'][-1]['reason']

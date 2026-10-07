@@ -12,7 +12,7 @@ import uuid
 from pathlib import Path
 if __package__ in (None,''): sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from scripts.deployment.serve_arx_real_gateway import RealCoreFactory
-from robots.arx.deployment.grasp_continuation import read_checkpoint, restore_sensor_history, adopt_checkpoint, extend_closing_checkpoint, extend_completed_closing
+from robots.arx.deployment.grasp_continuation import read_checkpoint, restore_sensor_history, adopt_checkpoint, extend_closing_checkpoint, extend_completed_closing, extend_read_only_lift_review
 from robots.arx.deployment.bundle_program import resolve_call, compile_programs
 from robots.arx.gateway.contracts import ToolRequest
 from zetta.evolution.jsonio import file_sha256
@@ -50,6 +50,9 @@ def run(args):
         if args.completed_closing:
             if not args.completed_closing_sha256:raise ValueError('completed closing requires SHA')
             extend_completed_closing(checkpoint,args.completed_closing,args.completed_closing_sha256)
+        if args.lift_review_segment:
+            if not args.lift_review_segment_sha256:raise ValueError('lift review segment requires SHA')
+            extend_read_only_lift_review(checkpoint,args.lift_review_segment,args.lift_review_segment_sha256)
         if limits['max_steps']!=600 or limits['max_decisions']!=64:
             raise ValueError('source episode budgets must remain 600 steps and 64 decisions')
         grasp=core.registry.resolve('arx.execute_grasp').handler
@@ -100,6 +103,7 @@ def main():
     p.add_argument('--source-journal-sha256',required=True);p.add_argument('--hardware-sha256',required=True)
     p.add_argument('--source-bundle',type=Path);p.add_argument('--closing-segment',type=Path);p.add_argument('--closing-segment-sha256')
     p.add_argument('--completed-closing',type=Path);p.add_argument('--completed-closing-sha256')
+    p.add_argument('--lift-review-segment',type=Path);p.add_argument('--lift-review-segment-sha256')
     mode=p.add_mutually_exclusive_group(required=True)
     mode.add_argument('--execute',action='store_true');mode.add_argument('--check-only',action='store_true');a=p.parse_args()
     report=run(a);print(json.dumps({k:report[k] for k in ('status','task_success','termination_reason')}))

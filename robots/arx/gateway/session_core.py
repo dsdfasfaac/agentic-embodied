@@ -353,6 +353,8 @@ class ArxSessionCore:
                 if prepared.limit > remaining:
                     raise GatewayError("PLAN_EXCEEDS_BUDGET")
         except Exception as exc:
+            self._record("validation_error", {"request_id": request.request_id,
+                         "type": type(exc).__name__, "reason": str(exc)})
             result.update(status="rejected", error=self._error(exc, "validation"),
                           observation_id_after=self.current["observation_id"],
                           control_epoch=self.epoch)

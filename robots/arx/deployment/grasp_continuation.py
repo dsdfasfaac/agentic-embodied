@@ -234,3 +234,31 @@ def extend_completed_closing(checkpoint, segment, expected_sha256):
     checkpoint['cursor']+=1;checkpoint['closing_complete']=True;checkpoint['completed_closing_sha256']=expected_sha256
     checkpoint['expected_feedback']=snapshot['observation']['hardware']['measured_state']
     checkpoint['committed_command']=command
+
+
+def extend_read_only_lift_review(checkpoint, segment, expected_sha256):
+    """Charge an expired review segment with zero writes; issue no old token."""
+    segment=Path(segment);gateway=segment/'private/gateway';journal=gateway/'journal.sqlite3'
+    if file_sha256(journal)!=expected_sha256:raise ValueError('lift review segment SHA differs')
+    report=json.loads((segment/'result.json').read_text())
+    if (report['source_journal_sha256']!=checkpoint['journal_sha256'] or report['checkpoint_steps']!=checkpoint['steps']
+            or report['closing_segment_sha256']!=checkpoint['closing_segment_sha256']):
+        raise ValueError('lift review segment provenance differs')
+    with sqlite3.connect(f'file:{journal}?mode=ro',uri=True) as db:
+        records=[(k,json.loads(v)) for k,v in db.execute('select kind,payload from records order by sequence')]
+        snapshot=json.loads(db.execute('select payload from snapshot').fetchone()[0])
+    calls=[v for k,v in records if k=='tool_result'];rejected=[v for k,v in records if k=='attempt_rejected']
+    if (any(k in ('command_sent','command_dispatch_started') for k,v in records)
+            or len(calls)!=1 or calls[0]['tool']!='arx.review_grasp' or calls[0]['status']!='completed'
+            or calls[0]['result']['phase']!='lift' or not calls[0]['result']['eligible']
+            or len(rejected)!=1 or rejected[0]['tool']!='arx.execute_grasp'
+            or rejected[0]['executed_steps']!=0 or rejected[0]['write_certainty']!='none'
+            or rejected[0]['error']['code']!='VALIDATION_ERROR'
+            or report['total_physical_steps']!=checkpoint['steps']
+            or 64-snapshot['budget_remaining']['decisions']!=checkpoint['decisions']+1):
+        raise ValueError('lift review segment has writes, faults or inconsistent budgets')
+    checkpoint['histories'].append((gateway,records));checkpoint['decisions']+=1
+    checkpoint['recovery']['remaining_decisions']-=1
+    checkpoint['lift_review_segment_sha256']=expected_sha256
+    if checkpoint['recovery']['remaining_decisions']<2:
+        raise ValueError('remaining recovery budget cannot admit fresh review plus execution')

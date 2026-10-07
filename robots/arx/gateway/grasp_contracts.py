@@ -71,6 +71,9 @@ class GraspRecoveryConfig(StrictModel):
     # Conservative TCP sweep, not a full robot collision certificate.
     tcp_clearance_m: float = Field(default=.012, ge=.005, le=.03)
     target_exclusion_radius_m: float = Field(default=.020, ge=.005, le=.025)
+    # Explicitly commissioned held upright tube volume above its label.
+    # Disabled by default; applies only after target-specific lift admission.
+    held_target_upper_extent_m: float | None = Field(default=None, gt=0, le=.05)
     target_surface_offset_m: float = Field(default=.0, ge=0, le=.01)
     geometry_orientation_search_rad: float = Field(default=0., ge=0, le=.1)
     # Optional, task-specific empty-stop evidence. Never infer release from

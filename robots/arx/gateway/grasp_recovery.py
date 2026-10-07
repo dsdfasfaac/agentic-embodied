@@ -132,7 +132,16 @@ class GraspRecovery:
             # Target remains an obstacle during pregrasp. Only engage/lift may enter its ROI.
             obstacles = scene
         else:
-            obstacles = scene[np.linalg.norm(scene - target, axis=1) > self.config.target_exclusion_radius_m]
+            relative = scene - target
+            excluded = np.linalg.norm(relative, axis=1) <= self.config.target_exclusion_radius_m
+            if phase == "lift" and self.config.held_target_upper_extent_m is not None:
+                # A label-centred sphere cuts through the held tube's own
+                # upper glass wall. The commissioned upright target column
+                # moves with the grip; nearby objects outside it remain obstacles.
+                excluded |= ((np.linalg.norm(relative[:, :2], axis=1) <= self.config.target_exclusion_radius_m)
+                             & (relative[:, 2] >= 0)
+                             & (relative[:, 2] <= self.config.held_target_upper_extent_m))
+            obstacles = scene[~excluded]
         if len(obstacles) < 32:
             raise ValueError("insufficient scene points for TCP clearance review")
         targets, minimum_clearance = [], float("inf")
@@ -195,6 +204,7 @@ class GraspRecovery:
                                 "observation_id": observation["observation_id"]}
                     checks.append({"check": "bounded-joint-ik-and-tcp-clearance", "pass": True,
                                    "planned_steps": len(targets), "minimum_tcp_clearance_m": clearance,
+                                   "held_target_upper_extent_m": self.config.held_target_upper_extent_m if args.phase == "lift" else None,
                                    "goal_tcp_base": goal.tolist(), "target_evidence": cloud.evidence})
                     break
                 except ValueError as exc:
