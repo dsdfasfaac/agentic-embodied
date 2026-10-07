@@ -372,6 +372,29 @@ class RealBackend:
         # time on the first hold or Cartesian command.
         return StepCommit(policy, self._processor.previous.copy(), 0.0, False, {}, hardware=hardware)
 
+    def adopt_observed_hold(self, expected_feedback: np.ndarray) -> StepCommit:
+        """Initialize a new audited continuation without resetting or moving.
+
+        The caller must verify its journal checkpoint. This gate additionally
+        rejects controller restart, external arm movement, or gripper release.
+        Cold episode reset retains its frozen task-start requirement.
+        """
+        if self._started_ns is not None or self._closed:
+            raise RuntimeError("real backend cannot adopt an existing episode")
+        expected = np.asarray(expected_feedback, dtype=np.float32)
+        if expected.shape != (14,) or not np.isfinite(expected).all():
+            raise ValueError("continuation requires finite checkpoint feedback")
+        policy, observed, frames, now = self._observe()
+        tolerance = np.full(14, .02); tolerance[[6, 13]] = .10
+        if np.any(np.abs(policy.state - expected) > tolerance):
+            raise ValueError("live arm or gripper moved since continuation checkpoint")
+        command = policy.state.copy()
+        command[[6, 13]] -= np.asarray(self.task.control.gripper_command_offsets, dtype=np.float32)
+        self._processor = ActionProcessor(self.task, command)
+        self._started_ns = self._next_send_ns = now
+        return StepCommit(policy, self._processor.previous.copy(), 0., False, {},
+            hardware=HardwareEvidence(observed, None, None, frames))
+
     def observe(self) -> StepCommit:
         """Read synchronized sensors without issuing or repeating a motor command."""
         if self._started_ns is None or self._closed or self._processor is None:

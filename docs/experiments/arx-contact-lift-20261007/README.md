@@ -7,3 +7,7 @@
 `PickTubeGraspObserver` 同步使用样本的准入范围，避免 critic 能观测而 grasp review 仍丢弃同一批近距点。未复用旧深度或用末端 FK 构造目标抬升。SHA 与试验参数见 `protocol-14.json` / `frozen/`。
 
 当前：静态与近距回归已通过，等待离线实际 RGB-D 回放和真机复测。无自动成功或候选晋级结论。
+
+## Trial14 result
+
+278 commands,278 verified arrivals. Verified engage completed at260; closure interrupted after18 steps at278. No lift executed. Terminal observer unknown; operator confirmed pink tube held. Controller remains enabled for audited closing continuation. Minimum observed distance13.138mm; maximum observed lift2.298mm. This trial did not achieve the five-frame success condition.

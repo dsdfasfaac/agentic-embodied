@@ -1,0 +1,1492 @@
+{
+  "trial": "contact-lift-full-rollout-14",
+  "result": {
+    "artifact_paths": {
+      "events": "events",
+      "identities": "identities.json",
+      "invocations": "invocations",
+      "tools": "tools"
+    },
+    "attempt_id": "be72bedcb2fa479ab5c793fdd6faeb7a",
+    "cleanup_status": "complete",
+    "counts": {
+      "agent_calls": 0,
+      "physical_steps": 278,
+      "recoveries": 1,
+      "rejected_tools": 0,
+      "tool_attempts": 11
+    },
+    "episode_id": "d280e8ed2c41480a9301552214dde914",
+    "error": null,
+    "identities": {
+      "bootstrap": "24a62a0bebc73216e57c5ba174f67f86c5c49b5b1c99814d5512c122ece8770b",
+      "catalog": "b60a5187d7456e688ec9415093a51e8cc931dafa2a6b699f9fe0fa7a41b0f406",
+      "contract": "7f75cb68818bb5375938ae5ade8872c506993c9907c7d75e7fbb035d5a25ff97"
+    },
+    "last_operation": {
+      "request_id": "4520ccaa53304b05bbc84caf00b54e1b",
+      "status": "completed",
+      "write_certainty": "none"
+    },
+    "mode": "candidate",
+    "outcome": {
+      "evaluator_id": null,
+      "recovery_attempted": true,
+      "reentry_completed": false,
+      "task_success": null
+    },
+    "package_sha256": "fe9b859125f2c0c1a4b4b77540036961c46b28c94e399bd8f1b64355595f3ccd",
+    "schema_version": "arx.rollout.result.v1",
+    "status": "completed",
+    "termination_reason": "observation_unavailable",
+    "trial_id": "real-contact-lift-full-rollout-14"
+  },
+  "journal_sha256": "ab329082730017786bf5852d7b9b618472cee5dbe30cb879463df77805e77448",
+  "result_sha256": "04703155f013f111a7be944b44b5efe5f30ddb7c4d0639f078e72affba0141d0",
+  "command_count": 278,
+  "verified_arrival_count": 278,
+  "retained_sensor_observations": 309,
+  "wrist_observations": 121,
+  "unknown_observations": 22,
+  "milestones": {
+    "minimum_distance": {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_disagreement": false,
+        "cross_camera_error_m": null,
+        "depth_min_mm": 70,
+        "depth_support_fraction": 0.8333333333333334,
+        "lift_reference_monotonic_ns": 178300150126634,
+        "status": "observed",
+        "target_monotonic_ns": 178300817069919,
+        "unavailable_features": [],
+        "wrist_identity_validations": 160,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.00046644829732481186,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.013138074471090588
+      },
+      "observation_id": "obs-277",
+      "provider_sha256": "ab17e3388502c344c431df9b44e7065ab082dfad92ddac8ba448cf36b646b90a"
+    },
+    "maximum_lift": {
+      "feature_observation": {
+        "camera": "front_rgb",
+        "cross_camera_disagreement": false,
+        "cross_camera_error_m": 0.004361993559402336,
+        "depth_min_mm": 80,
+        "depth_support_fraction": 1.0,
+        "lift_reference_monotonic_ns": 178196951239861,
+        "status": "observed",
+        "target_monotonic_ns": 178197418086686,
+        "unavailable_features": [],
+        "wrist_identity_validations": 8,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0022984143787857514,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.38963273586768693
+      },
+      "observation_id": "obs-7",
+      "provider_sha256": "ab17e3388502c344c431df9b44e7065ab082dfad92ddac8ba448cf36b646b90a"
+    },
+    "final": {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 178300817069919,
+        "reason": "pink tube has insufficient valid metric depth",
+        "reason_code": "target_depth_unavailable",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-278-reacquire-31",
+      "provider_sha256": "ab17e3388502c344c431df9b44e7065ab082dfad92ddac8ba448cf36b646b90a"
+    }
+  },
+  "terminal_events": [
+    {
+      "kind": "interrupt",
+      "payload": {
+        "proposals": [
+          {
+            "detector_id": "bundle",
+            "event_id": "proposal-52624c911f49c06473a8e6101ab0d6f0791127419e3e2b4a3d6ec6535725bdf6",
+            "evidence_observation_ids": [
+              "obs-1"
+            ],
+            "failure_mode": "commission_far_open",
+            "limitations": [],
+            "proposal": "interrupt",
+            "reason_code": "commission_far_open",
+            "rule_id": "commission_far_open",
+            "summary": "Interrupt the initial hold to enter the frozen pregrasp commissioning recovery."
+          }
+        ],
+        "recovery_context": {
+          "binding_id": "pink_engage_retention_then_vla",
+          "last_execution_status": "interrupted",
+          "latest_proposal_ids": [
+            "proposal-52624c911f49c06473a8e6101ab0d6f0791127419e3e2b4a3d6ec6535725bdf6"
+          ],
+          "permitted_tools": [
+            "arx.set_gripper",
+            "arx.propose_grasp",
+            "arx.review_grasp",
+            "arx.execute_grasp",
+            "arx.hold",
+            "arx.review_reentry",
+            "arx.zeva"
+          ],
+          "recovery_id": "recovery-1",
+          "reentry_check_failures": [],
+          "reentry_token_available": false,
+          "remaining_decisions": 15,
+          "remaining_steps": 561,
+          "skill_entrypoint": "bundle:pink_engage_retention_then_vla",
+          "triggering_rule_ids": [
+            "commission_far_open"
+          ]
+        }
+      }
+    },
+    {
+      "kind": "interrupt",
+      "payload": {
+        "code": "OBSERVATION_UNAVAILABLE",
+        "controller_disable_requested": false,
+        "feature_observation": {
+          "last_valid_target_monotonic_ns": 178300817069919,
+          "reason": "pink tube has insufficient valid metric depth",
+          "reason_code": "target_depth_unavailable",
+          "status": "unknown",
+          "unavailable_features": [
+            "privileged.interaction.gripper_contact",
+            "privileged.interaction.lift_m",
+            "privileged.interaction.grasped",
+            "privileged.interaction.success",
+            "privileged.selected.target_gripper_distance_m"
+          ]
+        },
+        "observation_id": "obs-278-reacquire-31",
+        "step": 278,
+        "task_failure": false,
+        "wait_s": 2.0000592459982727
+      }
+    }
+  ],
+  "tool_history": [
+    {
+      "tool": "arx.zeva",
+      "status": "interrupted",
+      "executed_steps": 1,
+      "result": {
+        "command_target_reached": null,
+        "completion": "critic_interrupted",
+        "last_committed_step": 1,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.set_gripper",
+      "status": "completed",
+      "executed_steps": 17,
+      "result": {
+        "command_target_reached": true,
+        "completion": "plan_exhausted",
+        "last_committed_step": 18,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.propose_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "candidates": [
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 1.0,
+            "transform_base": [
+              [
+                0.9989633044075114,
+                -0.011646336068859946,
+                0.044007718681308865,
+                0.39900015962772006
+              ],
+              [
+                0.014112107674911462,
+                0.9983230683592779,
+                -0.05614178218240499,
+                0.2792006690539033
+              ],
+              [
+                -0.04328007467913739,
+                0.056704621908807616,
+                0.9974524655830778,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.006609515488239214,
+                -0.9975561764787704,
+                0.06955565528398676,
+                -0.010069034993648529
+              ],
+              [
+                -0.6494734627261696,
+                -0.05717173918426987,
+                -0.7582318995626379,
+                -0.14353591203689575
+              ],
+              [
+                0.7603555323133541,
+                -0.040163006805209706,
+                -0.648264141698089,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9955517582235819,
+                -0.00879773128461105,
+                0.09380456610917785,
+                0.39900015962772006
+              ],
+              [
+                0.014112107674911462,
+                0.998323068359278,
+                -0.056141782182405016,
+                0.2792006690539033
+              ],
+              [
+                -0.09315334194188123,
+                0.05721583009878849,
+                0.9940064405115107,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.005912182400989523,
+                -0.997489150254159,
+                0.07057224193982498,
+                -0.010069034993648529
+              ],
+              [
+                -0.61066953643273,
+                -0.059486984598477746,
+                -0.7896480329887211,
+                -0.14353591203689575
+              ],
+              [
+                0.7918634752104221,
+                -0.038427775066348015,
+                -0.6094879348867719,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.05,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9998779625804542,
+                -0.01446583107823127,
+                -0.005899125124486421,
+                0.39900015962772006
+              ],
+              [
+                0.014112107674911466,
+                0.998323068359278,
+                -0.05614178218240501,
+                0.2792006690539033
+              ],
+              [
+                0.006701370230477112,
+                0.05605168169525097,
+                0.9984053789538897,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.007255066065772593,
+                -0.9976243585884802,
+                0.06850549813862403,
+                -0.010069034993648529
+              ],
+              [
+                -0.6866548786113514,
+                -0.05477266468287717,
+                -0.724917259374225,
+                -0.14353591203689575
+              ],
+              [
+                0.7269473445137868,
+                -0.041780311899195406,
+                -0.6854210121480468,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              -0.05,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9984201718202685,
+                0.03826357643893016,
+                0.04114680085749365,
+                0.39900015962772006
+              ],
+              [
+                -0.035832884871139545,
+                0.9976574986838994,
+                -0.05827108879490401,
+                0.2792006690539033
+              ],
+              [
+                -0.04328007467913729,
+                0.05670462190880762,
+                0.997452465583078,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.0565277184754566,
+                -0.995828650788831,
+                0.07162342786803398,
+                -0.010069034993648529
+              ],
+              [
+                -0.6479209779926959,
+                -0.09116970700117594,
+                -0.7562317705993314,
+                -0.14353591203689575
+              ],
+              [
+                0.7596071506515607,
+                -0.003658264800378802,
+                -0.6503718888640131,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.0,
+              -0.05
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9970095489837677,
+                -0.06152713880177248,
+                0.04675864012719765,
+                0.39900015962772006
+              ],
+              [
+                0.0640218273012188,
+                0.9964933502803618,
+                -0.05387215035252494,
+                0.2792006690539033
+              ],
+              [
+                -0.04328007467913738,
+                0.05670462190880763,
+                0.997452465583078,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                -0.04332656291699818,
+                -0.9967885558592672,
+                0.06734525938462411,
+                -0.010069034993648529
+              ],
+              [
+                -0.649323477349993,
+                -0.02313453926166098,
+                -0.7601603876265177,
+                -0.14353591203689575
+              ],
+              [
+                0.7592771764697971,
+                -0.0766639948677391,
+                -0.6462358712032562,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.0,
+              0.05
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9989633044075116,
+                -0.011646336068859953,
+                0.04400771868130891,
+                0.39900015962772006
+              ],
+              [
+                0.016257573393475822,
+                0.9942413745853202,
+                -0.10592346519054657,
+                0.2792006690539033
+              ],
+              [
+                -0.04252067443745159,
+                0.10652911351737103,
+                0.9933999900978483,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.004474216551684491,
+                -0.9928516082236725,
+                0.1192713944826542,
+                -0.010069034993648529
+              ],
+              [
+                -0.6500797022758644,
+                -0.09351838736133757,
+                -0.7540893129964441,
+                -0.14353591203689575
+              ],
+              [
+                0.7598528555419181,
+                -0.0741619537292213,
+                -0.6458510993956931,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.05,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9989633044075117,
+                -0.011646336068859942,
+                0.04400771868130884,
+                0.39900015962772006
+              ],
+              [
+                0.011931369036603426,
+                0.9999094743789405,
+                -0.0062197739568823724,
+                0.2792006690539033
+              ],
+              [
+                -0.04393129727395256,
+                0.006738398276668412,
+                0.9990118293675523,
+                -0.03547339642909833
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.008781431659427318,
+                -0.9997679933102469,
+                0.019668404061509475,
+                -0.010069034993648529
+              ],
+              [
+                -0.6489455128592342,
+                -0.02066235305310091,
+                -0.7605542640518554,
+                -0.14353591203689575
+              ],
+              [
+                0.7607842058020864,
+                -0.006084967267328802,
+                -0.6489763982011405,
+                0.39399999380111694
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              -0.05,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "engine": "tube_geometry",
+        "environment_advanced": false,
+        "evidence": {
+          "calibration_sha256": "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10",
+          "camera": "front_rgb",
+          "camera_serial": "260422272500",
+          "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+          "depth_monotonic_ns": 178203018404538,
+          "depth_units": "m",
+          "frame": "right_arm_local_base",
+          "intrinsics_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+          "limitations": [
+            "Label is a tube surface proxy, not a complete tube mesh.",
+            "TCP depth clearance does not certify full arm or finger collision freedom."
+          ],
+          "mask_sha256": "fbd40ec07dc839eee527356d27e3f2894293886c3bcd3003fa901b91cfe02074",
+          "object_cloud_sha256": "a43fbc38fcb24bf60afe188bb0bcd1ba6d55187e0f5198c30673dd9fd5364260",
+          "object_point_count": 64,
+          "observation_id": "obs-18-read-2",
+          "scene_cloud_sha256": "93efbf87da5a1274b52b62ef04653ac5ac687b9ce3588c8a2f02c7ac52244ed4",
+          "scene_point_count": 15099,
+          "segmentation_scope": "visible_pink_label_surface",
+          "state_monotonic_ns": 178203076026893,
+          "target_base_xyz_m": [
+            0.39900015962772006,
+            0.2792006690539033,
+            -0.0354733964290983
+          ],
+          "target_pixel_xy": [
+            154.0,
+            48.0
+          ],
+          "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+        },
+        "observation_id": "obs-18-read-2",
+        "proposal_id": "grasp-287b75e641e04312b9deea3c917351e1",
+        "proposal_only": true,
+        "target_id": "pink_label"
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.review_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+        "checks": [
+          {
+            "check": "bounded-joint-ik-and-tcp-clearance",
+            "goal_tcp_base": [
+              [
+                0.9989633044075114,
+                -0.011646336068859946,
+                0.044007718681308865,
+                0.36903126049549473
+              ],
+              [
+                0.014112107674911462,
+                0.9983230683592779,
+                -0.05614178218240499,
+                0.27877730582365595
+              ],
+              [
+                -0.04328007467913739,
+                0.056704621908807616,
+                0.9974524655830778,
+                -0.03417499418872421
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "minimum_tcp_clearance_m": 0.027793930762976576,
+            "pass": true,
+            "planned_steps": 214,
+            "target_evidence": {
+              "calibration_sha256": "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10",
+              "camera": "front_rgb",
+              "camera_serial": "260422272500",
+              "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+              "depth_monotonic_ns": 178203818602691,
+              "depth_units": "m",
+              "frame": "right_arm_local_base",
+              "intrinsics_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+              "limitations": [
+                "Label is a tube surface proxy, not a complete tube mesh.",
+                "TCP depth clearance does not certify full arm or finger collision freedom."
+              ],
+              "mask_sha256": "6575632999e48ad902aa32f6574255e93604907496b7e60024a27c40ca686b11",
+              "object_cloud_sha256": "56d7c8738f0e70749e0b4046f468b513f911af3c33fc475d1a6da7f13e005be4",
+              "object_point_count": 60,
+              "observation_id": "obs-18-read-3",
+              "scene_cloud_sha256": "e0260dd1bd43e0bbedafd7128d9cb12abcce531543105dda1847f74578406182",
+              "scene_point_count": 15565,
+              "segmentation_scope": "visible_pink_label_surface",
+              "state_monotonic_ns": 178203830027511,
+              "target_base_xyz_m": [
+                0.40165653869971907,
+                0.27930830880966057,
+                -0.0355556628805124
+              ],
+              "target_pixel_xy": [
+                154.0,
+                47.5
+              ],
+              "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+            }
+          }
+        ],
+        "eligible": true,
+        "limitations": [
+          "No full arm/finger collision certificate.",
+          "D405 sees only exposed target surfaces.",
+          "Learned scores are model-gripper specific."
+        ],
+        "observation_id": "obs-18-read-3",
+        "phase": "pregrasp",
+        "proposal_id": "grasp-287b75e641e04312b9deea3c917351e1",
+        "review_token": "grasp-review-89907cb2a8da42ff93633f337ce94241"
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.execute_grasp",
+      "status": "completed",
+      "executed_steps": 197,
+      "result": {
+        "command_target_reached": true,
+        "completion": "plan_exhausted",
+        "last_committed_step": 215,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.propose_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "candidates": [
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 1.0,
+            "transform_base": [
+              [
+                0.9988001977206798,
+                -0.016165513456821094,
+                0.04622598119208162,
+                0.39742321029349803
+              ],
+              [
+                0.018142170284513346,
+                0.9989246631762464,
+                -0.04266590268778949,
+                0.27523114037254204
+              ],
+              [
+                -0.04548655651503312,
+                0.04345335160681076,
+                0.9980194284843564,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.043706767068792375,
+                -0.999041543979933,
+                0.0023900024265263724,
+                0.012533864006400108
+              ],
+              [
+                -0.47739410014324823,
+                -0.02298673528951615,
+                -0.8783885719037745,
+                0.002403091872110963
+              ],
+              [
+                0.8776016133471631,
+                0.03725055165002123,
+                -0.47794121477956475,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9952785772502354,
+                -0.01397354835831775,
+                0.09604839270275549,
+                0.39742321029349803
+              ],
+              [
+                0.018142170285424128,
+                0.9989246631762092,
+                -0.04266590268827301,
+                0.27523114037254204
+              ],
+              [
+                -0.09534891431479867,
+                0.044206985165125154,
+                0.9944618279375568,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.04564057442428563,
+                -0.9989426299440789,
+                0.005528132033718268,
+                0.012533864006400108
+              ],
+              [
+                -0.43289440942368484,
+                -0.02476515944129178,
+                -0.9011043875554885,
+                0.002403091872110963
+              ],
+              [
+                0.9002884917328376,
+                0.038733824410835324,
+                -0.4335669759452886,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.05,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9998253378619099,
+                -0.01831707319054641,
+                -0.0037119711975455946,
+                0.39742321029349803
+              ],
+              [
+                0.018142170283627933,
+                0.9989246631762851,
+                -0.042665902687261094,
+                0.27523114037254204
+              ],
+              [
+                0.004489493987078681,
+                0.04259110729950373,
+                0.9990825002184182,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.04161849309023385,
+                -0.9991333652977323,
+                -0.000647748870441338,
+                0.012533864006400108
+              ],
+              [
+                -0.520700288767379,
+                -0.021136239406030512,
+                -0.8534778665913019,
+                0.002403091872110963
+              ],
+              [
+                0.8527245219866849,
+                0.03585774571814135,
+                -0.5211286902575775,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              -0.05,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9984586881566644,
+                0.03378011405235922,
+                0.04403580438110602,
+                0.39742321029349803
+              ],
+              [
+                -0.03179970685644422,
+                0.9984842063945497,
+                -0.04492291755906251,
+                0.27523114037254204
+              ],
+              [
+                -0.045486556514153696,
+                0.04345335160597702,
+                0.998019428484433,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.09349215471013853,
+                -0.9956098032365099,
+                0.004509645741297181,
+                0.012533864006400108
+              ],
+              [
+                -0.47750989392663434,
+                -0.04881390545837256,
+                -0.8772693451483669,
+                0.002403091872110963
+              ],
+              [
+                0.8736380934343534,
+                0.07986440087645379,
+                -0.4799772487380261,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.0,
+              -0.05
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9966452269554834,
+                -0.06607073560119786,
+                0.04830061712406067,
+                0.39742321029349803
+              ],
+              [
+                0.06803870144802128,
+                0.9968683285299086,
+                -0.04030224527981322,
+                0.27523114037254204
+              ],
+              [
+                -0.045486556515869636,
+                0.04345335160768751,
+                0.9980194284842804,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                -0.006182974292872236,
+                -0.9999808729917882,
+                0.0001570844283443875,
+                0.012533864006400108
+              ],
+              [
+                -0.47598775643019664,
+                0.002804926254961003,
+                -0.8794474334605813,
+                0.002403091872110963
+              ],
+              [
+                0.8794301715573557,
+                -0.005512371135195216,
+                -0.4759959949953705,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.0,
+              0.0,
+              0.05
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.998800197720639,
+                -0.016165513457623827,
+                0.04622598119268442,
+                0.39742321029349803
+              ],
+              [
+                0.02039287760256298,
+                0.9955045050451078,
+                -0.09249276337227119,
+                0.27523114037254204
+              ],
+              [
+                -0.04452297956384892,
+                0.09332447106069869,
+                0.9946397577072897,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.04142074227627279,
+                -0.9977758829409376,
+                0.05222652323690053,
+                0.012533864006400108
+              ],
+              [
+                -0.4782056809376585,
+                -0.06569307957500212,
+                -0.8757875005474727,
+                0.002403091872110963
+              ],
+              [
+                0.8772705676796,
+                0.011300748241537834,
+                -0.4798631516433265,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              0.05,
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "pose_kind": "arx_tcp",
+            "quality_claim": "target_proxy_only",
+            "score": 0.99,
+            "transform_base": [
+              [
+                0.9988001977207195,
+                -0.016165513455989197,
+                0.046225981191519806,
+                0.39742321029349803
+              ],
+              [
+                0.015846116988984728,
+                0.9998480298793526,
+                0.007267600533437805,
+                0.27523114037254204
+              ],
+              [
+                -0.046336440763912495,
+                -0.006526378596025446,
+                0.9989045704486813,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "transform_camera": [
+              [
+                0.04603312389344029,
+                -0.9978125423302092,
+                -0.04744556953341502,
+                0.012533864006400108
+              ],
+              [
+                -0.47668009811730294,
+                0.019797955622565994,
+                -0.8788538701717681,
+                0.002403091872110963
+              ],
+              [
+                0.8778707397175821,
+                0.06307274782952878,
+                -0.474726018837848,
+                0.10199999809265137
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "world_rotation_delta_rad": [
+              -0.05,
+              0.0,
+              0.0
+            ]
+          }
+        ],
+        "engine": "tube_geometry",
+        "environment_advanced": false,
+        "evidence": {
+          "calibration_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+          "camera": "right_rgb",
+          "camera_serial": "260422275847",
+          "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+          "depth_monotonic_ns": 178273813939394,
+          "depth_units": "m",
+          "frame": "right_arm_local_base",
+          "intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+          "limitations": [
+            "Label is a tube surface proxy, not a complete tube mesh.",
+            "TCP depth clearance does not certify full arm or finger collision freedom."
+          ],
+          "mask_sha256": "58e786b4f0525ba9b625f3051d8d89e598b3e9f0a0c1c92af9e0b4e16edc17f4",
+          "object_cloud_sha256": "5202f59300656b52093e326f2876457083ed457642ad81f92eebd8c1c1dd9522",
+          "object_point_count": 473,
+          "observation_id": "obs-215-read-5",
+          "scene_cloud_sha256": "ae54f8bcd904b24be77e480bb17c87ad8e54186db4b2a33b831e54483b489065",
+          "scene_point_count": 9232,
+          "segmentation_scope": "visible_pink_label_surface",
+          "state_monotonic_ns": 178273869025162,
+          "target_base_xyz_m": [
+            0.39742321029349803,
+            0.2752311403725421,
+            -0.04511082305591691
+          ],
+          "target_pixel_xy": [
+            183.0,
+            121.0
+          ],
+          "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+        },
+        "observation_id": "obs-215-read-5",
+        "proposal_id": "grasp-951945d5943d460b8c8fc5e1a4637771",
+        "proposal_only": true,
+        "target_id": "pink_label"
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.review_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+        "checks": [
+          {
+            "check": "bounded-joint-ik-and-tcp-clearance",
+            "goal_tcp_base": [
+              [
+                0.9988001977206798,
+                -0.016165513456821094,
+                0.04622598119208162,
+                0.3674592043618776
+              ],
+              [
+                0.018142170284513346,
+                0.9989246631762464,
+                -0.04266590268778949,
+                0.27468687526400665
+              ],
+              [
+                -0.04548655651503312,
+                0.04345335160681076,
+                0.9980194284843564,
+                -0.04374622636046592
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "minimum_tcp_clearance_m": 0.025481510742181607,
+            "pass": true,
+            "planned_steps": 36,
+            "target_evidence": {
+              "calibration_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+              "camera": "right_rgb",
+              "camera_serial": "260422275847",
+              "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+              "depth_monotonic_ns": 178274280737505,
+              "depth_units": "m",
+              "frame": "right_arm_local_base",
+              "intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+              "limitations": [
+                "Label is a tube surface proxy, not a complete tube mesh.",
+                "TCP depth clearance does not certify full arm or finger collision freedom."
+              ],
+              "mask_sha256": "05194a769968be3e0f25886bd72a6da232949d17964052da994a9e79b95acf72",
+              "object_cloud_sha256": "734a67458701fd126e24243d582527dcda14043c5a23cca234fc00d74dcc2b8b",
+              "object_point_count": 266,
+              "observation_id": "obs-215-read-6",
+              "scene_cloud_sha256": "14500d6c5343434395d6b0bc241cf8c0bd2fc57bb11b4fb7071e430d89729ef7",
+              "scene_point_count": 9121,
+              "segmentation_scope": "visible_pink_label_surface",
+              "state_monotonic_ns": 178274287067944,
+              "target_base_xyz_m": [
+                0.3969985246664842,
+                0.27782795933697335,
+                -0.0454440126749415
+              ],
+              "target_pixel_xy": [
+                178.0,
+                122.0
+              ],
+              "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+            }
+          }
+        ],
+        "eligible": true,
+        "limitations": [
+          "No full arm/finger collision certificate.",
+          "D405 sees only exposed target surfaces.",
+          "Learned scores are model-gripper specific."
+        ],
+        "observation_id": "obs-215-read-6",
+        "phase": "pregrasp",
+        "proposal_id": "grasp-951945d5943d460b8c8fc5e1a4637771",
+        "review_token": "grasp-review-12d296e45fd444fcac650987df9064b4"
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.execute_grasp",
+      "status": "completed",
+      "executed_steps": 17,
+      "result": {
+        "command_target_reached": true,
+        "completion": "plan_exhausted",
+        "last_committed_step": 232,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.review_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+        "checks": [
+          {
+            "check": "bounded-joint-ik-and-tcp-clearance",
+            "goal_tcp_base": [
+              [
+                0.9988001977206798,
+                -0.016165513456821094,
+                0.04622598119208162,
+                0.39742321029349803
+              ],
+              [
+                0.018142170284513346,
+                0.9989246631762464,
+                -0.04266590268778949,
+                0.27523114037254204
+              ],
+              [
+                -0.04548655651503312,
+                0.04345335160681076,
+                0.9980194284843564,
+                -0.04511082305591691
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "minimum_tcp_clearance_m": 0.02025887982646325,
+            "pass": true,
+            "planned_steps": 46,
+            "target_evidence": {
+              "calibration_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+              "camera": "right_rgb",
+              "camera_serial": "260422275847",
+              "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+              "depth_monotonic_ns": 178280748246733,
+              "depth_units": "m",
+              "frame": "right_arm_local_base",
+              "intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+              "limitations": [
+                "Label is a tube surface proxy, not a complete tube mesh.",
+                "TCP depth clearance does not certify full arm or finger collision freedom."
+              ],
+              "mask_sha256": "1d0e611d52b6b1114faf2c984f39545f8f580e8561946668722037b155483b94",
+              "object_cloud_sha256": "373533122e1b9f1754374de3d563bbcc3fb3ab54d08d97b13dee8951f8ed0b68",
+              "object_point_count": 565,
+              "observation_id": "obs-232-read-8",
+              "scene_cloud_sha256": "4643978e2f72f23f655fd1583a9e93ab7e0a07b645237bd20c8dd00621aa7ee3",
+              "scene_point_count": 8846,
+              "segmentation_scope": "visible_pink_label_surface",
+              "state_monotonic_ns": 178280802155835,
+              "target_base_xyz_m": [
+                0.3971986471702062,
+                0.27373418729749277,
+                -0.04600813549231879
+              ],
+              "target_pixel_xy": [
+                180.0,
+                112.0
+              ],
+              "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+            }
+          }
+        ],
+        "eligible": true,
+        "limitations": [
+          "No full arm/finger collision certificate.",
+          "D405 sees only exposed target surfaces.",
+          "Learned scores are model-gripper specific."
+        ],
+        "observation_id": "obs-232-read-8",
+        "phase": "engage",
+        "proposal_id": "grasp-951945d5943d460b8c8fc5e1a4637771",
+        "review_token": "grasp-review-0ea7e4bb5e1f4d95876438c00d7f8e21"
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.execute_grasp",
+      "status": "completed",
+      "executed_steps": 28,
+      "result": {
+        "command_target_reached": true,
+        "completion": "plan_exhausted",
+        "last_committed_step": 260,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.set_gripper",
+      "status": "interrupted",
+      "executed_steps": 18,
+      "result": {
+        "command_target_reached": false,
+        "completion": "observation_unavailable",
+        "last_committed_step": 278,
+        "physical_arrival_verified": true
+      },
+      "error": null
+    },
+    {
+      "tool": "arx.finish",
+      "status": "completed",
+      "executed_steps": 0,
+      "result": {
+        "closed": true,
+        "finalization": "complete"
+      },
+      "error": null
+    }
+  ]
+}

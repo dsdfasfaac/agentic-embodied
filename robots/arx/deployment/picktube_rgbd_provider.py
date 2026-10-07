@@ -140,7 +140,7 @@ class PickTubeRgbdProvider:
             # The wrist approaches the label; pixel area grows with proximity.
             # Its separate metric size and cross-camera checks remain below.
             self.wrist_tracker.max_component_pixels = (8000, 100, 120)
-            self.wrist_tracker.max_tracking_displacement_px = 25
+            self.wrist_tracker.max_tracking_displacement_px = 80
             self.link6_fk = CommandKinematics(self.controller_fk.calibration.model_copy(update={"tcp_offset": [0., 0., 0.]}))
 
     def feature_sources(self):
@@ -270,13 +270,22 @@ class PickTubeRgbdProvider:
         depth_min_mm = WRIST_DEPTH_MIN_MM if camera == "right_rgb" else 80
         valid = mask & (depth >= depth_min_mm) & (depth <= 1500)
         yy, xx = np.nonzero(valid)
-        # Near an occluding gripper the few remaining depth pixels can land
-        # on its edge. Require support over the label before trusting a 3D
-        # centroid or using it to contradict the other camera.
-        if len(xx) < 12 or len(xx) < .8 * np.count_nonzero(mask):
+        # Established wrist identity can survive stereo holes during closing.
+        # Partial support must still span the label and form a tight measured
+        # depth cluster; front/acquisition retain the 80% support gate.
+        partial_wrist = camera == "right_rgb" and self.wrist_validations >= 3
+        support_fraction = len(xx) / np.count_nonzero(mask)
+        if len(xx) < 12 or (support_fraction < .8 and not partial_wrist):
             raise ValueError("pink tube has insufficient valid metric depth")
         support = depth[valid].astype(float)
         median = float(np.median(support))
+        if support_fraction < .8:
+            my, mx = np.nonzero(mask)
+            coverage = min((xx.max() - xx.min() + 1) / (mx.max() - mx.min() + 1),
+                           (yy.max() - yy.min() + 1) / (my.max() - my.min() + 1))
+            if (len(xx) < 30 or support_fraction < .5 or coverage < .8
+                    or np.median(np.abs(support - median)) > 3):
+                raise ValueError("pink tube has insufficient valid metric depth")
         if np.median(np.abs(support - median)) > 25:
             raise ValueError("pink tube depth is inconsistent")
         if camera == "right_rgb":
@@ -291,6 +300,7 @@ class PickTubeRgbdProvider:
         return {"camera": camera, "depth_key": depth_key, "stamp": stamp,
                 "mask": mask, "depth_support_fraction": len(xx) / np.count_nonzero(mask),
                 "depth_min_mm": depth_min_mm,
+                "partial_depth_support": support_fraction < .8,
                 "transform_left": transform, "point_camera": point,
                 "point_left": (transform @ np.r_[point, 1.])[:3], "deproject": deproject}
 
@@ -381,6 +391,7 @@ class PickTubeRgbdProvider:
             "cross_camera_disagreement": cross_error is not None and cross_error > .015,
             "depth_support_fraction": sample.get("depth_support_fraction"),
             "depth_min_mm": sample.get("depth_min_mm", 80),
+            "partial_depth_support": sample.get("partial_depth_support", False),
             "wrist_identity_validations": self.wrist_validations,
             "wrist_mount_sha256": getattr(self, "wrist_mount_sha", None),
         }

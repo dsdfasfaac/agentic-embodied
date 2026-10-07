@@ -589,3 +589,24 @@ def test_static_real_hardware_config_matches_vla_and_calibration_files(tmp_path)
     config = load_real_hardware_config(path, file_sha256(path))
     with pytest.raises(ValueError, match="calibration identity"):
         validate_real_hardware_config(config, task_path, model_path)
+
+
+def test_adopt_continuation_reads_hold_without_motion_or_double_preload():
+    backend,arm,_=make_backend(command_offset=.9)
+    arm.positions[7]+=.6;arm.positions[13]=-1.09
+    checkpoint=arm.positions.copy()
+    commit=backend.adopt_observed_hold(checkpoint)
+    assert not arm.sent and commit.hardware.command_receipt is None
+    assert commit.command[13]==pytest.approx(-1.99)
+    assert commit.policy.state[13]==pytest.approx(-1.09)
+    with pytest.raises(RuntimeError):backend.adopt_observed_hold(checkpoint)
+    backend.close()
+
+
+@pytest.mark.parametrize('axis,drift',[(7,.03),(13,.15)])
+def test_adopt_rejects_controller_reset_or_release(axis,drift):
+    backend,arm,_=make_backend()
+    checkpoint=arm.positions.copy();arm.positions[axis]+=drift
+    with pytest.raises(ValueError,match='moved since'):backend.adopt_observed_hold(checkpoint)
+    assert not arm.sent and backend._started_ns is None
+    backend.close()
