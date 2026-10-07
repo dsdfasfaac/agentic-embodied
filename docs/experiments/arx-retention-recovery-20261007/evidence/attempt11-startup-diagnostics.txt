@@ -1,0 +1,12 @@
+Traceback (most recent call last):
+  File "/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/worker.py", line 19, in _run
+    core = factory(
+           ^^^^^^^^
+  File "/home/dodo/chenfu/Agentic-Embodied/scripts/deployment/serve_arx_real_gateway.py", line 168, in __call__
+    report = preflight_real_bundle(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/real_input.py", line 443, in preflight_real_bundle
+    _check_sources(contract, live_capabilities)
+  File "/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/real_input.py", line 205, in _check_sources
+    raise ValueError("live tool catalog differs")
+ValueError: live tool catalog differs

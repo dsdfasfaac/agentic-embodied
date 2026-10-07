@@ -278,3 +278,23 @@ def test_sparse_depth_on_visible_label_cannot_disprove_wrist_identity():
     with pytest.raises(ValueError,match='insufficient valid metric depth'):
         p._label_sample(np.zeros((240,320,3),dtype=np.uint8),depth,tracker,np.eye(4),
                         lambda x,y,z:np.array([x,y,z]),'front_rgb',{})
+
+
+def test_established_wrist_identity_survives_front_edge_depth_disagreement(monkeypatch):
+    p=wrist_provider(monkeypatch)
+    front=np.array([.2,-.3,.1]);right=front+[0.,-.008,-.007]
+    for stamp in range(1,4):
+        p.observe({'observation_id':f'obs-{stamp}','hardware':hardware_for_provider(p,stamp)},
+                  {'front_rgb':front,'right_rgb':right})
+    p.observe({'observation_id':'obs-4','hardware':hardware_for_provider(p,4)},
+              {'front_rgb':front+[-.01,0.,.004],'right_rgb':right})
+    assert p.last_observation_quality['cross_camera_disagreement'] is True
+    assert p.wrist_validations == 3
+    values=p.observe({'observation_id':'obs-5','hardware':hardware_for_provider(p,5)},
+                     {'front_rgb':None,'right_rgb':right})
+    assert p.last_observation_quality['camera']=='right_rgb'
+    assert values['privileged.interaction.lift_m']==0.
+    assert not values['privileged.interaction.success']
+    with pytest.raises(FeatureObservationUnavailable):
+        p.observe({'observation_id':'obs-6','hardware':hardware_for_provider(p,6)},
+                  {'front_rgb':None,'right_rgb':right+[.1,0.,0.]})

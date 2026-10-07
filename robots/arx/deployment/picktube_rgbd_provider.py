@@ -351,7 +351,12 @@ class PickTubeRgbdProvider:
                     if wrist["stamp"] != self.wrist_validation_stamp:
                         self.wrist_validations += 1
                         self.wrist_validation_stamp = wrist["stamp"]
-                else:
+                elif self.wrist_validations < 3:
+                    # Cross-view agreement establishes identity. Once it is
+                    # established, a partially occluded front depth centroid
+                    # must not erase it. The wrist still needs fresh metric
+                    # depth and its own bounded world-position continuity on
+                    # every observation; no cached target is substituted.
                     self.wrist_validations = 0
         sample = front
         if sample is None and wrist is not None and self.wrist_validations >= 3:
@@ -368,6 +373,7 @@ class PickTubeRgbdProvider:
         self.last_observation_quality = {
             "status": "observed", "unavailable_features": [], "camera": sample["camera"],
             "target_monotonic_ns": sample["stamp"], "cross_camera_error_m": cross_error,
+            "cross_camera_disagreement": cross_error is not None and cross_error > .015,
             "depth_support_fraction": sample.get("depth_support_fraction"),
             "wrist_identity_validations": self.wrist_validations,
             "wrist_mount_sha256": getattr(self, "wrist_mount_sha", None),
