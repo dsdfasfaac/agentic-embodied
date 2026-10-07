@@ -1,4 +1,27 @@
-# Zetta Documentation
+# Agentic-Embodied 文档索引
+
+## 当前真机
+
+- [真机导航](real_robot/README.md)：先读模块职责和命令分类。
+- [当前部署](real_robot/current-deployment.md)：dodo 环境、当前冻结配置及复现入口。
+- [相比 Zetta 的改动](real_robot/zetta-changes.md)：按固定 Git 提交比较，区分本项目新增与上游后续更新。
+- [2026-10-07 分段成功](experiments/arx-no-lift-timing-20261007/README.md)：实际抬升、五帧保持及归位/失能记录。
+- [2026-10-05 真机进化试点](experiments/arx-real-evolution-20261005/README.md)：旧父代/候选配对实验，候选未获晋升。
+
+## 设计与历史记录
+
+`integration/arx-real-*` 记录输入契约、后端、bundle 执行和抓取接口的设计过程；其中日期、旧 SHA 和“尚未完成”描述是当时的状态。**当前部署配置以 `real_robot/current-deployment.md` 为索引，历史协议保持原样。**
+
+- [真机输入契约](integration/arx-real-input-contract.md)
+- [真机后端](integration/arx-real-backend.md)
+- [bundle 执行](integration/arx-real-bundle-running.md)
+- [抓取恢复接口](integration/arx-real-grasp-recovery.md)
+- [学习流程审查](evolution-learning-pipeline-review.md)
+- [通用 MuJoCo](integration/mujoco.md)
+
+`experiments/` 是不可覆盖的按日期实验记录；`../integrations/` 是历史仿真交付快照，不是当前真机入口。大文件的实际存储位置由实验协议记录。
+
+## 上游 Sphinx 文档构建
 
 Zetta's documentation is built with Sphinx. English and Simplified Chinese
 sources live in parallel trees so local builds and Read the Docs use the same

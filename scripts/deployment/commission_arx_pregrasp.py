@@ -16,7 +16,7 @@ from pathlib import Path
 if __package__ in (None, ""):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]))
 
-from scripts.deployment.serve_arx_real_gateway import RealCoreFactory
+from robots.arx.gateway.real_factory import RealCoreFactory
 from robots.arx.deployment.bundle_program import resolve_call
 from robots.arx.gateway.contracts import ToolRequest
 from zetta.evolution.jsonio import file_sha256
