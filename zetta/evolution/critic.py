@@ -53,11 +53,19 @@ class TemporalCritic:
         self._state = {rule.rule_id: _RuleState() for rule in self.rules}
 
     def evaluate(
-        self, observation: dict[str, Any], *, step_index: int
+        self, observation: dict[str, Any], *, step_index: int,
+        unavailable_features: set[str] | frozenset[str] = frozenset(),
     ) -> list[dict[str, Any]]:
         proposals: list[dict[str, Any]] = []
         for rule in self.rules:
             state = self._state[rule.rule_id]
+            if {rule.feature, *(p.feature for p in rule.activation_conditions)} & unavailable_features:
+                # Missing evidence is neither false nor failure. Break dwell
+                # and stagnant windows across gaps, while retaining cooldown.
+                state.consecutive = 0
+                state.history.clear()
+                state.cooldown_remaining = max(0, state.cooldown_remaining - 1)
+                continue
             value = resolve_feature(observation, rule.feature)
             if not all(
                 self._predicate(condition, observation)

@@ -98,8 +98,7 @@ class RealCoreFactory:
                 provider = RealFeatureProvider(
                     Path(self.feature_provider), self.expected_feature_provider_sha256
                 )
-                if hasattr(provider.impl, "validate_hardware"):
-                    provider.impl.validate_hardware(config)
+                provider.validate_hardware(config)
                 bundle, _ = _load_bundle(Path(self.bundle))
                 contract = RealInputContract.model_validate_json(Path(self.real_input_contract).read_text())
                 programs = compile_programs(

@@ -7,7 +7,7 @@ import numpy as np
 from robots.manipulation.grasp_proposals import TargetCloud
 from .picktube_rgbd_provider import (
     CALIBRATION_SHA256, CONTROLLER_FK_SHA256, FRONT_INTRINSICS_SHA256,
-    FRONT_SERIAL, NOMINAL_CHAIN_SHA256,
+    FRONT_SERIAL, NOMINAL_CHAIN_SHA256, RIGHT_SERIAL, RIGHT_INTRINSICS_SHA256,
 )
 
 
@@ -17,11 +17,17 @@ class PickTubeGraspObserver:
 
     def cloud(self, observation, images):
         provider = self.provider
-        rgb = np.asarray(images["front_rgb"])
-        depth = np.asarray(images["front_depth_mm"])
+        hardware = observation["hardware"]
+        sample = provider.target_sample(images, hardware)
+        camera, depth_key = sample["camera"], sample["depth_key"]
+        serial = FRONT_SERIAL if camera == "front_rgb" else RIGHT_SERIAL
+        intrinsics_sha = FRONT_INTRINSICS_SHA256 if camera == "front_rgb" else RIGHT_INTRINSICS_SHA256
+        calibration_sha = CALIBRATION_SHA256 if camera == "front_rgb" else provider.wrist_mount_sha
+        rgb = np.asarray(images[camera])
+        depth = np.asarray(images[depth_key])
         if depth.dtype != np.uint16 or depth.shape != rgb.shape[:2]:
             raise ValueError("aligned front D405 depth must be uint16 millimetres")
-        mask = provider._pink_component(rgb)
+        mask = sample["mask"]
         valid = (depth >= 80) & (depth <= 1500)
         yy, xx = np.nonzero(mask & valid)
         if len(xx) < 12:
@@ -31,18 +37,17 @@ class PickTubeGraspObserver:
         if np.median(np.abs(z_mm - median)) > 25:
             raise ValueError("pink target depth is inconsistent")
         # A target-only cloud prevents another colour from entering model input.
-        object_cloud = np.asarray([provider._deproject(float(x), float(y), z / 1000.)
+        object_cloud = np.asarray([sample["deproject"](float(x), float(y), z / 1000.)
                                    for x, y, z in zip(xx, yy, z_mm)])
-        target = provider._deproject(float(np.median(xx)), float(np.median(yy)), median / 1000.)
+        target = sample["point_camera"]
         # Sampling at two-pixel intervals retains ~4 mm spacing at 0.4 m.
         sy, sx = np.nonzero(valid[::2, ::2])
         sy, sx = sy * 2, sx * 2
-        scene = np.asarray([provider._deproject(float(x), float(y), float(depth[y, x]) / 1000.)
+        scene = np.asarray([sample["deproject"](float(x), float(y), float(depth[y, x]) / 1000.)
                             for x, y in zip(sx, sy)])
-        transform = provider.transform.copy()
+        transform = sample["transform_left"].copy()
         # The original extrinsic is left-base; all ARX grasp plans use right-base.
         transform[:3, 3] += [0., .5, 0.]
-        hardware = observation["hardware"]
         state = np.asarray(hardware["measured_state"])
         predicted, _, _ = provider.controller_fk.fk(state[7:13])
         feedback = np.asarray(hardware.get("right_tcp_xyz_m"))
@@ -51,19 +56,19 @@ class PickTubeGraspObserver:
                 or feedback.shape != (3,) or not np.isfinite(feedback).all()
                 or np.linalg.norm(predicted - feedback) > .01):
             raise ValueError("grasp controller FK differs from the measured joint sample")
-        if (hardware.get("camera_health", {}).get("front_rgb", {}).get("device_id") != FRONT_SERIAL
-                or hardware.get("camera_calibration_sha256", {}).get("front_rgb") != FRONT_INTRINSICS_SHA256
-                or hardware.get("depth_monotonic_ns", {}).get("front_depth_mm") !=
-                hardware.get("camera_monotonic_ns", {}).get("front_rgb")):
+        if (hardware.get("camera_health", {}).get(camera, {}).get("device_id") != serial
+                or hardware.get("camera_calibration_sha256", {}).get(camera) != intrinsics_sha
+                or hardware.get("depth_monotonic_ns", {}).get(depth_key) !=
+                hardware.get("camera_monotonic_ns", {}).get(camera)):
             raise ValueError("front RGB/depth camera identity, calibration or timestamp differs")
         return TargetCloud(
             "pink_label", object_cloud, scene, target, transform,
             {"observation_id": observation["observation_id"],
-             "camera": "front_rgb", "camera_serial": FRONT_SERIAL,
-             "depth_monotonic_ns": hardware["depth_monotonic_ns"]["front_depth_mm"],
+             "camera": camera, "camera_serial": serial,
+             "depth_monotonic_ns": hardware["depth_monotonic_ns"][depth_key],
              "state_monotonic_ns": hardware["state_monotonic_ns"],
-             "calibration_sha256": CALIBRATION_SHA256,
-             "intrinsics_sha256": FRONT_INTRINSICS_SHA256,
+             "calibration_sha256": calibration_sha,
+             "intrinsics_sha256": intrinsics_sha,
              "controller_fk_sha256": CONTROLLER_FK_SHA256,
              "tool_geometry_sha256": NOMINAL_CHAIN_SHA256,
              "object_cloud_sha256": hashlib.sha256(object_cloud.tobytes()).hexdigest(),

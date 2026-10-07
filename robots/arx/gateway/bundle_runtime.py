@@ -9,6 +9,7 @@ from pathlib import Path
 
 from robots.arx.gateway.contracts import Assessment, Proposal
 from robots.arx.deployment.real_input import RealFeatureSource
+from robots.arx.deployment.feature_observation import FeatureObservationUnavailable
 from zetta.evolution.critic import TemporalCritic, resolve_feature
 from zetta.evolution.jsonio import file_sha256
 
@@ -28,6 +29,14 @@ class RealFeatureProvider:
         self.sources = [RealFeatureSource.model_validate(value) for value in self.impl.feature_sources()]
         if any(source.provider_sha256 != expected_sha256 for source in self.sources):
             raise ValueError("feature provider attestation differs from loaded bytes")
+        self.sha256 = expected_sha256
+
+    def validate_hardware(self, config):
+        if hasattr(self.impl, "validate_hardware"):
+            self.impl.validate_hardware(config)
+        self.sources = [RealFeatureSource.model_validate(value) for value in self.impl.feature_sources()]
+        if any(source.provider_sha256 != self.sha256 for source in self.sources):
+            raise ValueError("configured feature provider attestation differs")
 
     def augment(self, observation, images):
         hardware = observation.get("hardware")
@@ -41,14 +50,29 @@ class RealFeatureProvider:
         if (not isinstance(reference_ns, int) or reference_ns <= 0
                 or reference_ns > now):
             raise ValueError("invalid real observation completion timestamp")
-        values = self.impl.observe(observation, images)
+        quality = {"status": "observed", "unavailable_features": []}
+        try:
+            values = self.impl.observe(observation, images)
+            quality = getattr(self.impl, "last_observation_quality", quality)
+        except FeatureObservationUnavailable as exc:
+            values = dict(exc.available)
+            if (set(values) & set(exc.unavailable) or
+                    set(values) | set(exc.unavailable) != {source.name for source in self.sources}):
+                raise ValueError("invalid unavailable feature declaration") from exc
+            values.update({name: None for name in exc.unavailable})
+            quality = dict(exc.detail)
         if not isinstance(values, dict) or set(values) != {source.name for source in self.sources}:
             raise ValueError("real feature provider returned wrong feature names")
         result = dict(observation)
+        result["feature_observation"] = quality
         for source in self.sources:
             value = values[source.name]
             expected = {"boolean": bool, "integer": int, "string": str}.get(source.scalar_type)
-            if expected is not None:
+            unavailable = source.name in quality["unavailable_features"]
+            if unavailable:
+                if value is not None:
+                    raise ValueError("unavailable features must not carry cached values")
+            elif expected is not None:
                 if type(value) is not expected:
                     raise ValueError(f"invalid real feature type: {source.name}")
             elif type(value) not in (float, int) or not math.isfinite(value):
@@ -93,6 +117,7 @@ class BundleMonitor:
                 "provider_sha256": self.provider.sources[0].provider_sha256,
                 "features": {source.name: measured[source.name]
                              for source in self.provider.sources},
+                "feature_observation": measured.get("feature_observation", {"status": "observed"}),
             }
 
     def completion_evidence(self):
@@ -116,7 +141,9 @@ class BundleMonitor:
         measured = self.provider.augment(observation, images) if self.provider else observation
         self._remember_features(observation, measured)
         events = []
-        for item in self.temporal.evaluate(measured, step_index=observation["step_index"]):
+        quality = measured.get("feature_observation", {"status": "observed", "unavailable_features": []})
+        for item in self.temporal.evaluate(measured, step_index=observation["step_index"],
+                                          unavailable_features=set(quality.get("unavailable_features", []))):
             rule = self.by_id[item["rule_id"]]
             events.append(Proposal(
                 detector_id="bundle", failure_mode=rule.rule_id, rule_id=rule.rule_id,
@@ -126,7 +153,8 @@ class BundleMonitor:
         return Assessment(
             critic_id="bundle", observation_id=observation["observation_id"],
             step_index=observation["step_index"],
-            status="failure" if events else "clear", events=events,
+            status="failure" if events else "unknown" if quality["status"] == "unknown" else "clear",
+            events=events, features={"feature_observation": quality},
         )
 
 
@@ -169,8 +197,17 @@ class RealBundleReentry:
             checks = []
         rule = self.recoveries[context["policy_id"]]
         measured = self.provider.augment(obs, context["images"][-1]) if self.provider else obs
+        unavailable = set(measured.get("feature_observation", {}).get("unavailable_features", []))
+        checks.append({"check_id": "feature-observability", "status": "unknown" if unavailable else "pass",
+                       "evidence_ids": [obs["observation_id"]],
+                       "reason_code": "target_unobserved" if unavailable else "observed"})
         for rule_id in rule.trigger_rule_ids:
             critic = self.rules[rule_id]
+            needed = {critic.feature, *(p.feature for p in critic.activation_conditions)}
+            if needed & unavailable:
+                checks.append({"check_id": rule_id, "status": "unknown",
+                               "evidence_ids": [obs["observation_id"]], "reason_code": "feature_unavailable"})
+                continue
             active = all(TemporalCritic._predicate(p, measured) for p in critic.activation_conditions)
             if critic.operator == "stagnant" and active:
                 history = (self.monitor.temporal._state[rule_id].history

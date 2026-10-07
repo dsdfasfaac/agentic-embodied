@@ -61,7 +61,9 @@ class GraspRecoveryConfig(StrictModel):
     speed_m_s: float = Field(default=.02, gt=0, le=.03)
     max_travel_m: float = Field(default=.30, gt=0, le=.40)
     max_joint_step_rad: float = Field(default=.035, gt=0, le=.035)
-    target_drift_m: float = Field(default=.008, gt=0, le=.015)
+    # This compares observed label surfaces, including registration error
+    # between cameras. Commissioned cross-view observations may need 20 mm.
+    target_drift_m: float = Field(default=.008, gt=0, le=.020)
     pose_tolerance_m: float = Field(default=.008, gt=0, le=.015)
     sensor_max_age_ms: float = Field(default=150., gt=0, le=1000)
     sensor_max_skew_ms: float = Field(default=100., gt=0, le=1000)

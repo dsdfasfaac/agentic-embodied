@@ -52,6 +52,14 @@ class CameraSettings(StrictModel):
     capture_height: int = Field(gt=0)
     capture_fps: int = Field(gt=0)
     depth_enabled: bool = False
+    robot_mount_calibration_file: Path | None = None
+    robot_mount_calibration_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+
+    @model_validator(mode="after")
+    def mount_pair(self):
+        if (self.robot_mount_calibration_file is None) != (self.robot_mount_calibration_sha256 is None):
+            raise ValueError("camera mount calibration requires both file and SHA")
+        return self
 
     def identity(self) -> CameraIdentity:
         return CameraIdentity(

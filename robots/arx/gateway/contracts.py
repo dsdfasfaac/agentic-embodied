@@ -108,6 +108,7 @@ class ExecutionOutput(StrictModel):
         "environment_ended",
         "task_success",
         "cancelled",
+        "observation_unavailable",
         "error",
     ]
     last_committed_step: Annotated[int, Field(ge=0)]
@@ -198,6 +199,7 @@ class RuntimeLimits(StrictModel):
     idle_agent_timeout_s: Annotated[float, Field(gt=0)]
     lease_timeout_s: Annotated[float, Field(gt=0)]
     shutdown_timeout_s: Annotated[float, Field(gt=0)]
+    observation_reacquire_timeout_s: Annotated[float, Field(gt=0, le=5)] = 2.0
 
 
 class GatewayError(Exception):

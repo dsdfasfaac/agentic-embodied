@@ -383,7 +383,24 @@ class ArxSessionCore:
                     result.update(status="completed", result=value)
             else:
                 self._admit_motion(request)
-                self.execute_targets(prepared, request, result)
+                evidence = getattr(self.critic, "last_feature_evidence", None) or {}
+                if (evidence.get("feature_observation", {}).get("status") == "unknown"
+                        and self.commit.hardware is not None):
+                    task_success = self._assess(result, terminal=False)
+                    unavailable, task_success = self._reacquire_observation(result, task_success)
+                else:
+                    unavailable, task_success = None, False
+                if unavailable:
+                    result.update(status="cancelled" if unavailable == "cancelled" else "interrupted", result={
+                        "completion": unavailable, "last_committed_step": self.step_index,
+                        "command_target_reached": False, "physical_arrival_verified": False})
+                elif task_success:
+                    self.close()
+                    result.update(status="completed", result={
+                        "completion": "task_success", "last_committed_step": self.step_index,
+                        "command_target_reached": None, "physical_arrival_verified": self.step_index > 0})
+                else:
+                    self.execute_targets(prepared, request, result)
             if result["result"] is not None:
                 entry.spec.output_model.model_validate(result["result"])
             if bundle_call is not None and result["status"] == "completed":
@@ -584,6 +601,10 @@ class ArxSessionCore:
                     raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
                 prepared.on_commit(self._context())
                 task_success = self._assess(result, terminal=commit.environment_ended)
+                if not commit.environment_ended and not task_success:
+                    wait_completion, task_success = self._reacquire_observation(result, task_success)
+                    if wait_completion:
+                        completion = wait_completion
                 self._save()
                 self.journal.update(result)
                 if task_success:
@@ -593,6 +614,8 @@ class ArxSessionCore:
                 if commit.environment_ended:
                     self.close()
                     completion = "environment_ended"
+                    break
+                if completion:
                     break
                 if self.state in {"INTERRUPTED", "ENDED"}:
                     completion = "critic_interrupted"
@@ -609,7 +632,8 @@ class ArxSessionCore:
             self.close()
         if completion == "plan_exhausted" and prepared.reached is False:
             completion = "budget_exhausted"
-        status = {"critic_interrupted": "interrupted", "cancelled": "cancelled"}.get(
+        status = {"critic_interrupted": "interrupted", "observation_unavailable": "interrupted",
+                  "cancelled": "cancelled"}.get(
             completion, "completed"
         )
         result.update(
@@ -636,6 +660,60 @@ class ArxSessionCore:
         ):
             return "budget_exhausted"
         return None
+
+    def _reacquire_observation(self, result, task_success=False):
+        """Wait on sensors only; the separate controller keeps its last target."""
+        def unavailable():
+            return (self.commit.hardware is not None and self.assessment is not None
+                    and self.assessment.features.get("feature_observation", {}).get("status") == "unknown")
+        if not unavailable() or self.assessment.events or task_success:
+            return None, task_success
+        started = time.monotonic()
+        deadline = started + self.limits.observation_reacquire_timeout_s
+        self.token = None
+        if self.recovery:
+            self.recovery["reentry_token_available"] = False
+        self._record("observation_wait_started", {
+            "observation_id": self.current["observation_id"], "step": self.step_index,
+            "timeout_s": self.limits.observation_reacquire_timeout_s,
+            "feature_observation": self.assessment.features["feature_observation"],
+            "robot_commands_sent": False,
+        }, public=True)
+        while unavailable() and not self.assessment.events:
+            if self.cancel_requested():
+                return "cancelled", False
+            if time.monotonic() >= deadline:
+                self.state = "INTERRUPTED"
+                self.epoch += 1
+                self._record("interrupt", {
+                    "code": "OBSERVATION_UNAVAILABLE", "step": self.step_index,
+                    "observation_id": self.current["observation_id"],
+                    "feature_observation": self.assessment.features["feature_observation"],
+                    "wait_s": time.monotonic() - started,
+                    "task_failure": False, "controller_disable_requested": False,
+                }, public=True)
+                return "observation_unavailable", False
+            time.sleep(min(.05, max(0., deadline - time.monotonic())))
+            if time.monotonic() >= deadline:
+                continue
+            self.phase_changed("observation")
+            self.commit = self.backend.observe()
+            self.read_samples += 1
+            self._publish(self.commit, lifecycle="observation-reacquisition",
+                          observation_id=f"obs-{self.step_index}-reacquire-{self.read_samples}")
+            self._retain_grasp_sensors()
+            if (self.step_index and self.commit.hardware.arrival_verified is not True):
+                self.state = "EXECUTION_UNCERTAIN"
+                raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
+            task_success = bool(self._assess(result, terminal=False))
+            self._save()
+            if task_success:
+                break
+        self._record("observation_reacquired", {
+            "observation_id": self.current["observation_id"], "step": self.step_index,
+            "wait_s": time.monotonic() - started, "robot_commands_sent": False,
+        }, public=True)
+        return None, task_success
 
     def _assess(self, result, *, terminal):
         self.phase_changed("critic")

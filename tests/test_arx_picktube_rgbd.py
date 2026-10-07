@@ -39,60 +39,46 @@ def test_picktube_distance_uses_aligned_depth_extrinsic_and_controller_fk():
     tool_centre, _, _ = provider.tool_fk.fk(state[7:13])
     expected_distance = np.linalg.norm(point_left - (tool_centre + [0, -0.5, 0]))
     stamp = time.monotonic_ns()
-    obs = {"hardware": {
-        "measured_state": state.tolist(),
-        "state_monotonic_ns": stamp,
-        "right_tcp_monotonic_ns": stamp,
-        "right_tcp_xyz_m": controller_ee.tolist(),
-        "right_tcp_frame": "right_arm_local_base",
-        "depth_monotonic_ns": {"front_depth_mm": stamp},
-        "auxiliary_feedback": {"right_gripper_current_native": 0.07},
-        "auxiliary_monotonic_ns": {"right_gripper_current_native": stamp},
-    }}
+    def observation(measured=state, offset_ns=0):
+        frame_stamp = time.monotonic_ns() + offset_ns
+        return {"hardware": {
+            "measured_state": measured.tolist(), "state_monotonic_ns": frame_stamp,
+            "right_tcp_monotonic_ns": frame_stamp, "right_tcp_xyz_m": controller_ee.tolist(),
+            "right_tcp_frame": "right_arm_local_base",
+            "camera_monotonic_ns": {"front_rgb": frame_stamp},
+            "depth_monotonic_ns": {"front_depth_mm": frame_stamp},
+            "auxiliary_feedback": {"right_gripper_current_native": 0.07},
+            "auxiliary_monotonic_ns": {"right_gripper_current_native": frame_stamp},
+        }}
+    obs = observation()
     result = provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": depth})
     assert result["privileged.interaction.gripper_closed"] is True
     assert result["privileged.interaction.gripper_contact"] is False
     assert result["privileged.interaction.lift_m"] == 0.0
     assert result["privileged.interaction.grasped"] is False
     assert result["privileged.interaction.success"] is False
+    assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
     settled_state = state.copy()
     settled_state[13] = -0.858
-    settled = provider.observe(
-        {"hardware": {**obs["hardware"], "measured_state": settled_state.tolist()}},
-        {"front_rgb": rgb, "front_depth_mm": depth},
-    )
+    settled = provider.observe(observation(settled_state), {"front_rgb": rgb, "front_depth_mm": depth})
     assert settled["privileged.interaction.gripper_closed"] is True
-    assert result["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
-    with pytest.raises(ValueError, match="insufficient valid metric depth"):
-        provider.observe(obs, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
+    from robots.arx.deployment.feature_observation import FeatureObservationUnavailable
+    with pytest.raises(FeatureObservationUnavailable, match="insufficient valid metric depth"):
+        provider.observe(observation(), {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
     open_state = state.copy()
     open_state[13] = -2.5
-    dropout = {"hardware": {**obs["hardware"],
-                            "measured_state": open_state.tolist(),
-                            "depth_monotonic_ns": {"front_depth_mm": stamp + 100_000_000}}}
-    fallback = provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
-    assert fallback["privileged.interaction.gripper_closed"] is False
-    assert fallback["privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
-    dropout["hardware"]["depth_monotonic_ns"]["front_depth_mm"] = stamp + 600_000_000
-    assert provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})[
-        "privileged.selected.target_gripper_distance_m"] == pytest.approx(expected_distance, abs=0.005)
-    moved_rgb = rgb.copy()
-    moved_rgb[40:52, 150:164] = 0
-    moved_rgb[40:52, 158:172] = [230, 70, 150]
-    with pytest.raises(ValueError, match="insufficient valid metric depth"):
-        provider.observe(dropout, {"front_rgb": moved_rgb, "front_depth_mm": np.zeros_like(depth)})
-    dropout["hardware"]["depth_monotonic_ns"]["front_depth_mm"] = stamp + 1_600_000_000
-    with pytest.raises(ValueError, match="insufficient valid metric depth"):
-        provider.observe(dropout, {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
-    with pytest.raises(ValueError, match="controller FK"):
-        provider.observe({"hardware": {**obs["hardware"], "right_tcp_frame": "unknown"}},
-                         {"front_rgb": rgb, "front_depth_mm": depth})
-    with pytest.raises(ValueError, match="differs from fresh joint feedback"):
-        provider.observe({"hardware": {**obs["hardware"], "right_tcp_xyz_m": [1, 1, 1]}},
-                         {"front_rgb": rgb, "front_depth_mm": depth})
-    with pytest.raises(ValueError, match="motor current"):
-        provider.observe({"hardware": {**obs["hardware"], "auxiliary_feedback": {}}},
-                         {"front_rgb": rgb, "front_depth_mm": depth})
+    with pytest.raises(FeatureObservationUnavailable) as failure:
+        provider.observe(observation(open_state), {"front_rgb": rgb, "front_depth_mm": np.zeros_like(depth)})
+    assert failure.value.available["privileged.interaction.gripper_closed"] is False
+    assert "privileged.interaction.success" in failure.value.unavailable
+    assert provider.success_hold_frames == 0
+    for bad, message in (({"right_tcp_frame": "unknown"}, "controller FK"),
+                         ({"right_tcp_xyz_m": [1, 1, 1]}, "differs from fresh"),
+                         ({"auxiliary_feedback": {}}, "fresh right gripper")):
+        invalid = observation()
+        invalid["hardware"].update(bad)
+        with pytest.raises(ValueError, match=message):
+            provider.observe(invalid, {"front_rgb": rgb, "front_depth_mm": depth})
     with pytest.raises(ValueError, match="pinned 640x480"):
         provider.validate_hardware(SimpleNamespace(
             cameras=[SimpleNamespace(**{**front.__dict__, "depth_enabled": False})],

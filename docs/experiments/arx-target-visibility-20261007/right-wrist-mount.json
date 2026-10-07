@@ -1,0 +1,46 @@
+{
+  "schema_version": "arx.real.wrist_mount.v1",
+  "camera_serial": "260422275847",
+  "parent_frame": "right_link6_after_rotation",
+  "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+  "rgb_intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+  "T_link6_from_camera": [
+    [
+      0.04370676705696739,
+      -0.4773941001381886,
+      0.8776016132999513,
+      0.07021098111921359
+    ],
+    [
+      -0.999041543881893,
+      -0.02298673530846146,
+      0.03725055164615762,
+      0.0038099547564131864
+    ],
+    [
+      0.0023900024084362874,
+      -0.8783885718479653,
+      -0.47794121472768986,
+      0.05579979838601826
+    ],
+    [
+      0.0,
+      0.0,
+      0.0,
+      1.0
+    ]
+  ],
+  "quality": {
+    "accepted": true,
+    "scope": "pink-label position during supervised open-gripper pregrasp; not a full six-DOF board calibration",
+    "fit_max_step": 60,
+    "heldout_steps": [
+      61,
+      100
+    ],
+    "heldout_rms_m": 0.006170345367157753,
+    "heldout_max_m": 0.010186744342055862,
+    "samples": 104
+  },
+  "evidence_sha256": "278b919393b6728ed2cfb924455e29cbf89ddfdaaeee88774b4506d3e55cd503"
+}

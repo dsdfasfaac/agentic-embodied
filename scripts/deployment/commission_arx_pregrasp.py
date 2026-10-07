@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Supervised commissioning of a frozen bundle prefix through the real gateway.
 
-No VLA call is made. A one-step hold lets the real bundle critic trigger; only
-the bundle's ordered recovery prefix through pregrasp is executed. The optional
+By default no VLA call is made. A one-step hold lets the real bundle critic
+trigger; the bundle's ordered recovery prefix through pregrasp is executed.
+--resume-vla-once also admits its reviewed reentry and one fresh VLA chunk. The optional
 physical step cap is a commissioning stop, never reported as critic success.
 Closing the gateway leaves the separately managed controllers running.
 """
@@ -36,8 +37,18 @@ def run(args):
               "grasp_config_sha256": file_sha256(args.grasp_config)}
     def cancelled():
         return core is not None and core.step_index >= args.max_physical_steps
+    retained = set()
+    def phase_changed(phase):
+        if phase == "inference" and core is not None and getattr(args, "resume_vla_once", False):
+            report["vla_called"] = True
+        if (phase == "critic" and getattr(args, "retain_step_sensors", False)
+                and core is not None and core.current is not None
+                and core.current["observation_id"] not in retained):
+            core._retain_grasp_sensors()
+            retained.add(core.current["observation_id"])
     factory = RealCoreFactory(
-        hardware_config=str(root / "robots/arx/manifests/real/dodo_picktube_hardware.json"),
+        hardware_config=str(getattr(args, "hardware_config", None) or
+                            root / "robots/arx/manifests/real/dodo_picktube_hardware.json"),
         hardware_sha256=args.hardware_sha256,
         task=str(root / "robots/arx/manifests/pickup_test_tube.yaml"),
         model_contract=str(root / "robots/arx/manifests/task7_model_a.yaml"),
@@ -67,14 +78,17 @@ def run(args):
                           "error": result["error"]}), flush=True)
         return result
     try:
-        core = factory(cancelled, lambda phase: None)
+        core = factory(cancelled, phase_changed)
         # This harness admits only the open-gripper geometric pregrasp prefix.
         # Inspect all programs before reset or the first hold sends a command.
         for program in core.programs.values():
+            pregrasp_indices = [i for i, c in enumerate(program.calls)
+                                if c.tool == "arx.execute_grasp" and c.arguments.get("phase", "pregrasp") == "pregrasp"]
+            if not pregrasp_indices:
+                raise ValueError("bundle has no pregrasp commissioning prefix")
+            final_pregrasp = pregrasp_indices[-1]
             reached_pregrasp = False
-            for entry in program.calls:
-                if reached_pregrasp:
-                    break
+            for entry in program.calls[:final_pregrasp + 1]:
                 allowed = (
                     entry.tool == "arx.propose_grasp" and entry.arguments.get("engine", "tube_geometry") == "tube_geometry"
                     or entry.tool == "arx.set_gripper" and entry.arguments.get("opening") == 1.
@@ -85,13 +99,20 @@ def run(args):
                 reached_pregrasp = entry.tool == "arx.execute_grasp"
             if not reached_pregrasp:
                 raise ValueError("bundle has no pregrasp commissioning prefix")
+            if getattr(args, "resume_vla_once", False):
+                suffix = program.calls[final_pregrasp + 1:]
+                if ([c.tool for c in suffix] != ["arx.review_reentry", "arx.zeva"]
+                        or suffix[-1].arguments.get("max_chunks") != 1):
+                    raise ValueError("commissioning reentry requires one review and one VLA chunk")
         core.reset()
         result = call("arx.hold", {"steps": 1})
         if result["status"] != "interrupted" or core.recovery is None:
             raise ValueError("commissioning critic did not interrupt the hold")
         program = core.programs[core.recovery["binding_id"]]
-        for entry in program.calls:
-            if entry.tool in {"arx.review_reentry", "arx.zeva"}:
+        final_pregrasp = max(i for i, c in enumerate(program.calls)
+                            if c.tool == "arx.execute_grasp" and c.arguments.get("phase", "pregrasp") == "pregrasp")
+        for index, entry in enumerate(program.calls):
+            if entry.tool in {"arx.review_reentry", "arx.zeva"} and not getattr(args, "resume_vla_once", False):
                 break
             if entry.tool == "arx.execute_grasp" and entry.arguments.get("phase") != "pregrasp":
                 raise ValueError("commissioning supports pregrasp only")
@@ -99,13 +120,29 @@ def run(args):
                           core.program_token, core.program_outputs))
             if result["status"] != "completed":
                 report.update(status="stopped", termination_reason=(
-                    "commissioning_step_cap" if cancelled() else "gateway_rejected_or_interrupted"))
+                    "commissioning_step_cap" if cancelled() else
+                    (result.get("result") or {}).get("completion") or "gateway_rejected_or_interrupted"))
                 break
             if entry.tool == "arx.execute_grasp":
                 outcome = result["result"] or {}
                 report.update(status="stopped", termination_reason="pregrasp_unverified")
-                if outcome.get("command_target_reached") and outcome.get("physical_arrival_verified"):
+                evidence = core.critic.last_feature_evidence
+                features = evidence["features"]
+                settings = json.loads(args.grasp_config.read_text())
+                target_verified = (evidence.get("feature_observation", {}).get("status") == "observed"
+                    and features["privileged.interaction.gripper_closed"] is False
+                    and features["privileged.interaction.gripper_contact"] is False
+                    and features["privileged.selected.target_gripper_distance_m"] <=
+                        settings["pregrasp_distance_m"] + settings["pose_tolerance_m"])
+                if outcome.get("command_target_reached") and outcome.get("physical_arrival_verified") and target_verified:
                     report.update(status="pregrasp_verified", termination_reason="measured_pregrasp")
+                if index == final_pregrasp and (not target_verified or not getattr(args, "resume_vla_once", False)):
+                    break
+            elif entry.tool == "arx.review_reentry":
+                report["reentry_verified"] = (result["result"].get("assessment", {}).get("status") == "eligible")
+            elif entry.tool == "arx.zeva":
+                report.update(status="reentry_vla_verified", termination_reason=(
+                    "task_success" if result["result"]["completion"] == "task_success" else "bounded_vla_chunk_complete"))
                 break
         report.update(physical_steps=core.step_index, final_observation=core.current,
                       final_features=getattr(core.critic, "last_feature_evidence", None))
@@ -132,6 +169,9 @@ def main():
     for name in ("bundle", "grasp-config", "frozen", "output"):
         parser.add_argument("--" + name, type=Path, required=True)
     parser.add_argument("--hardware-sha256", required=True)
+    parser.add_argument("--hardware-config", type=Path)
+    parser.add_argument("--retain-step-sensors", action="store_true")
+    parser.add_argument("--resume-vla-once", action="store_true")
     parser.add_argument("--max-physical-steps", type=int, default=6)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()

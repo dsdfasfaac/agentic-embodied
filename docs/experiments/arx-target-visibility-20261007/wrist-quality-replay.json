@@ -1,0 +1,3965 @@
+{
+  "scope": "offline replay; no robot commands",
+  "source": "runs/arx_grasp_recovery_20261007/visibility-wrist-reentry-05",
+  "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787",
+  "samples": [
+    {
+      "observation_id": "obs-0",
+      "step": 0,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171746846565552,
+        "cross_camera_error_m": 0.0036319315511485106,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 1,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171746846565552
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3914712134045607
+      }
+    },
+    {
+      "observation_id": "obs-1",
+      "step": 1,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171747113113156,
+        "cross_camera_error_m": 0.0033466068976766763,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 2,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171747113113156
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3923207907700157
+      }
+    },
+    {
+      "observation_id": "obs-1-read-1",
+      "step": 1,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171747313090536,
+        "cross_camera_error_m": 0.004549683256573545,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 3,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171747313090536
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3924350673839786
+      }
+    },
+    {
+      "observation_id": "obs-1-read-2",
+      "step": 1,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171747779880635,
+        "cross_camera_error_m": 0.004382994166684832,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 4,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171747779880635
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.39327026199533044
+      }
+    },
+    {
+      "observation_id": "obs-1-read-3",
+      "step": 1,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171748779922875,
+        "cross_camera_error_m": 0.004463759381290503,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 5,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171748779922875
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.39327026199533044
+      }
+    },
+    {
+      "observation_id": "obs-2",
+      "step": 2,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171749781488927,
+        "cross_camera_error_m": 0.0037314979970393706,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 6,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171749781488927
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.39186624081082705
+      }
+    },
+    {
+      "observation_id": "obs-3",
+      "step": 3,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171750048359668,
+        "cross_camera_error_m": 0.004910570281383996,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 7,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171750048359668
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.39046539649133655
+      }
+    },
+    {
+      "observation_id": "obs-4",
+      "step": 4,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171750314901848,
+        "cross_camera_error_m": 0.005067149078608022,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 8,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171750314901848
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3888377286960989
+      }
+    },
+    {
+      "observation_id": "obs-5",
+      "step": 5,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171750581430847,
+        "cross_camera_error_m": 0.0022293223959290085,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 9,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171750581430847
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.38680920785852263
+      }
+    },
+    {
+      "observation_id": "obs-6",
+      "step": 6,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171750846862620,
+        "cross_camera_error_m": 0.002727291559151156,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 10,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171750846862620
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3850381156178298
+      }
+    },
+    {
+      "observation_id": "obs-7",
+      "step": 7,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171751113811256,
+        "cross_camera_error_m": 0.00125868469778218,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 11,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171751113811256
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.38465236362450916
+      }
+    },
+    {
+      "observation_id": "obs-8",
+      "step": 8,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171751381723620,
+        "cross_camera_error_m": 0.0036446548150093853,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 12,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171751381723620
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.38224573407269535
+      }
+    },
+    {
+      "observation_id": "obs-9",
+      "step": 9,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171751648313690,
+        "cross_camera_error_m": 0.0030524512553998014,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 13,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171751648313690
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3806690384558413
+      }
+    },
+    {
+      "observation_id": "obs-10",
+      "step": 10,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171751913603786,
+        "cross_camera_error_m": 0.0031958807369464144,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 14,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171751913603786
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3786397684052676
+      }
+    },
+    {
+      "observation_id": "obs-11",
+      "step": 11,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171752181857766,
+        "cross_camera_error_m": 0.0021178068705822715,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 15,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171752181857766
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3765918809126106
+      }
+    },
+    {
+      "observation_id": "obs-12",
+      "step": 12,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171752448466262,
+        "cross_camera_error_m": 0.003527238202213284,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 16,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171752448466262
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.37482062781968056
+      }
+    },
+    {
+      "observation_id": "obs-13",
+      "step": 13,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171752713700115,
+        "cross_camera_error_m": 0.004982600599927408,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 17,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171752713700115
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3725712295776655
+      }
+    },
+    {
+      "observation_id": "obs-14",
+      "step": 14,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171752981929756,
+        "cross_camera_error_m": 0.0028560393913177264,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 18,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171752981929756
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.370623890852669
+      }
+    },
+    {
+      "observation_id": "obs-15",
+      "step": 15,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171753248589802,
+        "cross_camera_error_m": 0.003913930564322491,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 19,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171753248589802
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3688356937654371
+      }
+    },
+    {
+      "observation_id": "obs-16",
+      "step": 16,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171753515212722,
+        "cross_camera_error_m": 0.004038274755775141,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 20,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171753515212722
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3662768364916265
+      }
+    },
+    {
+      "observation_id": "obs-17",
+      "step": 17,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171753780554110,
+        "cross_camera_error_m": 0.004038163449640594,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 21,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171753780554110
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.36455125795838106
+      }
+    },
+    {
+      "observation_id": "obs-18",
+      "step": 18,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171754047261951,
+        "cross_camera_error_m": 0.004735641353511722,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 22,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171754047261951
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.36257990164189763
+      }
+    },
+    {
+      "observation_id": "obs-19",
+      "step": 19,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171754314121901,
+        "cross_camera_error_m": 0.004441318399625747,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 23,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171754314121901
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3618232276722482
+      }
+    },
+    {
+      "observation_id": "obs-20",
+      "step": 20,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171754580626637,
+        "cross_camera_error_m": 0.00668946366168765,
+        "depth_support_fraction": 0.9868421052631579,
+        "wrist_identity_validations": 24,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171754580626637
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3578880279684983
+      }
+    },
+    {
+      "observation_id": "obs-21",
+      "step": 21,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171754848892188,
+        "cross_camera_error_m": 0.003667309842895103,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 25,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171754848892188
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3569390254771772
+      }
+    },
+    {
+      "observation_id": "obs-22",
+      "step": 22,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171755114541033,
+        "cross_camera_error_m": 0.0021979277429756117,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 26,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171755114541033
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.35413099601104303
+      }
+    },
+    {
+      "observation_id": "obs-23",
+      "step": 23,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171755380712775,
+        "cross_camera_error_m": 0.004947251856505197,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 27,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171755380712775
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.35270075630955056
+      }
+    },
+    {
+      "observation_id": "obs-24",
+      "step": 24,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171755647413685,
+        "cross_camera_error_m": 0.0038431673516725958,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 28,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171755647413685
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.349926671873182
+      }
+    },
+    {
+      "observation_id": "obs-25",
+      "step": 25,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171755914495823,
+        "cross_camera_error_m": 0.0034121056855517056,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 29,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171755914495823
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3468375002064018
+      }
+    },
+    {
+      "observation_id": "obs-26",
+      "step": 26,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171756180820954,
+        "cross_camera_error_m": 0.003908911318902181,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 30,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171756180820954
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3451627689719225
+      }
+    },
+    {
+      "observation_id": "obs-27",
+      "step": 27,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171756448134640,
+        "cross_camera_error_m": 0.003945941752926426,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 31,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171756448134640
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3431393746801828
+      }
+    },
+    {
+      "observation_id": "obs-28",
+      "step": 28,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171756780881376,
+        "cross_camera_error_m": 0.002433934235906015,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 32,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171756780881376
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3417663745514746
+      }
+    },
+    {
+      "observation_id": "obs-29",
+      "step": 29,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171756980876712,
+        "cross_camera_error_m": 0.0012506194971086695,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 33,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171756980876712
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.34018922161815085
+      }
+    },
+    {
+      "observation_id": "obs-30",
+      "step": 30,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171757180796347,
+        "cross_camera_error_m": 0.002875743946361706,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 34,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171757180796347
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3395998069328579
+      }
+    },
+    {
+      "observation_id": "obs-31",
+      "step": 31,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171757380898843,
+        "cross_camera_error_m": 0.0025879626239751134,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 35,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171757380898843
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.33675830502563553
+      }
+    },
+    {
+      "observation_id": "obs-32",
+      "step": 32,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171757582399965,
+        "cross_camera_error_m": 0.0027363196231942805,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 36,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171757582399965
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.33556409900117257
+      }
+    },
+    {
+      "observation_id": "obs-33",
+      "step": 33,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171757780919793,
+        "cross_camera_error_m": 0.002291891118606323,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 37,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171757780919793
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.33342994298348105
+      }
+    },
+    {
+      "observation_id": "obs-34",
+      "step": 34,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171757980950676,
+        "cross_camera_error_m": 0.0030947347129351797,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 38,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171757980950676
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3311351613219314
+      }
+    },
+    {
+      "observation_id": "obs-35",
+      "step": 35,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171758181061582,
+        "cross_camera_error_m": 0.0010262480060582349,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 39,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171758181061582
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3291150098542216
+      }
+    },
+    {
+      "observation_id": "obs-36",
+      "step": 36,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171758380936714,
+        "cross_camera_error_m": 0.0026213898680119154,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 40,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171758380936714
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.32665679291767064
+      }
+    },
+    {
+      "observation_id": "obs-37",
+      "step": 37,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171758582458889,
+        "cross_camera_error_m": 0.002048754597244021,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 41,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171758582458889
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3259265184548405
+      }
+    },
+    {
+      "observation_id": "obs-38",
+      "step": 38,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171758781026947,
+        "cross_camera_error_m": 0.0018988622337837687,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 42,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171758781026947
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3246312989424055
+      }
+    },
+    {
+      "observation_id": "obs-39",
+      "step": 39,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171758981046317,
+        "cross_camera_error_m": 0.0028332074418265223,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 43,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171758981046317
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3237496802811876
+      }
+    },
+    {
+      "observation_id": "obs-40",
+      "step": 40,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171759181024432,
+        "cross_camera_error_m": 0.0017690962129986944,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 44,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171759181024432
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3188721453316958
+      }
+    },
+    {
+      "observation_id": "obs-41",
+      "step": 41,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171759381012206,
+        "cross_camera_error_m": 0.0031492106243966784,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 45,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171759381012206
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.31709255133582526
+      }
+    },
+    {
+      "observation_id": "obs-42",
+      "step": 42,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171759581129529,
+        "cross_camera_error_m": 0.0014935457981766795,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 46,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171759581129529
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.31564958709972407
+      }
+    },
+    {
+      "observation_id": "obs-43",
+      "step": 43,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171759781109288,
+        "cross_camera_error_m": 0.000817303989773754,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 47,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171759781109288
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.31333319259497866
+      }
+    },
+    {
+      "observation_id": "obs-44",
+      "step": 44,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171759981603342,
+        "cross_camera_error_m": 0.0018861391967354719,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 48,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171759981603342
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.31118195139903787
+      }
+    },
+    {
+      "observation_id": "obs-45",
+      "step": 45,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171760181168609,
+        "cross_camera_error_m": 0.003994600528529987,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 49,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171760181168609
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3107805398382875
+      }
+    },
+    {
+      "observation_id": "obs-46",
+      "step": 46,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171760381153277,
+        "cross_camera_error_m": 0.0012209274191582412,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 50,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171760381153277
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.307828059452309
+      }
+    },
+    {
+      "observation_id": "obs-47",
+      "step": 47,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171760581599127,
+        "cross_camera_error_m": 0.0012850139478097638,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 51,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171760581599127
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.30499134852923493
+      }
+    },
+    {
+      "observation_id": "obs-48",
+      "step": 48,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171760781717777,
+        "cross_camera_error_m": 0.004212432752164517,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 52,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171760781717777
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3046073650083379
+      }
+    },
+    {
+      "observation_id": "obs-49",
+      "step": 49,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171760981535026,
+        "cross_camera_error_m": 0.0014493346874842772,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 53,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171760981535026
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.30217821365191155
+      }
+    },
+    {
+      "observation_id": "obs-50",
+      "step": 50,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171761181449857,
+        "cross_camera_error_m": 0.0012401079704962169,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 54,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171761181449857
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2987822257818704
+      }
+    },
+    {
+      "observation_id": "obs-51",
+      "step": 51,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171761381483806,
+        "cross_camera_error_m": 0.0021406946286702676,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 55,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171761381483806
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.29690123355174036
+      }
+    },
+    {
+      "observation_id": "obs-52",
+      "step": 52,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171761581412771,
+        "cross_camera_error_m": 0.00042506525271725605,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 56,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171761581412771
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2948946382764938
+      }
+    },
+    {
+      "observation_id": "obs-53",
+      "step": 53,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171761781373819,
+        "cross_camera_error_m": 0.0016218017917465329,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 57,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171761781373819
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.29266395998332606
+      }
+    },
+    {
+      "observation_id": "obs-54",
+      "step": 54,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171761982836642,
+        "cross_camera_error_m": 0.0020599656301037417,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 58,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171761982836642
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2912435339506519
+      }
+    },
+    {
+      "observation_id": "obs-55",
+      "step": 55,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171762181355429,
+        "cross_camera_error_m": 0.0009991635630035199,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 59,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171762181355429
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.28749690962982727
+      }
+    },
+    {
+      "observation_id": "obs-56",
+      "step": 56,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171762381409879,
+        "cross_camera_error_m": 0.00410470586966279,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 60,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171762381409879
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.28776885615116987
+      }
+    },
+    {
+      "observation_id": "obs-57",
+      "step": 57,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171762581786605,
+        "cross_camera_error_m": 0.0009940674113272981,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 61,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171762581786605
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2849455078209768
+      }
+    },
+    {
+      "observation_id": "obs-58",
+      "step": 58,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171762783017900,
+        "cross_camera_error_m": 0.0033302933446047907,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 62,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171762783017900
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2841347781431027
+      }
+    },
+    {
+      "observation_id": "obs-59",
+      "step": 59,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171762983053043,
+        "cross_camera_error_m": 0.0022869878005170215,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 63,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171762983053043
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2823775149914596
+      }
+    },
+    {
+      "observation_id": "obs-60",
+      "step": 60,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171763181625646,
+        "cross_camera_error_m": 0.0010781175797339032,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 64,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171763181625646
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2791354687345779
+      }
+    },
+    {
+      "observation_id": "obs-61",
+      "step": 61,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171763381972666,
+        "cross_camera_error_m": 0.0019452451431328896,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 65,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171763381972666
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2777975612923149
+      }
+    },
+    {
+      "observation_id": "obs-62",
+      "step": 62,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171763581606964,
+        "cross_camera_error_m": 0.0015602471501135144,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 66,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171763581606964
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2749298475524049
+      }
+    },
+    {
+      "observation_id": "obs-63",
+      "step": 63,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171763781610571,
+        "cross_camera_error_m": 0.00219508213492634,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 67,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171763781610571
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.27273941314035843
+      }
+    },
+    {
+      "observation_id": "obs-64",
+      "step": 64,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171763981653741,
+        "cross_camera_error_m": 0.0013361583697495958,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 68,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171763981653741
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.27102194757753917
+      }
+    },
+    {
+      "observation_id": "obs-65",
+      "step": 65,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171764181566147,
+        "cross_camera_error_m": 0.003923111921768657,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 69,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171764181566147
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2702936796984866
+      }
+    },
+    {
+      "observation_id": "obs-66",
+      "step": 66,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171764383093003,
+        "cross_camera_error_m": 0.0006761849798592737,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 70,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171764383093003
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2673440026089913
+      }
+    },
+    {
+      "observation_id": "obs-67",
+      "step": 67,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171764583068124,
+        "cross_camera_error_m": 0.0024903264587886843,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 71,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171764583068124
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2650162641683331
+      }
+    },
+    {
+      "observation_id": "obs-68",
+      "step": 68,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171764783085582,
+        "cross_camera_error_m": 0.0014061307438792004,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 72,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171764783085582
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.26293852787952365
+      }
+    },
+    {
+      "observation_id": "obs-69",
+      "step": 69,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171764982042438,
+        "cross_camera_error_m": 0.003851720955423578,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 73,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171764982042438
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.26185545089802537
+      }
+    },
+    {
+      "observation_id": "obs-70",
+      "step": 70,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171765181764111,
+        "cross_camera_error_m": 0.003696814768620827,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 74,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171765181764111
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2604198784406647
+      }
+    },
+    {
+      "observation_id": "obs-71",
+      "step": 71,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171765381701651,
+        "cross_camera_error_m": 0.0028679658152528814,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 75,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171765381701651
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.25765712695153165
+      }
+    },
+    {
+      "observation_id": "obs-72",
+      "step": 72,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171765583178336,
+        "cross_camera_error_m": 0.0034940850177994625,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 76,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171765583178336
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.25432006911808075
+      }
+    },
+    {
+      "observation_id": "obs-73",
+      "step": 73,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171765783211287,
+        "cross_camera_error_m": 0.0032186520840840347,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 77,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171765783211287
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2530786781354352
+      }
+    },
+    {
+      "observation_id": "obs-74",
+      "step": 74,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171765981814850,
+        "cross_camera_error_m": 0.0024233806334753127,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 78,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171765981814850
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.25124167149149795
+      }
+    },
+    {
+      "observation_id": "obs-75",
+      "step": 75,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171766181836106,
+        "cross_camera_error_m": 0.0032673742204304456,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 79,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171766181836106
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.24915367789112655
+      }
+    },
+    {
+      "observation_id": "obs-76",
+      "step": 76,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171766381838297,
+        "cross_camera_error_m": 0.004012831743523532,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 80,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171766381838297
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.24768681587869712
+      }
+    },
+    {
+      "observation_id": "obs-77",
+      "step": 77,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171766583310154,
+        "cross_camera_error_m": 0.0036685238832776723,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 81,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171766583310154
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.24491593134476983
+      }
+    },
+    {
+      "observation_id": "obs-78",
+      "step": 78,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171766783217656,
+        "cross_camera_error_m": 0.004756009597274738,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 82,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171766783217656
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2443146464438455
+      }
+    },
+    {
+      "observation_id": "obs-79",
+      "step": 79,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171766983255982,
+        "cross_camera_error_m": 0.00483212552815705,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 83,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171766983255982
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.24172376744104707
+      }
+    },
+    {
+      "observation_id": "obs-80",
+      "step": 80,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171767183337143,
+        "cross_camera_error_m": 0.004315812080699543,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 84,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171767183337143
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.23998483085528277
+      }
+    },
+    {
+      "observation_id": "obs-81",
+      "step": 81,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171767383393183,
+        "cross_camera_error_m": 0.004474068031034751,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 85,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171767383393183
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.23867261306392532
+      }
+    },
+    {
+      "observation_id": "obs-82",
+      "step": 82,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171767581867406,
+        "cross_camera_error_m": 0.004247526756179564,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 86,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171767581867406
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.23523891025991
+      }
+    },
+    {
+      "observation_id": "obs-83",
+      "step": 83,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171767781913046,
+        "cross_camera_error_m": 0.003910185219824914,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 87,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171767781913046
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.23314666261771272
+      }
+    },
+    {
+      "observation_id": "obs-84",
+      "step": 84,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171767982360271,
+        "cross_camera_error_m": 0.0048772334135841824,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 88,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171767982360271
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.23106542116596132
+      }
+    },
+    {
+      "observation_id": "obs-85",
+      "step": 85,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171768182433162,
+        "cross_camera_error_m": 0.00447321132968018,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 89,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171768182433162
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.22984157468731412
+      }
+    },
+    {
+      "observation_id": "obs-86",
+      "step": 86,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171768382409865,
+        "cross_camera_error_m": 0.005408834595909289,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 90,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171768382409865
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.22786341997174797
+      }
+    },
+    {
+      "observation_id": "obs-87",
+      "step": 87,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171768582350164,
+        "cross_camera_error_m": 0.005875091205526595,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 91,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171768582350164
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.227217072278241
+      }
+    },
+    {
+      "observation_id": "obs-88",
+      "step": 88,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171768782413098,
+        "cross_camera_error_m": 0.005326168056491912,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 92,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171768782413098
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.22378545548801718
+      }
+    },
+    {
+      "observation_id": "obs-89",
+      "step": 89,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171768982025170,
+        "cross_camera_error_m": 0.005261040651577849,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 93,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171768982025170
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.22200817314251015
+      }
+    },
+    {
+      "observation_id": "obs-90",
+      "step": 90,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171769182095286,
+        "cross_camera_error_m": 0.004230573558816903,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 94,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171769182095286
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.21982874307173694
+      }
+    },
+    {
+      "observation_id": "obs-91",
+      "step": 91,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171769382093340,
+        "cross_camera_error_m": 0.005754284100137939,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 95,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171769382093340
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.21806424343668243
+      }
+    },
+    {
+      "observation_id": "obs-92",
+      "step": 92,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171769582180801,
+        "cross_camera_error_m": 0.006059253563834308,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 96,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171769582180801
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.21599134818479077
+      }
+    },
+    {
+      "observation_id": "obs-93",
+      "step": 93,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171769782127085,
+        "cross_camera_error_m": 0.00555488446925949,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 97,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171769782127085
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.21409815452359113
+      }
+    },
+    {
+      "observation_id": "obs-94",
+      "step": 94,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171769982110914,
+        "cross_camera_error_m": 0.005008494743556275,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 98,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171769982110914
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.21267890811425685
+      }
+    },
+    {
+      "observation_id": "obs-95",
+      "step": 95,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171770183676975,
+        "cross_camera_error_m": 0.005936460969093485,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 99,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171770183676975
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.2093027933673658
+      }
+    },
+    {
+      "observation_id": "obs-96",
+      "step": 96,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171770382317262,
+        "cross_camera_error_m": 0.005033478995407107,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 100,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171770382317262
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.20766600699792423
+      }
+    },
+    {
+      "observation_id": "obs-97",
+      "step": 97,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171770582347985,
+        "cross_camera_error_m": 0.0050676724404990865,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 101,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171770582347985
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.20594570533489132
+      }
+    },
+    {
+      "observation_id": "obs-98",
+      "step": 98,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171770782276666,
+        "cross_camera_error_m": 0.005694089313646077,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 102,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171770782276666
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.20454162579755975
+      }
+    },
+    {
+      "observation_id": "obs-99",
+      "step": 99,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171770982334790,
+        "cross_camera_error_m": 0.006022044127339545,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 103,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171770982334790
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.20234409123761224
+      }
+    },
+    {
+      "observation_id": "obs-100",
+      "step": 100,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171771182348548,
+        "cross_camera_error_m": 0.005189738874525997,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 104,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171771182348548
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19973433393169795
+      }
+    },
+    {
+      "observation_id": "obs-101",
+      "step": 101,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171771382310557,
+        "cross_camera_error_m": 0.005972385542419662,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 105,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171771382310557
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19810944513679726
+      }
+    },
+    {
+      "observation_id": "obs-102",
+      "step": 102,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171771582354656,
+        "cross_camera_error_m": 0.005931318526695654,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 106,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171771582354656
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19568760820489414
+      }
+    },
+    {
+      "observation_id": "obs-103",
+      "step": 103,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171771782638566,
+        "cross_camera_error_m": 0.006812487337747809,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 107,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171771782638566
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19474630948193827
+      }
+    },
+    {
+      "observation_id": "obs-104",
+      "step": 104,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171771982510725,
+        "cross_camera_error_m": 0.0062769882390046735,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 108,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171771982510725
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19168253424349657
+      }
+    },
+    {
+      "observation_id": "obs-105",
+      "step": 105,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171772182442614,
+        "cross_camera_error_m": 0.006167938923819191,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 109,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171772182442614
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.19002734716215547
+      }
+    },
+    {
+      "observation_id": "obs-106",
+      "step": 106,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171772382922715,
+        "cross_camera_error_m": 0.006798347425596099,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 110,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171772382922715
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.18798253373785193
+      }
+    },
+    {
+      "observation_id": "obs-107",
+      "step": 107,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171772584088103,
+        "cross_camera_error_m": 0.00687120865924748,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 111,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171772584088103
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.18590835464558006
+      }
+    },
+    {
+      "observation_id": "obs-108",
+      "step": 108,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171772783496833,
+        "cross_camera_error_m": 0.007391164054939319,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 112,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171772783496833
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1860245447565168
+      }
+    },
+    {
+      "observation_id": "obs-109",
+      "step": 109,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171772982485307,
+        "cross_camera_error_m": 0.006450629515733128,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 113,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171772982485307
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.18263493694997504
+      }
+    },
+    {
+      "observation_id": "obs-110",
+      "step": 110,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171773182551236,
+        "cross_camera_error_m": 0.007073371931893674,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 114,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171773182551236
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.18097219739228929
+      }
+    },
+    {
+      "observation_id": "obs-111",
+      "step": 111,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171773382622623,
+        "cross_camera_error_m": 0.007662041168710958,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 115,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171773382622623
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.17810665284111518
+      }
+    },
+    {
+      "observation_id": "obs-112",
+      "step": 112,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171773582536295,
+        "cross_camera_error_m": 0.007157560086658077,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 116,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171773582536295
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.17687552612709606
+      }
+    },
+    {
+      "observation_id": "obs-113",
+      "step": 113,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171773782778631,
+        "cross_camera_error_m": 0.006391810345854972,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 117,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171773782778631
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.17381878210090146
+      }
+    },
+    {
+      "observation_id": "obs-114",
+      "step": 114,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171773982615458,
+        "cross_camera_error_m": 0.007165459636108171,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 118,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171773982615458
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1721529528949115
+      }
+    },
+    {
+      "observation_id": "obs-115",
+      "step": 115,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171774182921813,
+        "cross_camera_error_m": 0.0072010913033391764,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 119,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171774182921813
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.17166317983448198
+      }
+    },
+    {
+      "observation_id": "obs-116",
+      "step": 116,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171774382666822,
+        "cross_camera_error_m": 0.007110319151029358,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 120,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171774382666822
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.16841076609824354
+      }
+    },
+    {
+      "observation_id": "obs-117",
+      "step": 117,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171774582638796,
+        "cross_camera_error_m": 0.007717886763833155,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 121,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171774582638796
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.16699079583242632
+      }
+    },
+    {
+      "observation_id": "obs-118",
+      "step": 118,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171774784065026,
+        "cross_camera_error_m": 0.007126942427798538,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 122,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171774784065026
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1643174589644893
+      }
+    },
+    {
+      "observation_id": "obs-119",
+      "step": 119,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171774984227475,
+        "cross_camera_error_m": 0.008025217915260794,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 123,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171774984227475
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1637834311912304
+      }
+    },
+    {
+      "observation_id": "obs-120",
+      "step": 120,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171775184213959,
+        "cross_camera_error_m": 0.007794371508256479,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 124,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171775184213959
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1599452270827156
+      }
+    },
+    {
+      "observation_id": "obs-121",
+      "step": 121,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171775384164173,
+        "cross_camera_error_m": 0.00870762833822593,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 125,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171775384164173
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.15883459944866285
+      }
+    },
+    {
+      "observation_id": "obs-122",
+      "step": 122,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171775584176576,
+        "cross_camera_error_m": 0.008499204452494613,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 126,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171775584176576
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1570328985736299
+      }
+    },
+    {
+      "observation_id": "obs-123",
+      "step": 123,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171775784188770,
+        "cross_camera_error_m": 0.007845454067488529,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 127,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171775784188770
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.15529353426388995
+      }
+    },
+    {
+      "observation_id": "obs-124",
+      "step": 124,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171775983205340,
+        "cross_camera_error_m": 0.008866349552906456,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 128,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171775983205340
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.15264757719302693
+      }
+    },
+    {
+      "observation_id": "obs-125",
+      "step": 125,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171776182896354,
+        "cross_camera_error_m": 0.008967629296489624,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 129,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171776182896354
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1506256300580817
+      }
+    },
+    {
+      "observation_id": "obs-126",
+      "step": 126,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171776383346900,
+        "cross_camera_error_m": 0.009419019934674195,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 130,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171776383346900
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.14955953045310075
+      }
+    },
+    {
+      "observation_id": "obs-127",
+      "step": 127,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171776582904625,
+        "cross_camera_error_m": 0.008686408376055757,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 131,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171776582904625
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1465751025098112
+      }
+    },
+    {
+      "observation_id": "obs-128",
+      "step": 128,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171776783278568,
+        "cross_camera_error_m": 0.00879754243283167,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 132,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171776783278568
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.14319797767391323
+      }
+    },
+    {
+      "observation_id": "obs-129",
+      "step": 129,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171776983910996,
+        "cross_camera_error_m": 0.008254901487456561,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 133,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171776983910996
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.14290717612814205
+      }
+    },
+    {
+      "observation_id": "obs-130",
+      "step": 130,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171777184516324,
+        "cross_camera_error_m": 0.008402926185551355,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 134,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171777184516324
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.13943136169141038
+      }
+    },
+    {
+      "observation_id": "obs-131",
+      "step": 131,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171777384398400,
+        "cross_camera_error_m": 0.009206024015324303,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 135,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171777384398400
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.13834786704078056
+      }
+    },
+    {
+      "observation_id": "obs-132",
+      "step": 132,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171777583667689,
+        "cross_camera_error_m": 0.010949833488576522,
+        "depth_support_fraction": 0.9857142857142858,
+        "wrist_identity_validations": 136,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171777583667689
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.13387562971061556
+      }
+    },
+    {
+      "observation_id": "obs-133",
+      "step": 133,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171777783363009,
+        "cross_camera_error_m": 0.013184972521337223,
+        "depth_support_fraction": 0.8142857142857143,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171777783363009
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1319438290636928
+      }
+    },
+    {
+      "observation_id": "obs-134",
+      "step": 134,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171777972519003,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9190283400809717,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171777972519003
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12586723098003902
+      }
+    },
+    {
+      "observation_id": "obs-135",
+      "step": 135,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171778172644470,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9196787148594378,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171778172644470
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12426671541235791
+      }
+    },
+    {
+      "observation_id": "obs-136",
+      "step": 136,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171778372567677,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.905982905982906,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171778372567677
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12209255318339866
+      }
+    },
+    {
+      "observation_id": "obs-137",
+      "step": 137,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171778572326668,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9109311740890689,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171778572326668
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12037674280799247
+      }
+    },
+    {
+      "observation_id": "obs-138",
+      "step": 138,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171778772619951,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9317269076305221,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171778772619951
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11860523234113174
+      }
+    },
+    {
+      "observation_id": "obs-139",
+      "step": 139,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171778972447521,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9580152671755725,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171778972447521
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11622358583705673
+      }
+    },
+    {
+      "observation_id": "obs-140",
+      "step": 140,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171779172497247,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.948339483394834,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171779172497247
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11521129877668075
+      }
+    },
+    {
+      "observation_id": "obs-141",
+      "step": 141,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171779372498948,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9838187702265372,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171779372498948
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11419976238661213
+      }
+    },
+    {
+      "observation_id": "obs-142",
+      "step": 142,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171779573833348,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9609120521172638,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171779573833348
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11110777462636666
+      }
+    },
+    {
+      "observation_id": "obs-143",
+      "step": 143,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171779772594061,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9484848484848485,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171779772594061
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.11010101086563345
+      }
+    },
+    {
+      "observation_id": "obs-144",
+      "step": 144,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171779972519460,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9492957746478873,
+        "wrist_identity_validations": 137,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171779972519460
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.10744453624317457
+      }
+    },
+    {
+      "observation_id": "obs-145",
+      "step": 145,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171780184263687,
+        "cross_camera_error_m": 0.010801471944423978,
+        "depth_support_fraction": 0.8709677419354839,
+        "wrist_identity_validations": 138,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171780184263687
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.09964589524319299
+      }
+    },
+    {
+      "observation_id": "obs-146",
+      "step": 146,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171780384061389,
+        "cross_camera_error_m": 0.008826044874972119,
+        "depth_support_fraction": 1.0,
+        "wrist_identity_validations": 139,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171780384061389
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.10287108301553069
+      }
+    },
+    {
+      "observation_id": "obs-147",
+      "step": 147,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171780583959429,
+        "cross_camera_error_m": 0.008985314812482903,
+        "depth_support_fraction": 0.9107142857142857,
+        "wrist_identity_validations": 140,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171780583959429
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.10147218378243347
+      }
+    },
+    {
+      "observation_id": "obs-148",
+      "step": 148,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171780783486038,
+        "cross_camera_error_m": 0.010274370133514434,
+        "depth_support_fraction": 0.9516129032258065,
+        "wrist_identity_validations": 141,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171780783486038
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.10541503477894369
+      }
+    },
+    {
+      "observation_id": "obs-149",
+      "step": 149,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171780983740875,
+        "cross_camera_error_m": 0.010139451486955692,
+        "depth_support_fraction": 0.9714285714285714,
+        "wrist_identity_validations": 142,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171780983740875
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1023634848848073
+      }
+    },
+    {
+      "observation_id": "obs-150",
+      "step": 150,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171781183841478,
+        "cross_camera_error_m": 0.01055357716785238,
+        "depth_support_fraction": 0.9722222222222222,
+        "wrist_identity_validations": 143,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171781183841478
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.09941089012994928
+      }
+    },
+    {
+      "observation_id": "obs-151",
+      "step": 151,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171781383532330,
+        "cross_camera_error_m": 0.010334206622136133,
+        "depth_support_fraction": 0.9722222222222222,
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171781383532330
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.10036224483007697
+      }
+    },
+    {
+      "observation_id": "obs-152",
+      "step": 152,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171781584228815,
+        "cross_camera_error_m": 0.010355107074773369,
+        "depth_support_fraction": 0.9722222222222222,
+        "wrist_identity_validations": 145,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171781584228815
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.09758909683247446
+      }
+    },
+    {
+      "observation_id": "obs-153",
+      "step": 153,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171781785058142,
+        "cross_camera_error_m": 0.01040689414271601,
+        "depth_support_fraction": 0.9594594594594594,
+        "wrist_identity_validations": 146,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171781785058142
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.09375036958781466
+      }
+    },
+    {
+      "observation_id": "obs-154",
+      "step": 154,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171781983565079,
+        "cross_camera_error_m": 0.01094743784872495,
+        "depth_support_fraction": 0.9285714285714286,
+        "wrist_identity_validations": 147,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171781983565079
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.09342308287377854
+      }
+    },
+    {
+      "observation_id": "obs-155",
+      "step": 155,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171782183665257,
+        "cross_camera_error_m": 0.010682936107842501,
+        "depth_support_fraction": 0.9041095890410958,
+        "wrist_identity_validations": 148,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171782183665257
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.08988271698686298
+      }
+    },
+    {
+      "observation_id": "obs-156",
+      "step": 156,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171782383601020,
+        "cross_camera_error_m": 0.012646697044732326,
+        "depth_support_fraction": 0.8666666666666667,
+        "wrist_identity_validations": 149,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171782383601020
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.08820114394355931
+      }
+    },
+    {
+      "observation_id": "obs-157",
+      "step": 157,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "front_rgb",
+        "target_monotonic_ns": 171782583625336,
+        "cross_camera_error_m": 0.012506916913573635,
+        "depth_support_fraction": 0.8701298701298701,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171782583625336
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.08653636346176254
+      }
+    },
+    {
+      "observation_id": "obs-158",
+      "step": 158,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171782772761737,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9218390804597701,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171782772761737
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.08131124520777284
+      }
+    },
+    {
+      "observation_id": "obs-159",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171782972745498,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.969047619047619,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171782972745498
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.079485150522071
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-4",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171783172775322,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9619686800894854,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171783172775322
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07868392565499602
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-5",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171783373092341,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9612903225806452,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171783373092341
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07915780269419143
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-6",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171783573152964,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9491150442477876,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171783573152964
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07818674917061184
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-7",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171783839487632,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9574468085106383,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171783839487632
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07792622271160417
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-8",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171784039561055,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9539473684210527,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171784039561055
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07818674917061184
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-9",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171784306637571,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9487179487179487,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171784306637571
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07915780269419143
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-10",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171784507418998,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9517543859649122,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171784507418998
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07868392565499602
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-11",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171784707425738,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9646017699115044,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171784707425738
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07894514770685733
+      }
+    },
+    {
+      "observation_id": "obs-159-reacquire-12",
+      "step": 159,
+      "quality": {
+        "status": "observed",
+        "unavailable_features": [],
+        "camera": "right_rgb",
+        "target_monotonic_ns": 171784974146543,
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9653679653679653,
+        "wrist_identity_validations": 150,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "lift_reference_monotonic_ns": 171784974146543
+      },
+      "features": {
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.0786839256549951
+      }
+    }
+  ],
+  "unknown_count": 0,
+  "wrist_count": 22
+}

@@ -634,6 +634,9 @@ class RolloutRunner:
                 raise RunnerError("infrastructure_error", "heartbeat_failed")
             records = self.collect()
             state = self.snapshot["state"]
+            if any(record["kind"] == "interrupt" and
+                   record["payload"].get("code") == "OBSERVATION_UNAVAILABLE" for record in records):
+                return "observation_unavailable"
             if state == "EXECUTION_UNCERTAIN":
                 raise RunnerError("execution_uncertain", "gateway_unknown")
             if state == "ENDED":
@@ -691,6 +694,12 @@ class RolloutRunner:
                     result = self.dispatch(call.tool, arguments, "runner", {
                         "rationale": f"Frozen bundle {recovery['binding_id']} step {call.step_index}",
                     })
+                    if (result.get("result") or {}).get("completion") == "observation_unavailable":
+                        self._save(f"recovery/{rid}-{cursor:03d}-unobserved.json", {
+                            "tool": call.tool, "tool_result": result,
+                            "observation_before": before, "task_failure": False,
+                        })
+                        return "observation_unavailable"
                     token = verify_call_result(call, result, real=getattr(self, "_real_bundle", False))
                     if token:
                         self.bundle_tokens[rid] = token

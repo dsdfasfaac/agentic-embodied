@@ -11,11 +11,13 @@ from scripts.deployment import commission_arx_pregrasp as module
     ('arx.propose_grasp', {'engine': 'graspgen'}),
     ('arx.set_gripper', {'opening': 0.}),
     ('arx.execute_grasp', {'phase': 'engage'}),
+    ('arx.zeva', {'max_chunks': 1}),
 ])
 def test_non_pregrasp_prefix_rejects_before_reset_or_hold(tmp_path, monkeypatch, tool, arguments):
     events = []
     core = SimpleNamespace(
         programs={'test': SimpleNamespace(calls=[
+            SimpleNamespace(tool='arx.execute_grasp', arguments={'phase': 'pregrasp'}),
             SimpleNamespace(tool=tool, arguments=arguments),
             SimpleNamespace(tool='arx.execute_grasp', arguments={'phase': 'pregrasp'}),
         ])}, current=None, closed=False,
