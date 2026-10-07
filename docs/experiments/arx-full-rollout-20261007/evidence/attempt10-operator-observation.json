@@ -1,0 +1,8 @@
+{
+  "trial": "full-zetta-rollout-10",
+  "source": "onsite_operator_user_message",
+  "observation": "已经接触到边缘了，没有完全加持，但是末端执行器没起来",
+  "interpretation": "未形成稳定抓取，未完成抬升",
+  "automated_task_success": null,
+  "cleared_for_homing": false
+}

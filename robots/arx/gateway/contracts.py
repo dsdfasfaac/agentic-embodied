@@ -200,6 +200,7 @@ class RuntimeLimits(StrictModel):
     lease_timeout_s: Annotated[float, Field(gt=0)]
     shutdown_timeout_s: Annotated[float, Field(gt=0)]
     observation_reacquire_timeout_s: Annotated[float, Field(gt=0, le=5)] = 2.0
+    retain_step_sensors: bool = False
 
 
 class GatewayError(Exception):

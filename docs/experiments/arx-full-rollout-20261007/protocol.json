@@ -1,0 +1,29 @@
+{
+  "schema_version": "arx.real.full-rollout.v1",
+  "source_baseline": "6253a79",
+  "trial": "full-zetta-rollout-09",
+  "bundle": "docs/experiments/arx-target-visibility-20261007/bundle-wrist-refine.json",
+  "bundle_file_sha256": "f2ca950ecc01fbcd2348f296c9f2d9fe47cd32d9f5c54ce65d0c87217961fe51",
+  "real_input_sha256": "070c2c680e569460ea015f65c393308a5510053f161f6a16096da812db7fc35a",
+  "hardware_sha256": "d6c40cc4ccec4ee687bc485e5a7f9632db4dd5ed90b0f31ba5276bc63b2e66a0",
+  "grasp_config_sha256": "40a40937b5da0589a38bee790efd022bf007a2afec4be5e3aa8107278e111603",
+  "feature_provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787",
+  "runtime_limits_sha256": "ed12e3cd8251f6f8aa9244c9ca18e0c5f2cdc3e811e39d028764e7768d35f1e6",
+  "runner_limits_sha256": "c946695d48cd307fc950a634294748ead7edfafc7fdd404a270a7b8517adb965",
+  "budget": {
+    "max_steps": 600,
+    "max_decisions": 64,
+    "max_recoveries": 4
+  },
+  "model_service": "dodo loopback5583 Model A iter5000 deterministic seed42",
+  "execution": "RealBundleRunner; nominal VLA continues after recovery reentry; no manual hold commissioning",
+  "terminal_success": "verified pink target grasp and at least 1cm lift held five fresh frames",
+  "raw_step_sensors_retained": true,
+  "post_episode": "measured home before disable; unloading required if possibly holding a tube",
+  "promotion_allowed": false,
+  "limitations": [
+    "Commissioning critic is far/open, not a complete wrong-colour grasp detector.",
+    "Single full rollout does not demonstrate evolved improvement or justify promotion.",
+    "Wrist point registration and full arm/finger collision remain incompletely validated."
+  ]
+}

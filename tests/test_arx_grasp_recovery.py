@@ -232,8 +232,8 @@ def test_runner_and_gateway_bind_grasp_outputs_and_preserve_physical_step_count(
     r.trial.runner_limits = r.trial.runner_limits.model_copy(update={"max_tool_attempts": 50})
     assert r.loop() == "environment_ended"
     assert backend.steps == core.step_index == 100
-    assert backend.reads == 3
-    assert len(list((tmp_path / "core/grasp-sensors").glob("*.npz"))) == 3
+    assert backend.reads == 4
+    assert len(list((tmp_path / "core/grasp-sensors").glob("*.npz"))) == 4
     assert r.outcome.reentry_completed
 
 

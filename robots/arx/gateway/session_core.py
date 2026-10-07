@@ -322,7 +322,8 @@ class ArxSessionCore:
         result = self._result(request)
         try:
             entry, args = self._validate(request)
-            if request.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"}:
+            fresh_reentry = request.tool == "arx.review_reentry" and self.commit.hardware is not None
+            if request.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"} or fresh_reentry:
                 self.phase_changed("observation")
                 # Fresh sensor acquisition sends no hold command and consumes no physical steps.
                 self.commit = self.backend.observe()
@@ -330,6 +331,14 @@ class ArxSessionCore:
                 self._publish(self.commit, lifecycle="grasp-observation",
                               observation_id=f"obs-{self.step_index}-read-{self.read_samples}")
                 self._retain_grasp_sensors()
+                if fresh_reentry:
+                    requested = list(args.observation_ids)
+                    args = args.model_copy(update={"observation_ids": [*requested[:-1], self.current["observation_id"]]})
+                    self._record("reentry_observation_refreshed", {
+                        "requested_observation_ids": requested,
+                        "review_observation_ids": args.observation_ids,
+                        "step": self.step_index, "robot_commands_sent": False,
+                    }, public=True)
                 self._save()
             prepared = (
                 entry.handler.prepare(args, self._context())
@@ -595,6 +604,8 @@ class ArxSessionCore:
                 self._publish(
                     commit, lifecycle="recovery" if self.recovery else "nominal"
                 )
+                if commit.hardware is not None and self.limits.retain_step_sensors:
+                    self._retain_grasp_sensors()
                 if commit.hardware is not None and commit.hardware.arrival_verified is not True:
                     self.state = "EXECUTION_UNCERTAIN"
                     self._save()

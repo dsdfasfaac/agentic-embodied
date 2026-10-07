@@ -101,6 +101,43 @@ def test_persistent_occlusion_interrupts_without_error_or_disabling(tmp_path):
     assert interrupts[-1]['task_failure'] is False
 
 
+def test_full_rollout_retains_physical_step_sensors_without_extra_commands(tmp_path):
+    backend=SensorBackend()
+    core,_,_=make_core(tmp_path, MissingCritic(backend), backend,
+        config=limits(observation_reacquire_timeout_s=.3, retain_step_sensors=True))
+    result,_=call(core)
+    assert result['status']=='completed' and backend.steps==4 and backend.reads==2
+    retained={p.name for p in (tmp_path/'grasp-sensors').glob('*.npz')}
+    assert {f'obs-{i}.npz' for i in range(1,5)} <= retained
+    assert len(retained)==6
+
+
+def test_real_reentry_refreshes_old_frame_without_motion_and_binds_token_to_new_frame(tmp_path):
+    from tests.test_arx_gateway import Review
+    from robots.arx.gateway.tools import default_registry
+    class Timestamped(SensorBackend):
+        def commit(self):
+            return replace(super().commit(), hardware=HardwareEvidence(
+                {'observation_completed_ns':time.monotonic_ns()},None,True,{}))
+    class FreshReview(Review):
+        def inspect(self,args,context):
+            obs=context['observations'][-1]
+            assert time.monotonic_ns()-obs['hardware']['observation_completed_ns'] < 150_000_000
+            return super().inspect(args,context)
+    backend=Timestamped()
+    core,_,_=make_core(tmp_path,ScriptCritic({1:'a'}),backend)
+    assert call(core)[0]['status']=='interrupted'
+    old=core.current['observation_id']
+    core.current['hardware']['observation_completed_ns']-=2_000_000_000
+    core.registry=default_registry(zeva=core.registry.resolve('arx.zeva').handler,reentry=FreshReview())
+    result,_=call(core,'arx.review_reentry',{'observation_ids':[old]})
+    assert result['status']=='completed' and backend.steps==1 and backend.reads==1
+    fresh=result['result']['assessment']['observation_id']
+    assert fresh!=old and fresh==core.current['observation_id']==core.token['observation_id']
+    assert call(core,'arx.zeva',{'max_chunks':1,'reentry_token':result['result']['reentry_token']})[0]['status']=='completed'
+    assert backend.steps==5
+
+
 def test_unknown_blocks_reentry_and_success():
     class Provider:
         sources = [SimpleNamespace(name='real_error', scalar_type='number', provider_sha256='a'*64),
