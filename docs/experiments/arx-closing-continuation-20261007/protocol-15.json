@@ -36,7 +36,7 @@
     "robots/arx/deployment/picktube_rgbd_provider.py": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
     "robots/arx/deployment/picktube_grasp_observer.py": "ba73f1b138f10d5a9c59e2ff0c187ba7a84c8eecbf45748661861d8afea9aa85",
     "robots/arx/gateway/real_backend.py": "b11f50b70abdd20f9c1c8914909012ba02cec44596957761ebfa1d75a557b806",
-    "robots/arx/deployment/grasp_continuation.py": "ac024b97c7ee680f973435a484ab9a58c3bee0b5f361165f99286115082642db",
+    "robots/arx/deployment/grasp_continuation.py": "031ad83bc5c51db5513a78dd8aa807dfba1ad98ecdf03aaeceaf23a0f1b10edb",
     "scripts/deployment/continue_arx_grasp_bundle.py": "7d0d23b9105e0013e0220e3303e1eac9d8c6f175e6a1febab00dd4bda66adfa4"
   },
   "kinematics_calibration": "robots/arx/manifests/real/dodo_right_controller_ee_fk.json",
@@ -45,6 +45,7 @@
   "observer_correction": "Established wrist identity admits >=50% depth only with >=30 points, >=80% two-axis spatial span and <=3mm median absolute depth deviation. Wrist pixel tracking expands to 80px; every sample still requires <=25/35mm world continuity. Front and unestablished wrist keep >=80% support. Colour thresholds remain unchanged.",
   "depth_range_source": "https://www.intel.com/content/www/us/en/products/sku/229218/intel-realsense-depth-camera-d405/specifications.html",
   "source_trial": "/mnt/hdd16t/chenfu/grasp_recovery/contact-lift-full-rollout-14",
-  "source_journal_sha256": "ab329082730017786bf5852d7b9b618472cee5dbe30cb879463df77805e77448",
-  "continuation": "Resume only interrupted closing after audited engage; carry physical/decision budgets; subtract 18 spent closing steps from its 60 step cap; discard review tokens; restore measured target history then require fresh state and RGB-D before closing/lift."
+  "source_journal_sha256": "04e0e5e68a179c7c1243f17b307ad34f6bb6f971118098b26e382e2e7ea83bb5",
+  "continuation": "Resume only interrupted closing after audited engage; carry physical/decision budgets; subtract 18 spent closing steps from its 60 step cap; discard review tokens; restore measured target history then require fresh state and RGB-D before closing/lift.",
+  "journal_checkpoint_note": "The byte digest changed after SQLite WAL checkpoint; record count and last sequence remain2957 and terminal state unchanged. Pin the settled database bytes for continuation."
 }

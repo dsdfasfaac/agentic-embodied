@@ -22,6 +22,8 @@ def checkpoint_fixture(tmp_path, *, verified=True):
     db.executescript('create table records(sequence integer primary key,kind text,payload text); create table operations(request_id text,request text);create table snapshot(payload text);')
     def record(kind,value):db.execute('insert into records(kind,payload) values(?,?)',(kind,json.dumps(value)))
     record('interrupt',{'recovery_context':dict(binding_id='grasp',remaining_steps=180,remaining_decisions=10)})
+    record('tool_result',dict(tool='arx.zeva',result={'completion':'critic_interrupted'}))
+    record('recovery_acknowledged',{'binding_id':'grasp'})
     outputs={}
     for i,e in enumerate(entries):
         rid=str(i);args=resolve_call(e,'old-obs',None,outputs)

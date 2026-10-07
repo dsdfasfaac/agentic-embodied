@@ -40,7 +40,13 @@ def read_checkpoint(trial, expected_journal_sha256, program, package_sha256):
     recovery = deepcopy(records[start][1]['recovery_context'])
     if recovery['binding_id'] != program.binding.binding_id:
         raise ValueError('checkpoint recovery binding differs')
-    calls = [v for k,v in records[start+1:] if k == 'tool_result' and v['tool'] != 'arx.finish']
+    acknowledged = next(i for i,(k,v) in enumerate(records[start+1:], start+1)
+                        if k == 'recovery_acknowledged' and v['binding_id'] == recovery['binding_id'])
+    nominal = [v for k,v in records[start+1:acknowledged] if k == 'tool_result']
+    if (len(nominal) != 1 or nominal[0]['tool'] != 'arx.zeva'
+            or nominal[0].get('result',{}).get('completion') != 'critic_interrupted'):
+        raise ValueError('checkpoint has no verified nominal-to-recovery boundary')
+    calls = [v for k,v in records[acknowledged+1:] if k == 'tool_result' and v['tool'] != 'arx.finish']
     outputs, phases, proposals = {}, {}, {}
     cursor, spent, close_spent = 0, 0, None
     for index,result in enumerate(calls):
