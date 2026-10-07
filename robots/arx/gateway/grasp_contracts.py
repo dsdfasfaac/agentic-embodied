@@ -73,6 +73,11 @@ class GraspRecoveryConfig(StrictModel):
     target_exclusion_radius_m: float = Field(default=.020, ge=.005, le=.025)
     target_surface_offset_m: float = Field(default=.0, ge=0, le=.01)
     geometry_orientation_search_rad: float = Field(default=0., ge=0, le=.1)
+    # Optional, task-specific empty-stop evidence. Never infer release from
+    # motor current alone; default configurations do not authorize it.
+    empty_stop_max_open_fraction: float | None = Field(default=None, ge=0, le=.03)
+    release_target_distance_min_m: float = Field(default=.035, ge=.035, le=.08)
+    release_target_lift_max_m: float = Field(default=.005, gt=0, le=.005)
 
     @model_validator(mode="after")
     def endpoints(self):

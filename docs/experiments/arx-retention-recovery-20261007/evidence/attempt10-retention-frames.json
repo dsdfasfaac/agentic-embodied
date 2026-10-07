@@ -1,0 +1,1035 @@
+{
+  "source_trial": "full-zetta-rollout-10",
+  "frames": [
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9082125603864735,
+        "lift_reference_monotonic_ns": 173912373004292,
+        "status": "observed",
+        "target_monotonic_ns": 173912373004292,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.026366353100630326
+      },
+      "observation_id": "obs-230",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8876629889669007,
+        "lift_reference_monotonic_ns": 173912772957095,
+        "status": "observed",
+        "target_monotonic_ns": 173912772957095,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02636635310062891
+      },
+      "observation_id": "obs-231",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8741594620557157,
+        "lift_reference_monotonic_ns": 173913106472362,
+        "status": "observed",
+        "target_monotonic_ns": 173913106472362,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.026021826201698066
+      },
+      "observation_id": "obs-232",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8826429980276134,
+        "lift_reference_monotonic_ns": 173913441170811,
+        "status": "observed",
+        "target_monotonic_ns": 173913441170811,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02566064793352347
+      },
+      "observation_id": "obs-233",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8799603174603174,
+        "lift_reference_monotonic_ns": 173913839893235,
+        "status": "observed",
+        "target_monotonic_ns": 173913839893235,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.024658183768055505
+      },
+      "observation_id": "obs-234",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8647294589178357,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173915507585141,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02602905758854977
+      },
+      "observation_id": "obs-235",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8696883852691218,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173915840168670,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0006950949063609865,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.025618355121670995
+      },
+      "observation_id": "obs-236",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8621761658031089,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173916106818790,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": -0.0004245174747675301,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.025037060227075907
+      },
+      "observation_id": "obs-237",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8577319587628865,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173916439887140,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0013388958888328126,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.024883635015595314
+      },
+      "observation_id": "obs-238",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8494288681204569,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173916773312819,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0011206039090810027,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.024458348389306463
+      },
+      "observation_id": "obs-239",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8428571428571429,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173917106795832,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0007591146872794191,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02456325950012461
+      },
+      "observation_id": "obs-240",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8227459016393442,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173917506586734,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0012863356030834786,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.024978429487990967
+      },
+      "observation_id": "obs-241",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8387755102040816,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173917773327603,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0006068644639481355,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.025983540095429112
+      },
+      "observation_id": "obs-242",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8194726166328601,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173918240091907,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0012834784679982905,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02621715877271825
+      },
+      "observation_id": "obs-243",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8355601233299075,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173918573561165,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.001020371169211401,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.027008969593802737
+      },
+      "observation_id": "obs-244",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8282828282828283,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173919173445908,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0012654251868218433,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.025983540095429098
+      },
+      "observation_id": "obs-245",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8186372745490982,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173919440152632,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0012865050928211538,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.0270975333639578
+      },
+      "observation_id": "obs-246",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8112617309697602,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173919973458670,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.0013023818023002384,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.02709753336395655
+      },
+      "observation_id": "obs-247",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8358974358974359,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173920306927815,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": true,
+        "privileged.interaction.lift_m": 0.001355326160804124,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.027097533363957964
+      },
+      "observation_id": "obs-248",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173920306927815,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-249",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8507078507078507,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173920973796647,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.004061733847661675,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.036710785273583776
+      },
+      "observation_id": "obs-249-reacquire-8",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8443271767810027,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173921306863995,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.00371838382519208,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.039143776289775285
+      },
+      "observation_id": "obs-250",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9089347079037801,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173922707529712,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0014939646716851107,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.04567595218110075
+      },
+      "observation_id": "obs-251",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9252199413489736,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173922974307515,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0008427772108866652,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.040933633945352536
+      },
+      "observation_id": "obs-252",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8625146886016452,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173923307144694,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0019180665442894013,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.035951955114648264
+      },
+      "observation_id": "obs-253",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8629320619785459,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173923640655914,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0033412126528628155,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.036781060302391665
+      },
+      "observation_id": "obs-254",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8465011286681715,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173923907537310,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0037482409177166526,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.03654643122253336
+      },
+      "observation_id": "obs-255",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8314087759815243,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173924240615305,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0014798884830258124,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.035862465588255246
+      },
+      "observation_id": "obs-256",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8477206595538312,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173924507484935,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0035231715358217536,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.036087784182592654
+      },
+      "observation_id": "obs-257",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8751289989680082,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173924840565497,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0019925935144317064,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.03646581602228271
+      },
+      "observation_id": "obs-258",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8779761904761905,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173925174255965,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0039867343980058145,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.036852850952049564
+      },
+      "observation_id": "obs-259",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8634496919917864,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173925440733039,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.00418955915285138,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.036125391353059505
+      },
+      "observation_id": "obs-260",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.8743093922651933,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173925708483252,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0015763232706951236,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.03974082701805823
+      },
+      "observation_id": "obs-261",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9076175040518638,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173926041928358,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.005295574547556366,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.04577185248008994
+      },
+      "observation_id": "obs-262",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9418886198547215,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173926307449846,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": -0.003849375666736453,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.06696344717130698
+      },
+      "observation_id": "obs-263",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "camera": "right_rgb",
+        "cross_camera_error_m": null,
+        "depth_support_fraction": 0.9656862745098039,
+        "lift_reference_monotonic_ns": 173915507585141,
+        "status": "observed",
+        "target_monotonic_ns": 173926640847856,
+        "unavailable_features": [],
+        "wrist_identity_validations": 144,
+        "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+      },
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0003698585169239557,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.07378433429988679
+      },
+      "observation_id": "obs-264",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube has insufficient valid metric depth",
+        "reason_code": "target_depth_unavailable",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-9",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-10",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-11",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-12",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-13",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube has insufficient valid metric depth",
+        "reason_code": "target_depth_unavailable",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-14",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    },
+    {
+      "feature_observation": {
+        "last_valid_target_monotonic_ns": 173926640847856,
+        "reason": "pink tube target position changed inconsistently",
+        "reason_code": "target_tracking_discontinuity",
+        "status": "unknown",
+        "unavailable_features": [
+          "privileged.interaction.gripper_contact",
+          "privileged.interaction.lift_m",
+          "privileged.interaction.grasped",
+          "privileged.interaction.success",
+          "privileged.selected.target_gripper_distance_m"
+        ]
+      },
+      "features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": true,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "observation_id": "obs-265-reacquire-15",
+      "provider_sha256": "3ce6c2133932146e47762d323eb3c26d5fcd2f0bc3970a3f4070045625fb6787"
+    }
+  ]
+}

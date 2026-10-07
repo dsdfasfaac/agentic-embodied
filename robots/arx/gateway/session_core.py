@@ -323,7 +323,8 @@ class ArxSessionCore:
         try:
             entry, args = self._validate(request)
             fresh_reentry = request.tool == "arx.review_reentry" and self.commit.hardware is not None
-            if request.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"} or fresh_reentry:
+            fresh_gripper = request.tool == "arx.set_gripper" and self.commit.hardware is not None
+            if request.tool in {"arx.propose_grasp", "arx.review_grasp", "arx.execute_grasp"} or fresh_reentry or fresh_gripper:
                 self.phase_changed("observation")
                 # Fresh sensor acquisition sends no hold command and consumes no physical steps.
                 self.commit = self.backend.observe()
@@ -364,6 +365,11 @@ class ArxSessionCore:
             "effective_arguments",
             {"request_id": request.request_id, "arguments": args.model_dump()},
         )
+        if prepared is not None and hasattr(prepared, "admission_evidence"):
+            self._record("motion_admission_evidence", {
+                "request_id": request.request_id, "tool": request.tool,
+                "evidence": prepared.admission_evidence,
+            }, public=True)
         self.active = True
         self.decisions += 1
         bundle_call = (self.programs[self.recovery["binding_id"]].calls[self.program_cursor]

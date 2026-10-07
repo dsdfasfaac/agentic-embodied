@@ -232,8 +232,8 @@ def test_runner_and_gateway_bind_grasp_outputs_and_preserve_physical_step_count(
     r.trial.runner_limits = r.trial.runner_limits.model_copy(update={"max_tool_attempts": 50})
     assert r.loop() == "environment_ended"
     assert backend.steps == core.step_index == 100
-    assert backend.reads == 4
-    assert len(list((tmp_path / "core/grasp-sensors").glob("*.npz"))) == 4
+    assert backend.reads == 5
+    assert len(list((tmp_path / "core/grasp-sensors").glob("*.npz"))) == 5
     assert r.outcome.reentry_completed
 
 
@@ -251,6 +251,49 @@ def test_reentry_requires_this_recoverys_target_and_measured_pregrasp():
     assert wrapped.inspect(None, review_context)["status"] == "eligible"
     rec.observer.target += [.1, 0., 0.]
     assert wrapped.inspect(None, review_context)["status"] == "ineligible"
+
+
+def test_release_requires_empty_stop_separated_unlifted_target_and_fresh_sensors():
+    from robots.arx.gateway.grasp_recovery import TargetVerifiedGripperPlanner
+    from robots.arx.gateway.tools import PolicyGripperPlanner
+    from robots.arx.gateway.contracts import GripperArgs
+    rec = recovery(empty_stop_max_open_fraction=.03)
+    planner = TargetVerifiedGripperPlanner(PolicyGripperPlanner(closed_policy=0., open_policy=-3.4), rec)
+    ctx = context()
+    ctx['observation']['hardware']['measured_state'][13] = -.05
+    ctx['observation']['hardware']['auxiliary_feedback']['right_gripper_current_native'] = .6
+    values = {'privileged.interaction.gripper_contact': False,
+              'privileged.interaction.grasped': False, 'privileged.interaction.success': False,
+              'privileged.interaction.lift_m': .003,
+              'privileged.selected.target_gripper_distance_m': .04}
+    rec.observer.provider.observe = lambda o, i: dict(values)
+    current = ApprovedToolContext(ctx['command'], ctx['observation'], {})
+    args = GripperArgs(opening=1., max_steps=60)
+    plan = planner.prepare(args, current)
+    assert plan.admission_evidence['reason'] == 'calibrated_empty_stop_and_target_separation'
+    # Preload current alone does not establish occupancy, but neither does
+    # false contact at a partially closed grip establish an empty stop.
+    for key, value in [('privileged.interaction.gripper_contact', True),
+                       ('privileged.interaction.grasped', True),
+                       ('privileged.interaction.success', True),
+                       ('privileged.interaction.lift_m', .012),
+                       ('privileged.selected.target_gripper_distance_m', .02),
+                       ('privileged.interaction.gripper_contact', None)]:
+        saved = values[key]; values[key] = value
+        with pytest.raises(ValueError, match='possible held object'):
+            planner.prepare(args, current)
+        values[key] = saved
+    for grip in (-.85, -1.5):
+        ctx['observation']['hardware']['measured_state'][13] = grip
+        with pytest.raises(ValueError, match='possible held object'):
+            planner.prepare(args, current)
+    ctx['observation']['hardware']['measured_state'][13] = -.05
+    rec.config = rec.config.model_copy(update={'empty_stop_max_open_fraction': None})
+    with pytest.raises(ValueError, match='possible held object'):
+        planner.prepare(args, current)
+    ctx['observation']['hardware']['observation_completed_ns'] -= 3_000_000_000
+    with pytest.raises(ValueError, match='fresh'):
+        planner.prepare(args, current)
 
 
 def test_target_cloud_uses_only_pink_depth_and_correct_right_base_transform():

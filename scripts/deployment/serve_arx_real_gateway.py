@@ -123,7 +123,7 @@ class RealCoreFactory:
             if self.grasp_config:
                 from zetta.evolution.jsonio import file_sha256
                 from robots.arx.gateway.grasp_contracts import GraspRecoveryConfig
-                from robots.arx.gateway.grasp_recovery import GraspRecovery, GraspReentry
+                from robots.arx.gateway.grasp_recovery import GraspRecovery, GraspReentry, TargetVerifiedGripperPlanner
                 from robots.arx.deployment.picktube_grasp_observer import PickTubeGraspObserver
                 if file_sha256(Path(self.grasp_config)) != self.expected_grasp_config_sha256:
                     raise ValueError("grasp configuration SHA mismatch")
@@ -134,13 +134,15 @@ class RealCoreFactory:
                     closed_policy=config.right_gripper_closed_policy,
                     open_policy=config.right_gripper_open_policy, control_hz=config.timing.control_hz)
                 reentry = GraspReentry(reentry, grasp)
+            gripper = PolicyGripperPlanner(
+                closed_policy=config.right_gripper_closed_policy,
+                open_policy=config.right_gripper_open_policy,
+                max_policy_step=task.control.max_gripper_step,
+            )
+            if grasp is not None:
+                gripper = TargetVerifiedGripperPlanner(gripper, grasp)
             registry = default_registry(
-                zeva=zeva,
-                gripper=PolicyGripperPlanner(
-                    closed_policy=config.right_gripper_closed_policy,
-                    open_policy=config.right_gripper_open_policy,
-                    max_policy_step=task.control.max_gripper_step,
-                ),
+                zeva=zeva, gripper=gripper,
                 eef=eef, reentry=reentry, grasp=grasp,
             )
             if bundle:

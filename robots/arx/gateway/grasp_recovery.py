@@ -299,3 +299,41 @@ class GraspReentry:
         if not passed:
             result["status"] = "ineligible"
         return result
+
+
+class TargetVerifiedGripperPlanner:
+    """Guard opening with fresh target evidence and the calibrated empty stop.
+
+    A fully closed PickTube gripper at its observed empty stop can have high
+    current from the +0.9 preload. This narrowly scoped admission does not
+    certify occupancy for other objects or grippers.
+    """
+
+    def __init__(self, planner, grasp):
+        self.planner, self.grasp = planner, grasp
+
+    def prepare(self, args, context):
+        grasp = self.grasp
+        state = grasp._fresh(context.observation)
+        fraction = (state[13] - grasp.closed) / (grasp.open - grasp.closed)
+        evidence = {"observation_id": context.observation["observation_id"],
+                    "measured_open_fraction": float(fraction), "requested_opening": args.opening}
+        if args.opening > fraction + .01 and fraction < .60:
+            values = grasp.observer.provider.observe(context.observation, context.images)
+            stop = grasp.config.empty_stop_max_open_fraction
+            empty = (stop is not None and -.01 <= fraction <= stop
+                     and values.get("privileged.interaction.gripper_contact") is False
+                     and values.get("privileged.interaction.grasped") is False
+                     and values.get("privileged.interaction.success") is False
+                     and type(values.get("privileged.interaction.lift_m")) in (int, float)
+                     and abs(values["privileged.interaction.lift_m"]) <= grasp.config.release_target_lift_max_m
+                     and type(values.get("privileged.selected.target_gripper_distance_m")) in (int, float)
+                     and values["privileged.selected.target_gripper_distance_m"] >= grasp.config.release_target_distance_min_m)
+            if not empty:
+                raise ValueError("opening requires observed empty stop and separated unlifted target; possible held object")
+            evidence.update(reason="calibrated_empty_stop_and_target_separation", features=values)
+        else:
+            evidence["reason"] = "closing_or_already_open"
+        plan = self.planner.prepare(args, context)
+        plan.admission_evidence = evidence
+        return plan

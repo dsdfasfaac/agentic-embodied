@@ -1,0 +1,82 @@
+{
+  "schema_version": "arx.real.critic-replay.v1",
+  "source_trial": "full-zetta-rollout-10",
+  "source_journal_sha256": "9fadaf215117f5f7bf913f82de5a48d1e1ceaf2cbbb09ff47572ed01296f97ce",
+  "candidate_sha256": "fe9b859125f2c0c1a4b4b77540036961c46b28c94e399bd8f1b64355595f3ccd",
+  "robot_commands_sent": false,
+  "new_rule_events": [
+    {
+      "rule_id": "closed_contact_no_lift",
+      "step_index": 244,
+      "feature": "privileged.interaction.lift_m",
+      "observed_value": 0.001020371169211401,
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true,
+          "observed_value": true
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false,
+          "observed_value": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false,
+          "observed_value": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": true,
+          "observed_value": true
+        }
+      ],
+      "proposal": "Interrupt stalled contact without a verified grasp; review current target and grip before retry.",
+      "safety_only": false,
+      "environment_write": false,
+      "observation_id": "obs-244"
+    },
+    {
+      "rule_id": "closed_target_separated",
+      "step_index": 251,
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "observed_value": 0.04567595218110075,
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true,
+          "observed_value": true
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false,
+          "observed_value": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false,
+          "observed_value": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": false,
+          "observed_value": false
+        }
+      ],
+      "proposal": "Interrupt closed unretained target before tracking is lost; execute audited target recovery.",
+      "safety_only": false,
+      "environment_write": false,
+      "observation_id": "obs-251"
+    }
+  ],
+  "interpretation": "Counterfactual critic replay only; new engagement recovery changes subsequent observations; no performance promotion."
+}
