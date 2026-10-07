@@ -97,3 +97,15 @@ def test_chained_closing_rejects_unrelated_critic_failure(tmp_path):
     cp=read_checkpoint(source,file_sha256(j),p,'a'*64)
     child=tmp_path/'child';journal=closing_segment_fixture(child,cp,rule='closed_target_separated')
     with pytest.raises(ValueError,match='unrelated interruption'):extend_closing_checkpoint(cp,child,file_sha256(journal))
+
+
+def test_policy_closure_accepts_smoothing_residual_within_one_thousandth():
+    import numpy as np
+    from robots.arx.gateway.tools import PolicyGripperPlanner,ApprovedToolContext
+    from robots.arx.gateway.contracts import GripperArgs
+    planner=PolicyGripperPlanner(closed_policy=0.,open_policy=-3.4,max_policy_step=.07)
+    command=np.zeros(14,dtype=np.float32);command[13]=-.00021
+    context=ApprovedToolContext(command,{},{});plan=planner.prepare(GripperArgs(opening=0.,max_steps=1),context)
+    assert plan.next_targets(context) is None and plan.reached is True
+    command[13]=-.01;plan=planner.prepare(GripperArgs(opening=0.,max_steps=1),context)
+    assert plan.next_targets(context) is not None and plan.reached is False

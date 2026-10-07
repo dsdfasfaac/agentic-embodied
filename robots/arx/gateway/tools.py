@@ -336,4 +336,5 @@ class PolicyGripperPlanner:
         return ArrayPlan(
             np.repeat(target[None], args.max_steps, axis=0),
             convergence_target=target,
+            tolerance=1e-3,
         )

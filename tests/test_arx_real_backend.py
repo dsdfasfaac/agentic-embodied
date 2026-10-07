@@ -610,3 +610,15 @@ def test_adopt_rejects_controller_reset_or_release(axis,drift):
     with pytest.raises(ValueError,match='moved since'):backend.adopt_observed_hold(checkpoint)
     assert not arm.sent and backend._started_ns is None
     backend.close()
+
+
+def test_adopt_preserves_last_sent_pressure_against_blocked_fingers():
+    backend,arm,_=make_backend(command_offset=.9)
+    arm.positions[7]+=.6;arm.positions[13]=-.62
+    expected=arm.positions.copy();sent=expected.copy();sent[13]=-.00021
+    commit=backend.adopt_observed_hold(expected,sent)
+    assert not arm.sent and commit.command[13]==pytest.approx(-.00021)
+    assert commit.policy.state[13]==pytest.approx(-.62)
+    # Reconstructing the command from feedback would weaken the held grasp.
+    assert commit.command[13]!=pytest.approx(commit.policy.state[13]-.9)
+    backend.close()

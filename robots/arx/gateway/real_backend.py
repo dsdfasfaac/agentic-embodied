@@ -372,7 +372,8 @@ class RealBackend:
         # time on the first hold or Cartesian command.
         return StepCommit(policy, self._processor.previous.copy(), 0.0, False, {}, hardware=hardware)
 
-    def adopt_observed_hold(self, expected_feedback: np.ndarray) -> StepCommit:
+    def adopt_observed_hold(self, expected_feedback: np.ndarray,
+                           committed_command: np.ndarray | None = None) -> StepCommit:
         """Initialize a new audited continuation without resetting or moving.
 
         The caller must verify its journal checkpoint. This gate additionally
@@ -390,6 +391,16 @@ class RealBackend:
             raise ValueError("live arm or gripper moved since continuation checkpoint")
         command = policy.state.copy()
         command[[6, 13]] -= np.asarray(self.task.control.gripper_command_offsets, dtype=np.float32)
+        if committed_command is not None:
+            recorded = np.asarray(committed_command, dtype=np.float32)
+            if recorded.shape != (14,) or not np.isfinite(recorded).all():
+                raise ValueError("continuation committed command must be finite 14D")
+            axes = [0,1,2,3,4,5,7,8,9,10,11,12]
+            if np.max(np.abs(recorded[axes] - policy.state[axes])) > .035:
+                raise ValueError("continuation command arm pose differs from live feedback")
+            # Preserve the journalled preload against a blocked grasp. Seeding
+            # from finger feedback would relax pressure on the first lift.
+            command = recorded.copy()
         self._processor = ActionProcessor(self.task, command)
         self._started_ns = self._next_send_ns = now
         return StepCommit(policy, self._processor.previous.copy(), 0., False, {},

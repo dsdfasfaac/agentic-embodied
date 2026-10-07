@@ -168,7 +168,8 @@ def adopt_checkpoint(core, checkpoint):
     if core.current is not None or core.journal.snapshot() is not None:
         raise ValueError('continuation must use a fresh segment journal')
     core.backend.set_event_sink(lambda k,v:core._record(k,v))
-    commit = core.backend.adopt_observed_hold(np.asarray(checkpoint['expected_feedback']))
+    commit = core.backend.adopt_observed_hold(np.asarray(checkpoint['expected_feedback']),
+                                             checkpoint.get('committed_command'))
     core.step_index = checkpoint['steps']; core.decisions = checkpoint['decisions']; core.incidents = 1
     core.programs[checkpoint['recovery']['binding_id']] = checkpoint['program']
     core.recovery = deepcopy(checkpoint['recovery'])
@@ -181,6 +182,55 @@ def adopt_checkpoint(core, checkpoint):
     distance = evidence['features']['privileged.selected.target_gripper_distance_m']
     if evidence['feature_observation']['status'] != 'observed' or distance is None or distance > .02:
         raise ValueError('continuation requires fresh same-target depth within 20mm of gripper')
+    if checkpoint.get('closing_complete'):
+        values=evidence['features']
+        if not (values['privileged.interaction.gripper_closed'] is True and
+                values['privileged.interaction.gripper_contact'] is True):
+            raise ValueError('completed closing requires fresh target-specific closed contact')
+        core._record('closing_completion_reverified',dict(observation_id=core.current['observation_id'],
+            command_tolerance_policy=1e-3,source_journal_sha256=checkpoint['completed_closing_sha256'],
+            prior_result='BUNDLE_STEP_FAILED at stricter command convergence; original result preserved'))
     core._record('closing_continuation_admitted', {k:checkpoint[k] for k in (
         'source_trial','journal_sha256','closing_steps_consumed','closing_steps_remaining','steps','decisions')})
     core._retain_grasp_sensors(); core._save()
+
+
+def extend_completed_closing(checkpoint, segment, expected_sha256):
+    """Accept measured closing rejected solely by the former1e-4 tolerance.
+
+    No command is reissued and no budget is refunded. Fresh closed contact is
+    independently mandatory in adopt_checkpoint before lift review.
+    """
+    segment=Path(segment);gateway=segment/'private/gateway';journal=gateway/'journal.sqlite3'
+    if file_sha256(journal)!=expected_sha256:raise ValueError('completed closing SHA differs')
+    report=json.loads((segment/'result.json').read_text())
+    if (report['checkpoint_steps']!=checkpoint['steps'] or report['closing_segment_sha256']!=checkpoint['closing_segment_sha256']
+            or report['source_journal_sha256']!=checkpoint['journal_sha256']):
+        raise ValueError('completed closing provenance differs')
+    with sqlite3.connect(f'file:{journal}?mode=ro',uri=True) as db:
+        records=[(k,json.loads(v)) for k,v in db.execute('select kind,payload from records order by sequence')]
+        operations=[json.loads(v) for v, in db.execute('select request from operations')]
+        snapshot=json.loads(db.execute('select payload from snapshot').fetchone()[0])
+    calls=[v for k,v in records if k=='tool_result'];failed=[v for k,v in records if k=='bundle_step_failed']
+    entry=checkpoint['program'].calls[checkpoint['cursor']]
+    from robots.arx.gateway.contracts import GripperArgs
+    if (len(calls)!=1 or len(operations)!=1 or calls[0]['tool']!='arx.set_gripper'
+            or calls[0]['error']['code']!='BUNDLE_STEP_FAILED'
+            or GripperArgs.model_validate(operations[0]['arguments'])!=GripperArgs.model_validate(entry.arguments)
+            or len(failed)!=1 or failed[0]['reason']!='recovery target not reached: arx.set_gripper'
+            or failed[0]['output']['physical_arrival_verified'] is not True):
+        raise ValueError('closing was rejected for reasons other than command convergence')
+    commands=[v for k,v in records if k=='command_sent'];arrivals=[v for k,v in records if k=='arrival_observed']
+    spent=calls[0]['executed_steps'];command=np.asarray(commands[-1]['target']) if commands else np.empty(0)
+    if (spent!=entry.arguments['max_steps'] or len(commands)!=spent or len(arrivals)!=spent
+            or not all(v['verified'] is True for v in arrivals) or command.shape!=(14,)
+            or abs(command[13])>1e-3 or entry.arguments['opening']!=0.
+            or report['total_physical_steps']!=checkpoint['steps']+spent
+            or 64-snapshot['budget_remaining']['decisions']!=checkpoint['decisions']+1):
+        raise ValueError('closing command or measured arrivals fail completion review')
+    checkpoint['histories'].append((gateway,records));checkpoint['steps']+=spent;checkpoint['decisions']+=1
+    checkpoint['closing_steps_consumed']+=spent;checkpoint['closing_steps_remaining']=0
+    checkpoint['recovery']['remaining_steps']-=spent;checkpoint['recovery']['remaining_decisions']-=1
+    checkpoint['cursor']+=1;checkpoint['closing_complete']=True;checkpoint['completed_closing_sha256']=expected_sha256
+    checkpoint['expected_feedback']=snapshot['observation']['hardware']['measured_state']
+    checkpoint['committed_command']=command
