@@ -2,7 +2,7 @@
 
 ## Observed outcome
 
-One supervised **segmented** rollout reached `task_success` at `obs-336`. Five consecutive new wrist RGB-D frames `obs-332` through `obs-336` measured the same pink target closed/contact/grasped, lifted **13.863–14.877mm**, over **1.601s**. All336 dispatched commands have verified arrival records. The final lift segment issued16 commands and ended on the task success predicate before its nominal20mm pose target finished settling (`command_target_reached=false`, `physical_arrival_verified=true`). The requested >=10mm/five-frame terminal criterion was satisfied.
+One supervised **segmented** rollout reached `task_success` at `obs-336`. Five consecutive new wrist RGB-D frames `obs-332-reacquire-5`, `obs-333`, `obs-334`, `obs-335`, `obs-336` measured the same pink target closed/contact/grasped, lifted **13.863–14.877mm**, over **1.601s**. All336 dispatched commands have verified arrival records. The final lift segment issued16 commands and ended on the task success predicate before its nominal20mm pose target finished settling (`command_target_reached=false`, `physical_arrival_verified=true`). The requested >=10mm/five-frame terminal criterion was satisfied.
 
 [Success audit](evidence/success-audit.json) records each frame's sensor SHA, acquisition timestamp, joint/current feedback, quality gates, source journals and results. Full RGB-D is retained under `/mnt/hdd16t/chenfu/grasp_recovery/` on dodo. This is not an uninterrupted autonomous rollout or a success-rate estimate; no candidate is promoted.
 
