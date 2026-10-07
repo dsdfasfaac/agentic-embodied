@@ -86,6 +86,12 @@ ARX. Source inspected for this implementation: GraspGen commit
 the Robotiq config uses PointNet. Install the dependencies required by the
 chosen config and verify an actual inference before commissioning.
 
+The 2026-10-07 dodo deployment now passes native model loading and camera-only
+proposal inference. See [deployment evidence and reproduction](../experiments/arx-grasp-recovery-20261007/README.md).
+The launcher uses `venv313` to match the installed Torch Python ABI. The two
+checked-in upstream patches and separate environment versions are recorded
+there. Physical ARX transfer and synchronized joint/path acceptance are pending.
+
 ## Bundle and commissioning
 
 The provisional generation 2 bundle, configuration, frozen catalog and input

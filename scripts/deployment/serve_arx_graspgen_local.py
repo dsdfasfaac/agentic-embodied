@@ -12,6 +12,7 @@ import hashlib
 import json
 import threading
 import socket
+import time
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 
@@ -19,12 +20,20 @@ import numpy as np
 
 
 class Model:
-    def __init__(self, config_path):
+    def __init__(self, config_path, seed=42):
         from grasp_gen.grasp_server import GraspGenSampler, load_grasp_cfg
+        from grasp_gen.robot import get_gripper_info
+        import torch
 
         self.api = GraspGenSampler
         config = load_grasp_cfg(str(config_path))
         self.gripper = str(config.data.gripper_name)
+        info = get_gripper_info(self.gripper)
+        self.gripper_tcp = np.asarray(info.transform_from_base_link_to_tool_tcp).tolist()
+        self.gripper_depth = float(info.depth)
+        self.seed, self.request_index = seed, 0
+        torch.manual_seed(seed)
+        np.random.seed(seed)
         entries = {"config": Path(config_path), "generator": Path(config.eval.checkpoint),
                    "discriminator": Path(config.discriminator.checkpoint)}
         self.files = {name: hashlib.sha256(path.read_bytes()).hexdigest() for name, path in entries.items()}
@@ -35,7 +44,10 @@ class Model:
     def health(self):
         return {"ready": True, "gripper_id": self.gripper,
                 "model_sha256": self.model_sha, "checkpoint_sha256": self.files,
-                "backend": "nvlabs-graspgen-local", "proposal_only": True}
+                "backend": "nvlabs-graspgen-local", "proposal_only": True,
+                "base_seed": self.seed, "grasp_approach_axis": "+Z",
+                "grasp_closing_axis": "X", "model_gripper_depth_m": self.gripper_depth,
+                "transform_grasp_from_model_tcp": self.gripper_tcp}
 
     def generate(self, payload):
         points = np.asarray(payload["point_cloud"], dtype=np.float32)
@@ -47,13 +59,23 @@ class Model:
         if payload.get("filter_collisions"):
             raise ValueError("model server has no full scene; request collision review in the robot gateway")
         with self.lock:
+            import torch
+            request_index = self.request_index
+            seed = (self.seed + request_index) % (2 ** 32)
+            self.request_index += 1
+            torch.manual_seed(seed)
+            np.random.seed(seed)
+            started = time.monotonic()
             grasps, scores = self.api.run_inference(points, self.sampler,
                 num_grasps=max(64, count * 4), topk_num_grasps=count,
                 min_grasps=1, max_tries=1, remove_outliers=False)
         return {"ok": True, "grasps": [{"transform_model": pose.detach().cpu().numpy().tolist(),
                                         "score": float(score)} for pose, score in zip(grasps, scores)],
                 "evidence": {**self.health(), "collision_filter_applied": False,
-                             "target_only_cloud": True, "input_points": len(points)},
+                             "target_only_cloud": True, "input_points": len(points),
+                             "request_index": request_index, "seed": seed,
+                             "inference_s": time.monotonic() - started,
+                             "input_cloud_sha256": hashlib.sha256(points.tobytes()).hexdigest()},
                 "environment_advanced": False}
 
 
@@ -62,8 +84,11 @@ def main():
     parser.add_argument("--config", required=True, type=Path)
     parser.add_argument("--host", choices=("127.0.0.1", "::1"), default="127.0.0.1")
     parser.add_argument("--port", type=int, default=18093)
+    parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
-    model = Model(args.config)
+    if not 0 <= args.seed < 2 ** 32:
+        parser.error("seed must be in 0..2**32-1")
+    model = Model(args.config, seed=args.seed)
 
     class Handler(BaseHTTPRequestHandler):
         def log_message(self, *args):

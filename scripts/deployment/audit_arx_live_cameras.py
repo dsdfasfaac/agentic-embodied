@@ -114,9 +114,16 @@ def audit(samples: int, image_dir: Path | None) -> dict:
                 import cv2
                 image_dir.mkdir(parents=True, exist_ok=True)
                 for name, frame in frames.items():
-                    cv2.imwrite(str(image_dir / f"{name}.png"),
-                                cv2.cvtColor(frame.pixels, cv2.COLOR_RGB2BGR))
-                cv2.imwrite(str(image_dir / "front_depth_mm.png"), depth)
+                    if not cv2.imwrite(str(image_dir / f"{name}.png"),
+                                       cv2.cvtColor(frame.pixels, cv2.COLOR_RGB2BGR)):
+                        raise OSError(f"could not retain {name}")
+                if not cv2.imwrite(str(image_dir / "front_depth_mm.png"), depth):
+                    raise OSError("could not retain front aligned depth")
+                observation["saved_images"] = {
+                    path.name: {"sha256": hashlib.sha256(path.read_bytes()).hexdigest()}
+                    for path in [*(image_dir / f"{name}.png" for name in frames),
+                                 image_dir / "front_depth_mm.png"]
+                }
     finally:
         source.close()
     result["passed"] = (

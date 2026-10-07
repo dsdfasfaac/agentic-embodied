@@ -1,0 +1,15 @@
+diff --git a/pointnet2_ops/setup.py b/pointnet2_ops/setup.py
+index 6b9bf76..348455f 100644
+--- a/pointnet2_ops/setup.py
++++ b/pointnet2_ops/setup.py
+@@ -25,8 +25,8 @@ setup(
+             name="pointnet2_ops._ext",
+             sources=_ext_sources,
+             extra_compile_args={
+-                "cxx": ["-O3"],
+-                "nvcc": ["-O3", "-Xfatbin", "-compress-all"],
++                "cxx": ["-O3", "-std=c++20"],
++                "nvcc": ["-O3", "-std=c++20", "-Xfatbin", "-compress-all"],
+             },
+             include_dirs=[osp.join(this_dir, _ext_src_root, "include")],
+         )

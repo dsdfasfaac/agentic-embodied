@@ -1,0 +1,40 @@
+diff --git a/grasp_gen/models/discriminator.py b/grasp_gen/models/discriminator.py
+index b2c12bc..12c3fce 100644
+--- a/grasp_gen/models/discriminator.py
++++ b/grasp_gen/models/discriminator.py
+@@ -25,7 +25,6 @@ from grasp_gen.models.model_utils import (
+     load_pretrained_checkpoint_to_dict,
+     offset2batch,
+ )
+-from grasp_gen.models.ptv3.ptv3 import PointTransformerV3
+ from grasp_gen.robot import get_gripper_info
+ from grasp_gen.utils.logging_config import get_logger
+ from grasp_gen.models.model_utils import load_pretrained_checkpoint_to_dict
+@@ -91,6 +90,7 @@ class GraspGenDiscriminator(nn.Module):
+                 feature_dim=1 if self.pose_repr == "pc_feature" else -1,
+             )
+         elif self.obs_backbone == "ptv3":
++            from grasp_gen.models.ptv3.ptv3 import PointTransformerV3
+             self.object_encoder = PointTransformerV3(
+                 in_channels=3,
+                 enable_flash=False,
+diff --git a/grasp_gen/models/generator.py b/grasp_gen/models/generator.py
+index cd11541..3e8bf81 100644
+--- a/grasp_gen/models/generator.py
++++ b/grasp_gen/models/generator.py
+@@ -28,7 +28,6 @@ from grasp_gen.models.model_utils import (
+     load_pretrained_checkpoint_to_dict,
+     offset2batch,
+ )
+-from grasp_gen.models.ptv3.ptv3 import PointTransformerV3
+ from grasp_gen.robot import get_gripper_info
+ from grasp_gen.utils.logging_config import get_logger
+ 
+@@ -139,6 +138,7 @@ class GraspGenGenerator(nn.Module):
+                 feature_dim=1 if self.pose_repr == "pc_feature" else -1,
+             )
+         elif obs_backbone == "ptv3":
++            from grasp_gen.models.ptv3.ptv3 import PointTransformerV3
+             self.object_encoder = PointTransformerV3(
+                 in_channels=3,
+                 enable_flash=False,

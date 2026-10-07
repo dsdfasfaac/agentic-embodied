@@ -2,7 +2,7 @@
 set -euo pipefail
 ROOT=$(CDPATH= cd -- "$(dirname -- "${BASH_SOURCE[0]}")/../.." && pwd)
 GRASPGEN_ROOT=${GRASPGEN_ROOT:-/mnt/hdd16t/chenfu/grasp_recovery/GraspGen}
-GRASPGEN_PYTHON=${GRASPGEN_PYTHON:-/mnt/hdd16t/chenfu/grasp_recovery/venv/bin/python}
+GRASPGEN_PYTHON=${GRASPGEN_PYTHON:-/mnt/hdd16t/chenfu/grasp_recovery/venv313/bin/python}
 GRASPGEN_CONFIG=${GRASPGEN_CONFIG:?Set GRASPGEN_CONFIG to the downloaded model YAML}
 test -x "$GRASPGEN_PYTHON"
 test -f "$GRASPGEN_CONFIG"

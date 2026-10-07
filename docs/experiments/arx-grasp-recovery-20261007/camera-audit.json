@@ -1,0 +1,180 @@
+{
+  "cameras": [
+    {
+      "aligned_depth": true,
+      "capture": "640x480@15",
+      "name": "front_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "serial": "260422272500"
+    },
+    {
+      "aligned_depth": false,
+      "capture": "640x480@15",
+      "name": "left_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "serial": "260422271945"
+    },
+    {
+      "aligned_depth": false,
+      "capture": "640x480@15",
+      "name": "right_rgb",
+      "policy_rgb": "320x240",
+      "rgb_intrinsics_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+      "serial": "260422275847"
+    }
+  ],
+  "clock": "host_monotonic_ns",
+  "front_extrinsic_sha256": "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10",
+  "observations": [
+    {
+      "front_valid_depth_fraction": 0.8277473958333333,
+      "host_monotonic_ns": {
+        "front_rgb": 164862971879391,
+        "left_rgb": 164863022603648,
+        "right_rgb": 164863011957530
+      },
+      "index": 0,
+      "pink_label": {
+        "depth_mad_mm": 0.5,
+        "depth_median_mm": 409.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.41963335258016365,
+          -0.2283172006692936,
+          -0.03541406494808749
+        ],
+        "valid_depth_pixels": 60
+      },
+      "saved_images": {
+        "front_depth_mm.png": {
+          "sha256": "6e9964f414ee8385350423e1aebbf3273cbb8d595c0dc9610d778b34ee82941b"
+        },
+        "front_rgb.png": {
+          "sha256": "e16d3cb4368a4913afbb63eeef8e15cf6bbc741751308542bec8d1eb7b2c5f7c"
+        },
+        "left_rgb.png": {
+          "sha256": "8e31ec8305e48c78e8b62437a5a02d53c630435c612489b002021b9d0fdb3caa"
+        },
+        "right_rgb.png": {
+          "sha256": "60fc83496e828a7102db02f6a1d1f0e4a653a1e662d4adfcbc1bd535a0756853"
+        }
+      },
+      "sensor_age_ms": 51.349968,
+      "sensor_skew_ms": 50.724257
+    },
+    {
+      "front_valid_depth_fraction": 0.8325520833333333,
+      "host_monotonic_ns": {
+        "front_rgb": 164863038433339,
+        "left_rgb": 164863089440636,
+        "right_rgb": 164863078609973
+      },
+      "index": 1,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 411.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.4216208968350392,
+          -0.2282745818964603,
+          -0.03621459950306494
+        ],
+        "valid_depth_pixels": 55
+      },
+      "sensor_age_ms": 58.048353,
+      "sensor_skew_ms": 51.007297
+    },
+    {
+      "front_valid_depth_fraction": 0.818046875,
+      "host_monotonic_ns": {
+        "front_rgb": 164863105394646,
+        "left_rgb": 164863156072244,
+        "right_rgb": 164863145310591
+      },
+      "index": 2,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 409.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.41963335258016365,
+          -0.2283172006692936,
+          -0.03541406494808749
+        ],
+        "valid_depth_pixels": 60
+      },
+      "sensor_age_ms": 53.115484,
+      "sensor_skew_ms": 50.677598
+    },
+    {
+      "front_valid_depth_fraction": 0.8196223958333333,
+      "host_monotonic_ns": {
+        "front_rgb": 164863171975192,
+        "left_rgb": 164863222730396,
+        "right_rgb": 164863212004774
+      },
+      "index": 3,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 410.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.42062710873219583,
+          -0.22829589168037726,
+          -0.03581432751413094
+        ],
+        "valid_depth_pixels": 61
+      },
+      "sensor_age_ms": 58.848986,
+      "sensor_skew_ms": 50.755204
+    },
+    {
+      "front_valid_depth_fraction": 0.8301953125,
+      "host_monotonic_ns": {
+        "front_rgb": 164863238634128,
+        "left_rgb": 164863289327270,
+        "right_rgb": 164863278593028
+      },
+      "index": 4,
+      "pink_label": {
+        "depth_mad_mm": 1.0,
+        "depth_median_mm": 410.0,
+        "found": true,
+        "pixel_320x240": [
+          158.0,
+          44.0
+        ],
+        "point_in_left_base_m": [
+          0.42062710873219583,
+          -0.22829589168037726,
+          -0.03581432751413094
+        ],
+        "valid_depth_pixels": 61
+      },
+      "sensor_age_ms": 54.041923,
+      "sensor_skew_ms": 50.693142
+    }
+  ],
+  "passed": true,
+  "robot_commands_sent": false,
+  "robot_status_used": false,
+  "schema_version": "arx.live.camera.audit.v1"
+}
