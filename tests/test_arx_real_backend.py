@@ -143,6 +143,20 @@ def test_real_backend_arrival_uses_firmer_grip_command_feedback():
     assert commit.hardware.observation["expected_feedback_target"][13] == pytest.approx(-2.5)
 
 
+def test_first_hold_preserves_gripper_feedback_with_command_preload():
+    from robots.arx.gateway.tools import HoldPlanner, ApprovedToolContext
+    from robots.arx.gateway.contracts import HoldArgs
+    backend, arm, _ = make_backend(command_offset=.9)
+    initial = backend.reset()
+    assert initial.command[13] == pytest.approx(-3.4)
+    assert initial.policy.state[13] == pytest.approx(-2.5)
+    plan = HoldPlanner().prepare(HoldArgs(steps=1), ApprovedToolContext(initial.command, {}))
+    commit = backend.step(plan.next_targets(None)[0])
+    assert arm.sent[-1][13] == pytest.approx(-3.4)
+    assert commit.policy.state[13] == pytest.approx(-2.5)
+    assert commit.hardware.arrival_verified
+
+
 def test_sensor_refresh_never_sends_a_command_and_rechecks_current_arrival():
     backend, arm, _ = make_backend(command_offset=.9)
     backend.reset()

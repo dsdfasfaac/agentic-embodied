@@ -367,7 +367,10 @@ class RealBackend:
             observation=observed, command_receipt=None, arrival_verified=None,
             feature_frames=feature_frames,
         )
-        return StepCommit(policy, policy.state.copy(), 0.0, False, {}, hardware=hardware)
+        # Feedback includes the SDK gripper preload. Plans consume command
+        # coordinates; using feedback here would apply the preload a second
+        # time on the first hold or Cartesian command.
+        return StepCommit(policy, self._processor.previous.copy(), 0.0, False, {}, hardware=hardware)
 
     def observe(self) -> StepCommit:
         """Read synchronized sensors without issuing or repeating a motor command."""

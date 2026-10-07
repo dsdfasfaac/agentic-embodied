@@ -91,19 +91,33 @@ class CommandKinematics:
         return tcp, r, jac
 
     def solve(self, joints, target_p, target_r):
-        q = joints.copy().astype(float)
-        for _ in range(160):
-            p, r, jac = self.fk(q)
-            ep = target_p - p
-            er = 0.5 * sum(np.cross(r[:, i], target_r[:, i]) for i in range(3))
-            if np.linalg.norm(ep) < 0.00015 and np.linalg.norm(er) < 0.003:
-                return q
-            jac[3:] *= 0.12
-            dq = jac.T @ np.linalg.solve(
-                jac @ jac.T + 0.00001 * np.eye(6), np.r_[ep, 0.12 * er]
-            )
-            q += np.clip(dq, -0.04, 0.04)
-        raise ValueError("IK did not converge")
+        initial = joints.copy().astype(float)
+        self.fk(initial)  # Invalid measured starts must never be projected into bounds.
+        # Solve within the reviewed joint envelope, including near singular
+        # starts. Every Cartesian caller separately checks joint increments.
+        from scipy.optimize import least_squares
+        from scipy.spatial.transform import Rotation
+        bounds = np.asarray([link.limits for link in self.calibration.links])
+        def residual(value):
+            p, r, _ = self.fk(value)
+            return np.r_[p - target_p, .12 * Rotation.from_matrix(r @ target_r.T).as_rotvec()]
+        def jacobian(value):
+            _, r, jac = self.fk(value)
+            v = Rotation.from_matrix(r @ target_r.T).as_rotvec()
+            angle = np.linalg.norm(v)
+            x, y, z = v
+            skew = np.array([[0., -z, y], [z, 0., -x], [-y, x, 0.]])
+            coefficient = 1. / 12. if angle < 1e-5 else (
+                1. - angle / (2. * np.tan(angle / 2.))) / angle ** 2
+            inverse_left = np.eye(3) - .5 * skew + coefficient * skew @ skew
+            return np.vstack((jac[:3], .12 * inverse_left @ jac[3:]))
+        solved = least_squares(residual, initial, jac=jacobian, bounds=(bounds[:, 0], bounds[:, 1]),
+                               max_nfev=200, xtol=1e-10, ftol=1e-10, gtol=1e-10)
+        p, r, _ = self.fk(solved.x)
+        if (np.linalg.norm(p - target_p) >= .00015
+                or np.linalg.norm(Rotation.from_matrix(r @ target_r.T).as_rotvec()) >= .003):
+            raise ValueError("bounded IK did not converge")
+        return solved.x
 
     def plan(self, command, args, *, settling_steps=15):
         d, rv = np.asarray(args.delta_xyz_m), np.asarray(args.delta_rotvec_rad)

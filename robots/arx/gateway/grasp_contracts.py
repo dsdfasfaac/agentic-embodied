@@ -70,6 +70,7 @@ class GraspRecoveryConfig(StrictModel):
     tcp_clearance_m: float = Field(default=.012, ge=.005, le=.03)
     target_exclusion_radius_m: float = Field(default=.020, ge=.005, le=.025)
     target_surface_offset_m: float = Field(default=.0, ge=0, le=.01)
+    geometry_orientation_search_rad: float = Field(default=0., ge=0, le=.1)
 
     @model_validator(mode="after")
     def endpoints(self):

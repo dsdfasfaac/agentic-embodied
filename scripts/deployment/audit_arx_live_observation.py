@@ -9,6 +9,7 @@ It checks the frozen task start state and computes the bundle's two features.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -26,7 +27,7 @@ from robots.arx.gateway.real_config import (
 
 
 def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
-          model_path: Path) -> dict:
+          model_path: Path, snapshot_dir: Path | None = None) -> dict:
     config = load_real_hardware_config(hardware_path, hardware_sha)
     task = load_task_manifest(task_path)
     provider = PickTubeRgbdProvider()
@@ -38,6 +39,17 @@ def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
         features = provider.observe(
             {"hardware": evidence}, {**policy.images, **feature_frames},
         )
+        retained = None
+        if snapshot_dir is not None:
+            snapshot_dir.mkdir(parents=True, exist_ok=False)
+            snapshot = snapshot_dir / "snapshot.npz"
+            np.savez_compressed(snapshot, **policy.images, **feature_frames)
+            retained = {"schema_version": "arx.grasp.sensor-snapshot.v1",
+                        "sha256": hashlib.sha256(snapshot.read_bytes()).hexdigest(),
+                        "robot_commands_sent": False,
+                        "observation": {"observation_id": "live-read-only-0", "step_index": 0,
+                                        "hardware": evidence}}
+            (snapshot_dir / "observation.json").write_text(json.dumps(retained, indent=2) + "\n")
         expected = np.asarray(task.start_state, dtype=float).copy()
         expected[[6, 13]] += np.asarray(task.control.gripper_command_offsets)
         error = np.asarray(policy.state, dtype=float) - expected
@@ -55,6 +67,8 @@ def audit(hardware_path: Path, hardware_sha: str, task_path: Path,
             "sensor_skew_ms": evidence["sensor_skew_ms"],
             "device_health": evidence["device_health"],
             "right_controller_ee_xyz_m": evidence.get("right_tcp_xyz_m"),
+            "retained_snapshot": None if retained is None else {
+                "path": str(snapshot_dir / "snapshot.npz"), "sha256": retained["sha256"]},
         }
     finally:
         backend.close()
@@ -71,10 +85,11 @@ def main() -> None:
     parser.add_argument("--model-contract", type=Path, default=root /
                         "robots/arx/manifests/task7_model_a.yaml")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--snapshot-dir", type=Path)
     args = parser.parse_args()
     try:
         report = audit(args.hardware_config, args.hardware_sha256,
-                       args.task, args.model_contract)
+                       args.task, args.model_contract, args.snapshot_dir)
     except Exception as exc:
         report = {
             "schema_version": "arx.live.observation.audit.v1",

@@ -148,3 +148,21 @@ def test_rack_context_selects_pale_tube_over_pink_sticker():
     yy, xx = np.nonzero(mask)
     assert 145 <= np.median(xx) <= 156
     assert 45 <= np.median(yy) <= 56
+
+
+def test_tracked_label_survives_rack_occlusion_but_not_label_loss():
+    pytest.importorskip("cv2")
+    provider = PickTubeRgbdProvider()
+    rgb = np.zeros((240, 320, 3), dtype=np.uint8)
+    rgb[70:105, 110:220] = [240, 240, 10]
+    rgb[45:56, 145:156] = [130, 125, 140]
+    provider._pink_component(rgb)
+    # Physical pregrasp obscures the yellow rack, not the target label.
+    rgb[70:105, 110:220] = 0
+    mask = provider._pink_component(rgb)
+    assert mask[45:56, 145:156].all()
+    with pytest.raises(ValueError, match="rack is not visible"):
+        PickTubeRgbdProvider()._pink_component(rgb)
+    rgb[45:56, 145:156] = 0
+    with pytest.raises(ValueError, match="pink tube label is not reliably visible"):
+        provider._pink_component(rgb)

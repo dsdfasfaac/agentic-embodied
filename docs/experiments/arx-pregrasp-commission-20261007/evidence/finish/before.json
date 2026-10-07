@@ -1,0 +1,76 @@
+{
+  "schema_version": "arx.live.observation.audit.v1",
+  "status": "observed",
+  "robot_commands_sent": false,
+  "measured_state": [
+    0.032235145568847656,
+    0.00476837158203125,
+    0.00324249267578125,
+    -0.037957191467285156,
+    -0.02422332763671875,
+    -0.00820159912109375,
+    -2.9596776962280273,
+    0.01659393310546875,
+    0.01697540283203125,
+    0.00438690185546875,
+    -0.03108978271484375,
+    -0.00476837158203125,
+    0.06733036041259766,
+    -2.48016357421875
+  ],
+  "expected_feedback_start_state": [
+    0.0322351456,
+    0.0062942505,
+    0.0024795532,
+    -0.0402460098,
+    -0.0268936157,
+    -0.0192642212,
+    -2.98,
+    0.018119812,
+    -0.001335144,
+    0.0032424927,
+    -0.0310897827,
+    -0.0040054321,
+    0.0700006485,
+    -2.5
+  ],
+  "task_start_error": [
+    -3.1152344592833003e-11,
+    -0.00152587891796875,
+    0.0007629394757812501,
+    0.0022888183327148467,
+    0.0026702880632812516,
+    0.01106262207890625,
+    0.02032230377197264,
+    -0.001525878894531249,
+    0.01831054683203125,
+    0.0011444091554687502,
+    -1.4843751228177382e-11,
+    -0.0007629394820312498,
+    -0.002670288087402342,
+    0.01983642578125
+  ],
+  "task_start_eligible": true,
+  "features": {
+    "privileged.interaction.gripper_closed": false,
+    "privileged.interaction.gripper_contact": false,
+    "privileged.interaction.lift_m": 0.0,
+    "privileged.interaction.grasped": false,
+    "privileged.interaction.success": false,
+    "privileged.selected.target_gripper_distance_m": 0.39703892060976315
+  },
+  "sensor_age_ms": 19.404775,
+  "sensor_skew_ms": 19.133684,
+  "device_health": {
+    "transport_responsive": true,
+    "fault_codes": [],
+    "diagnostics_available": false,
+    "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits"
+  },
+  "right_controller_ee_xyz_m": [
+    0.0006013510166004571,
+    0.001725672643000823,
+    -0.002720420331242257
+  ],
+  "retained_snapshot": null
+}

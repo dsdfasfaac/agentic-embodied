@@ -40,6 +40,7 @@ dependencies = [
     "huggingface_hub>=0.24",
     "prompt-toolkit>=3.0.48",
     "numpy",
+    "scipy>=1.10,<2",
     "imageio>=2.0",
 ]
 
@@ -59,7 +60,6 @@ test = [
     "pytest-asyncio>=0.24,<2",
     "omegaconf>=2.3,<3",
     "imageio-ffmpeg>=0.5,<1",
-    "scipy>=1.10,<2",
 ]
 ray = [
     "ray",

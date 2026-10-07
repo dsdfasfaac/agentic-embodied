@@ -1,0 +1,215 @@
+{
+  "pregrasp-short-check-02": {
+    "path": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_grasp_recovery_20261007/pregrasp-short-check-02",
+    "result_sha256": "d55d1803a7d529c968f27ef2ffb1996626bbf752caf91577c022a714eef3cb22",
+    "journal_sha256": "2fc7581c9b1c066e80d341f6100facaa80462f1493d1a82fe17f77ca4cf49225",
+    "record_counts": {
+      "ObservationPublished": 10,
+      "arrival_observed": 6,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 6,
+      "command_sent": 6,
+      "critic_assessment": 6,
+      "critic_lifecycle": 2,
+      "critic_proposal": 1,
+      "effective_arguments": 4,
+      "grasp_sensor_evidence": 3,
+      "interrupt": 1,
+      "private_evaluation": 6,
+      "real_feature_evidence": 7,
+      "recovery_acknowledged": 1,
+      "step_commit": 6,
+      "step_intent": 6,
+      "tool_result": 4
+    },
+    "status": "stopped",
+    "physical_steps": 6,
+    "last_features": {
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": -2.5592258119655487e-05,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3927549075578035
+      },
+      "observation_id": "obs-6",
+      "provider_sha256": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b"
+    },
+    "error": null
+  },
+  "pregrasp-full-check": {
+    "path": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_grasp_recovery_20261007/pregrasp-full-check",
+    "result_sha256": "2f029ea8b35514adfb804e7adf5b12e4a4a61e4d36cd5e0229d76807bcea0a30",
+    "journal_sha256": "26e11eddce729972bae24bc3b8cf65919fe6fc0682d2d342e2df6aade7a2797e",
+    "record_counts": {
+      "ObservationPublished": 4,
+      "arrival_observed": 1,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 1,
+      "command_sent": 1,
+      "critic_assessment": 1,
+      "critic_lifecycle": 1,
+      "critic_proposal": 1,
+      "effective_arguments": 3,
+      "execution_error": 1,
+      "grasp_sensor_evidence": 2,
+      "interrupt": 1,
+      "private_evaluation": 1,
+      "real_feature_evidence": 2,
+      "step_commit": 1,
+      "step_intent": 1,
+      "tool_result": 3
+    },
+    "status": "stopped",
+    "physical_steps": 1,
+    "last_features": {
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.3976317311721988
+      },
+      "observation_id": "obs-1",
+      "provider_sha256": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b"
+    },
+    "error": {
+      "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 393, in execute\n    next_token = verify_call_result(\n                 ^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/bundle_program.py\", line 184, in verify_call_result\n    raise ValueError(\"target grasp review rejected execution\")\nValueError: target grasp review rejected execution\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 398, in execute\n    raise GatewayError(\"BUNDLE_STEP_FAILED\") from exc\nrobots.arx.gateway.contracts.GatewayError: Request cannot be executed\n"
+    }
+  },
+  "pregrasp-full-check-02": {
+    "path": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_grasp_recovery_20261007/pregrasp-full-check-02",
+    "result_sha256": "64c74dbb8cf828490064318b76de0f09637d4c3cad4c28b277acb49dfecb7acf",
+    "journal_sha256": "6f98855a9d083fb25dc0f1c23219f67268569e7a4c36f17c9fd3622f31f015ef",
+    "record_counts": {
+      "ObservationPublished": 4,
+      "arrival_observed": 1,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "bundle_step_failed": 1,
+      "command_dispatch_started": 1,
+      "command_sent": 1,
+      "critic_assessment": 1,
+      "critic_lifecycle": 1,
+      "critic_proposal": 1,
+      "effective_arguments": 3,
+      "execution_error": 1,
+      "grasp_sensor_evidence": 2,
+      "interrupt": 1,
+      "private_evaluation": 1,
+      "real_feature_evidence": 2,
+      "step_commit": 1,
+      "step_intent": 1,
+      "tool_result": 3
+    },
+    "status": "stopped",
+    "physical_steps": 1,
+    "last_features": {
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": -0.0008005984646581865,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.39840558639708407
+      },
+      "observation_id": "obs-1",
+      "provider_sha256": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b"
+    },
+    "error": {
+      "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 393, in execute\n    next_token = verify_call_result(\n                 ^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/bundle_program.py\", line 184, in verify_call_result\n    raise ValueError(\"target grasp review rejected execution\")\nValueError: target grasp review rejected execution\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 402, in execute\n    raise GatewayError(\"BUNDLE_STEP_FAILED\") from exc\nrobots.arx.gateway.contracts.GatewayError: Request cannot be executed\n"
+    }
+  },
+  "pregrasp-full-check-03": {
+    "path": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_grasp_recovery_20261007/pregrasp-full-check-03",
+    "result_sha256": "4c795c812d5dfd1497df296b3d6090e339dbc72f2a7a419149890d64489c2ed5",
+    "journal_sha256": "d5ef0d3ca2017a4d9ee0bc3c0607222b2099fcb02d1cb90f1bc08dceaa8141c8",
+    "record_counts": {
+      "ObservationPublished": 125,
+      "arrival_observed": 121,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 121,
+      "command_sent": 121,
+      "critic_assessment": 120,
+      "critic_lifecycle": 2,
+      "critic_proposal": 2,
+      "effective_arguments": 4,
+      "execution_error": 1,
+      "grasp_sensor_evidence": 3,
+      "interrupt": 1,
+      "private_evaluation": 121,
+      "real_feature_evidence": 121,
+      "recovery_acknowledged": 1,
+      "step_commit": 121,
+      "step_intent": 121,
+      "suppressed_proposal": 1,
+      "tool_result": 4
+    },
+    "status": "stopped",
+    "physical_steps": 121,
+    "last_features": {
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0011572231875910388,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.1689601337115194
+      },
+      "observation_id": "obs-120",
+      "provider_sha256": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b"
+    },
+    "error": {
+      "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 644, in _assess\n    assessment = self.critic.observe(self._critic_observation(), self._images())\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/bundle_runtime.py\", line 116, in observe\n    measured = self.provider.augment(observation, images) if self.provider else observation\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/bundle_runtime.py\", line 44, in augment\n    values = self.impl.observe(observation, images)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 304, in observe\n    distance = self.measure_distance(\n               ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 211, in measure_distance\n    component = self._pink_component(np.asarray(rgb))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 148, in _pink_component\n    raise ValueError(\"yellow test-tube rack is not reliably visible\")\nValueError: yellow test-tube rack is not reliably visible\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 386, in execute\n    self.execute_targets(prepared, request, result)\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 586, in execute_targets\n    task_success = self._assess(result, terminal=commit.environment_ended)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 663, in _assess\n    raise GatewayError(\"CRITIC_EXECUTION_ERROR\") from exc\nrobots.arx.gateway.contracts.GatewayError: Request cannot be executed\n"
+    }
+  },
+  "pregrasp-full-check-04": {
+    "path": "/home/dodo/chenfu/Agentic-Embodied/runs/arx_grasp_recovery_20261007/pregrasp-full-check-04",
+    "result_sha256": "345d9af30c3d325049842d57a0bf138229c1bac274cd6149405f549c90673f47",
+    "journal_sha256": "32e7cca87ea3b64fdbbc5592258f8aa9559473e0463db4726a460e0cfaabbddd",
+    "record_counts": {
+      "ObservationPublished": 144,
+      "arrival_observed": 140,
+      "artifact_finalization": 1,
+      "baseline_initialized": 1,
+      "command_dispatch_started": 140,
+      "command_sent": 140,
+      "critic_assessment": 139,
+      "critic_lifecycle": 2,
+      "critic_proposal": 2,
+      "effective_arguments": 4,
+      "execution_error": 1,
+      "grasp_sensor_evidence": 3,
+      "interrupt": 1,
+      "private_evaluation": 140,
+      "real_feature_evidence": 140,
+      "recovery_acknowledged": 1,
+      "step_commit": 140,
+      "step_intent": 140,
+      "suppressed_proposal": 1,
+      "tool_result": 4
+    },
+    "status": "stopped",
+    "physical_steps": 140,
+    "last_features": {
+      "features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.006195963148670325,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.12416546097901322
+      },
+      "observation_id": "obs-139",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589"
+    },
+    "error": {
+      "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 644, in _assess\n    assessment = self.critic.observe(self._critic_observation(), self._images())\n                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/bundle_runtime.py\", line 116, in observe\n    measured = self.provider.augment(observation, images) if self.provider else observation\n               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/bundle_runtime.py\", line 44, in augment\n    values = self.impl.observe(observation, images)\n             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 308, in observe\n    distance = self.measure_distance(\n               ^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 215, in measure_distance\n    component = self._pink_component(np.asarray(rgb))\n                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 192, in _pink_component\n    raise ValueError(\"pink tube label is not reliably visible in front RGB\")\nValueError: pink tube label is not reliably visible in front RGB\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 386, in execute\n    self.execute_targets(prepared, request, result)\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 586, in execute_targets\n    task_success = self._assess(result, terminal=commit.environment_ended)\n                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 663, in _assess\n    raise GatewayError(\"CRITIC_EXECUTION_ERROR\") from exc\nrobots.arx.gateway.contracts.GatewayError: Request cannot be executed\n"
+    }
+  }
+}

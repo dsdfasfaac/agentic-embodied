@@ -394,6 +394,10 @@ class ArxSessionCore:
                         bundle_call, result, real=self.commit.hardware is not None
                     )
                 except ValueError as exc:
+                    self._record("bundle_step_failed", {
+                        "tool": request.tool, "output": deepcopy(result["result"]),
+                        "reason": str(exc), "observation_id": self.current["observation_id"],
+                    })
                     self.close()
                     raise GatewayError("BUNDLE_STEP_FAILED") from exc
                 if next_token:

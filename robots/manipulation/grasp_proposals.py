@@ -104,7 +104,7 @@ class LocalGraspService:
         return result
 
 
-def geometry_proposal(cloud: TargetCloud, tcp_rotation_base, *, surface_offset_m=0.):
+def geometry_proposal(cloud: TargetCloud, tcp_rotation_base, *, surface_offset_m=0., orientation_search_rad=0.):
     """Tube-specific target approach with the current ARX TCP orientation.
 
     The visible label is a surface proxy. A measured tube-radius correction may
@@ -115,5 +115,19 @@ def geometry_proposal(cloud: TargetCloud, tcp_rotation_base, *, surface_offset_m
     camera_pose[:3, :3] = cloud.camera_to_base[:3, :3].T @ tcp_rotation_base
     target = cloud.target_camera_m.copy()
     camera_pose[:3, 3] = target + surface_offset_m * target / np.linalg.norm(target)
-    return [{"transform_camera": camera_pose.tolist(), "score": 1.,
-             "pose_kind": "arx_tcp", "quality_claim": "target_proxy_only"}]
+    result = [{"transform_camera": camera_pose.tolist(), "score": 1.,
+               "pose_kind": "arx_tcp", "quality_claim": "target_proxy_only"}]
+    if orientation_search_rad:
+        if not 0 < orientation_search_rad <= .1:
+            raise ValueError("geometric orientation search must be in 0..0.1 rad")
+        from scipy.spatial.transform import Rotation
+        for vector in ([0., orientation_search_rad, 0.], [0., -orientation_search_rad, 0.],
+                       [0., 0., -orientation_search_rad], [0., 0., orientation_search_rad],
+                       [orientation_search_rad, 0., 0.], [-orientation_search_rad, 0., 0.]):
+            pose = camera_pose.copy()
+            pose[:3, :3] = cloud.camera_to_base[:3, :3].T @ (
+                Rotation.from_rotvec(vector).as_matrix() @ tcp_rotation_base)
+            result.append({"transform_camera": pose.tolist(), "score": .99,
+                           "pose_kind": "arx_tcp", "quality_claim": "target_proxy_only",
+                           "world_rotation_delta_rad": vector})
+    return result

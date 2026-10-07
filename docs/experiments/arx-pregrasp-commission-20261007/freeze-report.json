@@ -1,0 +1,136 @@
+{
+  "audit_scope": "static declarations only; live joint feedback and EEF kinematics not attested",
+  "bundle": "docs/experiments/arx-pregrasp-commission-20261007/bundle.json",
+  "bundle_file_sha256": "32cb5d69c7bc20860667f9f737f05cc246a12a5e89ccb4552ff5a2545b50be3e",
+  "bundle_semantic_sha256": "97b9bd91007f5a26485408d26b40ca0def444d57033ab3483be7b9bc616627cb",
+  "catalog": "docs/experiments/arx-pregrasp-commission-20261007/frozen/tool-catalog.json",
+  "catalog_sha256": "efaa2d8b34f6e2300adeff8936e7ab69fa20ad50135ffc3e8fc6246537fee510",
+  "feature_provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+  "grasp_config_sha256": "95b7cc49202102adac0e5fc552a187ae0692e15a08c0b5ec6cb130d9f797036e",
+  "real_input_contract": "docs/experiments/arx-pregrasp-commission-20261007/frozen/real-input-contract.json",
+  "real_input_contract_sha256": "315a04ad658b901f905dbcc803460dffdb6f2677a7f10c911845bff6bf749274",
+  "recovery_plans": [
+    {
+      "recovery_id": "pink_pregrasp_then_vla",
+      "steps": [
+        {
+          "tool": "arx.propose_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_reentry",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.zeva",
+          "tool_calls": 1
+        }
+      ],
+      "tool_calls": 5
+    }
+  ],
+  "used_features": [
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_closed",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "right_gripper_policy"
+      ],
+      "source_kind": "joint_feedback",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_contact",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.grasped",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.success",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.selected.target_gripper_distance_m",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "9315073ce69a0c03289f0e53e202dc69d73ab88e12ce1f951e3b2abbee64c589",
+      "scalar_type": "number",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "m"
+    }
+  ]
+}

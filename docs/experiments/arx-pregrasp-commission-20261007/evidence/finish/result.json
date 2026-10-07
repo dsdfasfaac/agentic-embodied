@@ -1,0 +1,14 @@
+{
+  "controller_disabled": true,
+  "controller_stop": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "stopped pid=83256\n"
+  },
+  "homing_is_rollout_step": false,
+  "operator_confirmed_unloaded": false,
+  "schema_version": "arx.real.post_episode.v1",
+  "status": "homed_and_disabled",
+  "termination_reason": "gateway_rejected_or_interrupted",
+  "trial": "runs/arx_grasp_recovery_20261007/pregrasp-full-check-04"
+}

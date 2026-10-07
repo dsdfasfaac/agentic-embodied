@@ -42,7 +42,8 @@ def probe(args):
     state = np.asarray(observation["hardware"]["measured_state"], dtype=float)
     _, orientation, _ = provider.tool_fk.fk(state[7:13])
     if args.engine == "tube_geometry":
-        candidates = geometry_proposal(cloud, orientation, surface_offset_m=settings.target_surface_offset_m)
+        candidates = geometry_proposal(cloud, orientation, surface_offset_m=settings.target_surface_offset_m,
+                                       orientation_search_rad=settings.geometry_orientation_search_rad)
         service_evidence = None
     else:
         endpoint = getattr(settings, args.engine + "_endpoint")

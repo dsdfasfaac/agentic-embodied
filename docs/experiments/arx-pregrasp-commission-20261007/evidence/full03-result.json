@@ -1,0 +1,207 @@
+{
+  "bundle_sha256": "32cb5d69c7bc20860667f9f737f05cc246a12a5e89ccb4552ff5a2545b50be3e",
+  "controller_disabled": false,
+  "final_features": {
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": false,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0011572231875910388,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.1689601337115194
+    },
+    "observation_id": "obs-120",
+    "provider_sha256": "274dbb5f628f6b5e7fd85104dae68b2ad2749201c9d5a622c6c41c06fb327f2b"
+  },
+  "final_observation": {
+    "cameras": {
+      "front_rgb": {
+        "content_id": "rgb-7f484525e6d7249cb187886def09ed2510e3a9cbf1f3c4ec24fa1e5f48526fe3",
+        "encoding": "png",
+        "height": 240,
+        "sha256": "7f484525e6d7249cb187886def09ed2510e3a9cbf1f3c4ec24fa1e5f48526fe3",
+        "width": 320
+      },
+      "left_rgb": {
+        "content_id": "rgb-db5f94215b0cf29b06e2dcc39f5813f36c98c9431c0226705318f49475545fa8",
+        "encoding": "png",
+        "height": 240,
+        "sha256": "db5f94215b0cf29b06e2dcc39f5813f36c98c9431c0226705318f49475545fa8",
+        "width": 320
+      },
+      "right_rgb": {
+        "content_id": "rgb-08de63708888e15893ff2bd48843714ac4e40b95b93d1d8a790d02f1c384bfe6",
+        "encoding": "png",
+        "height": 240,
+        "sha256": "08de63708888e15893ff2bd48843714ac4e40b95b93d1d8a790d02f1c384bfe6",
+        "width": 320
+      }
+    },
+    "clock_domain": "host_monotonic_ns",
+    "episode_nonce": "commission-6f400c643ecb40be96ef30ff16318328",
+    "event_sequence": 1109,
+    "hardware": {
+      "arrival_reference_target": [
+        0.032235145568847656,
+        0.00629425048828125,
+        0.00247955322265625,
+        -0.040246009826660156,
+        -0.02689361572265625,
+        -0.01926422119140625,
+        -2.9800000190734863,
+        0.6329424381256104,
+        1.853915810585022,
+        0.5836101770401001,
+        1.217504620552063,
+        0.6171475648880005,
+        0.048671215772628784,
+        -2.4790191650390625
+      ],
+      "arrival_verified": true,
+      "auxiliary_feedback": {
+        "right_gripper_current_native": -0.012209892272949219
+      },
+      "auxiliary_monotonic_ns": {
+        "right_gripper_current_native": 167214917548055
+      },
+      "camera_calibration_sha256": {
+        "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+        "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+        "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+      },
+      "camera_health": {
+        "front_rgb": {
+          "device_id": "260422272500",
+          "responsive": true
+        },
+        "left_rgb": {
+          "device_id": "260422271945",
+          "responsive": true
+        },
+        "right_rgb": {
+          "device_id": "260422275847",
+          "responsive": true
+        }
+      },
+      "camera_monotonic_ns": {
+        "front_rgb": 167214914738918,
+        "left_rgb": 167214898823052,
+        "right_rgb": 167214898036633
+      },
+      "clock_domain": "host_monotonic_ns",
+      "command_receipt": {
+        "command_id": "cmd-5eaadb79030f4684bf34a7f2a65c444b",
+        "detail": "ROS2 publisher returned; controller/CAN receipt unavailable",
+        "expected_feedback_target": [
+          0.032235145568847656,
+          0.00629425048828125,
+          0.00247955322265625,
+          -0.040246009826660156,
+          -0.02689361572265625,
+          -0.01926422119140625,
+          -2.9800000190734863,
+          0.6329424381256104,
+          1.853915810585022,
+          0.5836101770401001,
+          1.217504620552063,
+          0.6171475648880005,
+          0.048671215772628784,
+          -2.4790191650390625
+        ],
+        "sent_monotonic_ns": 167214895769207,
+        "status": "ros_publish_returned"
+      },
+      "depth_monotonic_ns": {
+        "front_depth_mm": 167214914738918
+      },
+      "device_health": {
+        "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits",
+        "diagnostics_available": false,
+        "fault_codes": [],
+        "transport_responsive": true
+      },
+      "expected_feedback_target": [
+        0.032235145568847656,
+        0.00629425048828125,
+        0.00247955322265625,
+        -0.040246009826660156,
+        -0.02689361572265625,
+        -0.01926422119140625,
+        -2.9800000190734863,
+        0.6329424381256104,
+        1.853915810585022,
+        0.5836101770401001,
+        1.217504620552063,
+        0.6171475648880005,
+        0.048671215772628784,
+        -2.4790191650390625
+      ],
+      "gripper_arrival": {
+        "13": {
+          "closing_command": false,
+          "commanded_open_fraction": 0.7291232347488403,
+          "current": -0.012209892272949219,
+          "measured_open_fraction": 0.7291232838350185,
+          "mode": "position",
+          "settled": false
+        }
+      },
+      "measured_state": [
+        0.032235145568847656,
+        0.00514984130859375,
+        0.00324249267578125,
+        -0.037957191467285156,
+        -0.02422332763671875,
+        -0.00820159912109375,
+        -2.959296226501465,
+        0.6319141387939453,
+        1.846151351928711,
+        0.5743112564086914,
+        1.2159528732299805,
+        0.6139850616455078,
+        0.033761024475097656,
+        -2.4790191650390625
+      ],
+      "observation_completed_ns": 167214918477115,
+      "position_error": [
+        0.0,
+        -0.0011444091796875,
+        0.000762939453125,
+        0.002288818359375,
+        0.0026702880859375,
+        0.0110626220703125,
+        0.020703792572021484,
+        -0.001028299331665039,
+        -0.007764458656311035,
+        -0.009298920631408691,
+        -0.0015517473220825195,
+        -0.0031625032424926758,
+        -0.014910191297531128,
+        0.0
+      ],
+      "right_tcp_frame": "right_arm_local_base",
+      "right_tcp_monotonic_ns": 167214917548055,
+      "right_tcp_xyz_m": [
+        0.16105739512009576,
+        0.16752126193721992,
+        -0.02455642910494607
+      ],
+      "sensor_age_ms": 20.440482,
+      "sensor_skew_ms": 19.511422,
+      "state_acquisition_started_ns": 167214917274031,
+      "state_monotonic_ns": 167214917548055
+    },
+    "lifecycle": "recovery",
+    "observation_id": "obs-121",
+    "schema_version": "arx.public.observation.v1",
+    "simulation_time_s": 21.669741798,
+    "step_index": 121
+  },
+  "grasp_config_sha256": "95b7cc49202102adac0e5fc552a187ae0692e15a08c0b5ec6cb130d9f797036e",
+  "max_physical_steps": 301,
+  "physical_steps": 121,
+  "schema_version": "arx.pregrasp.commission.v1",
+  "status": "stopped",
+  "termination_reason": "gateway_rejected_or_interrupted",
+  "vla_called": false
+}

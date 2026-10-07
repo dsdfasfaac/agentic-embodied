@@ -137,15 +137,19 @@ class PickTubeRgbdProvider:
             raise ValueError("PickTube front RGB must be 320x240 uint8")
         hsv = cv2.cvtColor(rgb, cv2.COLOR_RGB2HSV)
         red, green, blue = (rgb[..., i].astype(np.int16) for i in range(3))
-        rack_mask = (((hsv[..., 0] >= 18) & (hsv[..., 0] <= 45))
-                     & (hsv[..., 1] >= 80) & (hsv[..., 2] >= 90)).astype(np.uint8)
-        rack_count, _, rack_stats, _ = cv2.connectedComponentsWithStats(rack_mask, 8)
-        if rack_count < 2:
-            raise ValueError("yellow test-tube rack is not visible in front RGB")
-        rack_index = int(np.argmax(rack_stats[1:, cv2.CC_STAT_AREA]) + 1)
-        rack_x, rack_y, rack_w, rack_h, rack_area = map(int, rack_stats[rack_index])
-        if rack_area < 500 or rack_w < 60 or rack_h < 10:
-            raise ValueError("yellow test-tube rack is not reliably visible")
+        # Rack context establishes target identity on acquisition. Once the
+        # label is tracked, the moving arm can obscure the rack; each new
+        # frame must still supply a bounded, visible pink component and depth.
+        if self.last_centre is None:
+            rack_mask = (((hsv[..., 0] >= 18) & (hsv[..., 0] <= 45))
+                         & (hsv[..., 1] >= 80) & (hsv[..., 2] >= 90)).astype(np.uint8)
+            rack_count, _, rack_stats, _ = cv2.connectedComponentsWithStats(rack_mask, 8)
+            if rack_count < 2:
+                raise ValueError("yellow test-tube rack is not visible in front RGB")
+            rack_index = int(np.argmax(rack_stats[1:, cv2.CC_STAT_AREA]) + 1)
+            rack_x, rack_y, rack_w, rack_h, rack_area = map(int, rack_stats[rack_index])
+            if rack_area < 500 or rack_w < 60 or rack_h < 10:
+                raise ValueError("yellow test-tube rack is not reliably visible")
         hsv_mask = (((hsv[..., 0] >= 155) | (hsv[..., 0] <= 6))
                     & (hsv[..., 1] >= 70) & (hsv[..., 2] >= 65))
         rgb_mask = ((red >= green + 18) & (blue >= green + 5)

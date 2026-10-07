@@ -81,7 +81,8 @@ class GraspRecovery:
         _, orientation, _ = self.kinematics.fk(state[7:13])
         if args.engine == "tube_geometry":
             candidates = geometry_proposal(cloud, orientation,
-                surface_offset_m=self.config.target_surface_offset_m)
+                surface_offset_m=self.config.target_surface_offset_m,
+                orientation_search_rad=self.config.geometry_orientation_search_rad)[:args.max_candidates]
         else:
             candidates = self.engines[args.engine].propose(cloud, max_candidates=args.max_candidates)
         candidates = [dict(item, transform_base=(cloud.camera_to_base @
