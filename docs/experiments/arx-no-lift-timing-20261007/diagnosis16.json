@@ -1,0 +1,15 @@
+{
+  "source": "contact14-continuation15-physical",
+  "source_journal_sha256": "df172c9eeac5acb0598758b16f3e860cb17852f30841fa813eb6d2c3e1b63759",
+  "observation_id": "obs-288",
+  "facts": {
+    "contact": true,
+    "closed": true,
+    "distance_m": 0.008582117215126034,
+    "lift_m": -5.72198681274283e-06,
+    "new_steps": 10,
+    "interrupt": "closed_contact_no_lift"
+  },
+  "diagnosis": "8-frame no-lift dwell expires during intended stationary closure, before the bundle lift step. Set48 frames (3.2s at15Hz); keep every recovery step and safety constraint unchanged.",
+  "promotion_allowed": false
+}

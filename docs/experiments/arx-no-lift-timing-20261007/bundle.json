@@ -1,0 +1,288 @@
+{
+  "candidate_id": "real-pink-no-lift-timing-20261007",
+  "causal_hypothesis": "8-frame no-lift dwell expires during intended stationary closure, before the bundle lift step. Set48 frames (3.2s at15Hz); keep every recovery step and safety constraint unchanged.",
+  "critic_rules": [
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false
+        }
+      ],
+      "cooldown_steps": 96,
+      "dwell_steps": 1,
+      "evidence_ids": [
+        "trial02-obs26",
+        "trial02-obs600",
+        "trial02-journal-36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74"
+      ],
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "operator": "gt",
+      "proposal": "Interrupt the initial hold to enter the frozen pregrasp commissioning recovery.",
+      "rule_id": "commission_far_open",
+      "safety_only": false,
+      "threshold": 0.1,
+      "title": "Supervised pregrasp commissioning request"
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": false
+        }
+      ],
+      "cooldown_steps": 96,
+      "dwell_steps": 3,
+      "evidence_ids": [
+        "full-zetta-rollout-10-obs237",
+        "full-zetta-rollout-10-obs244",
+        "full-zetta-rollout-10-obs252",
+        "attempt10-onsite-rim-contact-no-lift"
+      ],
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "operator": "gt",
+      "proposal": "Interrupt closed unretained target before tracking is lost; execute audited target recovery.",
+      "rule_id": "closed_target_separated",
+      "safety_only": false,
+      "threshold": 0.035,
+      "title": "Closed gripper remains separated from pink target"
+    },
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": true
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": true
+        }
+      ],
+      "cooldown_steps": 96,
+      "dwell_steps": 48,
+      "evidence_ids": [
+        "full-zetta-rollout-10-obs237",
+        "full-zetta-rollout-10-obs244",
+        "full-zetta-rollout-10-obs252",
+        "attempt10-onsite-rim-contact-no-lift",
+        "contact14-continuation15-physical-obs288-early-critic"
+      ],
+      "feature": "privileged.interaction.lift_m",
+      "operator": "stagnant",
+      "proposal": "Interrupt stalled contact without a verified grasp; review current target and grip before retry.",
+      "rule_id": "closed_contact_no_lift",
+      "safety_only": false,
+      "threshold": 0.002,
+      "title": "Contact without target lift"
+    }
+  ],
+  "diagnosis_sha256": "860d6dffaf41316ddeb741128cf72cd4911d3571d7b55749f1a075867d77e208",
+  "generation": 5,
+  "mechanism_change": "Increase contact/no-lift dwell from8 to48 frames so intended closure can complete before audited lift.",
+  "parent_sha256": "fe9b859125f2c0c1a4b4b77540036961c46b28c94e399bd8f1b64355595f3ccd",
+  "recovery_rules": [
+    {
+      "evidence_ids": [
+        "full-zetta-rollout-10-obs237",
+        "full-zetta-rollout-10-obs244",
+        "full-zetta-rollout-10-obs252",
+        "attempt10-onsite-rim-contact-no-lift"
+      ],
+      "fallback": "Record failure and end the attempt. Use existing verified homing/unload cleanup; do not bypass review or silently switch engines.",
+      "precondition": "Fresh observed target; open grip or calibrated empty-stop with target separated and unlifted. Possible held objects deny opening.",
+      "recovery_id": "pink_engage_retention_then_vla",
+      "safety_constraints": [
+        "Only the gateway executes motor targets.",
+        "Fresh single-use tokens, joint limits and step budgets are enforced.",
+        "No automatic opening if current suggests an object may be held.",
+        "TCP clearance is not a full arm/finger collision certificate.",
+        "Supervised commissioning; delivered unvalidated configuration has motion disabled.",
+        "Closed no-lift contact can be a rim collision: opening is denied unless empty-stop plus separated unlifted target is freshly observed."
+      ],
+      "steps": [
+        {
+          "parameters": {
+            "max_steps": 60,
+            "opening": 1.0
+          },
+          "stop_when": "Observed open gripper; refuse unknown or possible held object.",
+          "tool": "arx.set_gripper"
+        },
+        {
+          "parameters": {
+            "engine": "tube_geometry",
+            "max_candidates": 8
+          },
+          "stop_when": "Fresh pink target cloud and metric proposal are recorded.",
+          "tool": "arx.propose_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 240,
+            "phase": "pregrasp",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh same-target joint IK and TCP clearance are eligible.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 240,
+            "phase": "pregrasp",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches pregrasp; sent commands and feedback are recorded separately.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "engine": "tube_geometry",
+            "max_candidates": 8
+          },
+          "stop_when": "Fresh pink target cloud and metric proposal are recorded.",
+          "tool": "arx.propose_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "pregrasp",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh same-target joint IK and TCP clearance are eligible.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "pregrasp",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches pregrasp; sent commands and feedback are recorded separately.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "engage",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Measured pregrasp completed and fresh same-target scene admits engagement.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "engage",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches the target proxy, not just pregrasp.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "opening": 0.0
+          },
+          "stop_when": "Measured settled closure; preserve existing +0.9 command preload.",
+          "tool": "arx.set_gripper"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "lift",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Observed same-target contact and completed engage permit small lift.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 60,
+            "phase": "lift",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP lift; only observed target lift can count success.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "parameters": {
+            "steps": 5
+          },
+          "stop_when": "Five fresh observations verify target co-motion and pink lift success.",
+          "tool": "arx.hold"
+        },
+        {
+          "parameters": {
+            "observation_ids": [
+              "post-recovery"
+            ]
+          },
+          "stop_when": "Same-target measured pregrasp, healthy sensors and critic clearance permit reentry.",
+          "tool": "arx.review_reentry"
+        },
+        {
+          "parameters": {
+            "max_chunks": 1,
+            "reentry_token": "token-from-review"
+          },
+          "stop_when": "One bounded fresh VLA chunk or runtime terminal verdict.",
+          "tool": "arx.zeva"
+        }
+      ],
+      "stop_condition": "Pink-target 1cm lift held for five fresh frames ends success; honor runtime budgets.",
+      "title": "Measured pink target engagement and retained lift",
+      "trigger_rule_ids": [
+        "commission_far_open",
+        "closed_target_separated",
+        "closed_contact_no_lift"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "tool_plugin": null,
+  "validation_plan": "Replay attempt10 critics before new physical trial; bounded full runner, same Model A seed42, five fresh frames of verified pink 1cm lift. No promotion from one rollout."
+}

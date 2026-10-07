@@ -62,3 +62,38 @@ def test_checkpoint_rejects_changed_journal_and_candidate(tmp_path):
     journal,program=checkpoint_fixture(tmp_path)
     with pytest.raises(ValueError,match='SHA differs'):read_checkpoint(tmp_path,'f'*64,program,'a'*64)
     with pytest.raises(ValueError,match='same bundle'):read_checkpoint(tmp_path,file_sha256(journal),program,'b'*64)
+
+
+def closing_segment_fixture(path,checkpoint,*,rule='closed_contact_no_lift'):
+    g=path/'private/gateway';g.mkdir(parents=True);j=g/'journal.sqlite3';db=sqlite3.connect(j)
+    db.executescript('create table records(sequence integer primary key,kind text,payload text);create table operations(request text);create table snapshot(payload text);')
+    def record(k,v):db.execute('insert into records(kind,payload) values(?,?)',(k,json.dumps(v)))
+    args=checkpoint['program'].calls[checkpoint['cursor']].arguments
+    db.execute('insert into operations values(?)',(json.dumps({'arguments':args}),))
+    record('tool_result',dict(tool='arx.set_gripper',status='interrupted',executed_steps=10))
+    record('interrupt',dict(code='RECOVERY_ESCALATION_REQUIRED',proposals=[{'rule_id':rule}]))
+    for i in range(10):record('command_sent',{});record('arrival_observed',{'verified':True})
+    db.execute('insert into snapshot values(?)',(json.dumps(dict(observation={'hardware':{'measured_state':[.01]*14}},budget_remaining={'decisions':51})),))
+    db.commit();db.close()
+    (path/'result.json').write_text(json.dumps(dict(schema_version='arx.grasp.bundle-continuation.v1',termination_reason='critic_interrupted',
+        source_journal_sha256=checkpoint['journal_sha256'],checkpoint_steps=18,total_physical_steps=28)))
+    return j
+
+
+def test_chained_closing_cannot_refund_motion_or_decisions(tmp_path):
+    from robots.arx.deployment.grasp_continuation import extend_closing_checkpoint
+    source=tmp_path/'source';source.mkdir();j,p=checkpoint_fixture(source)
+    cp=read_checkpoint(source,file_sha256(j),p,'a'*64)
+    child=tmp_path/'child';journal=closing_segment_fixture(child,cp)
+    extend_closing_checkpoint(cp,child,file_sha256(journal))
+    assert cp['steps']==28 and cp['decisions']==13
+    assert cp['closing_steps_remaining']==32 and cp['closing_steps_consumed']==28
+    assert cp['recovery']['remaining_steps']==152 and cp['recovery']['remaining_decisions']==3
+
+
+def test_chained_closing_rejects_unrelated_critic_failure(tmp_path):
+    from robots.arx.deployment.grasp_continuation import extend_closing_checkpoint
+    source=tmp_path/'source';source.mkdir();j,p=checkpoint_fixture(source)
+    cp=read_checkpoint(source,file_sha256(j),p,'a'*64)
+    child=tmp_path/'child';journal=closing_segment_fixture(child,cp,rule='closed_target_separated')
+    with pytest.raises(ValueError,match='unrelated interruption'):extend_closing_checkpoint(cp,child,file_sha256(journal))

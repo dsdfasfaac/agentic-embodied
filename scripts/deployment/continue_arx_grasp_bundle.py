@@ -12,8 +12,8 @@ import uuid
 from pathlib import Path
 if __package__ in (None,''): sys.path.insert(0,str(Path(__file__).resolve().parents[2]))
 from scripts.deployment.serve_arx_real_gateway import RealCoreFactory
-from robots.arx.deployment.grasp_continuation import read_checkpoint, restore_sensor_history, adopt_checkpoint
-from robots.arx.deployment.bundle_program import resolve_call
+from robots.arx.deployment.grasp_continuation import read_checkpoint, restore_sensor_history, adopt_checkpoint, extend_closing_checkpoint
+from robots.arx.deployment.bundle_program import resolve_call, compile_programs
 from robots.arx.gateway.contracts import ToolRequest
 from zetta.evolution.jsonio import file_sha256
 
@@ -35,12 +35,26 @@ def run(args):
         core=factory(lambda:False,lambda phase:None)
         if len(core.programs)!=1: raise ValueError('continuation requires one frozen program')
         program=next(iter(core.programs.values()))
-        checkpoint=read_checkpoint(args.source_trial,args.source_journal_sha256,program,core.package_sha256)
+        source_package=core.package_sha256
+        if args.source_bundle:
+            from robots.arx.deployment.real_input import _load_bundle
+            source,_=_load_bundle(args.source_bundle);current,_=_load_bundle(args.bundle)
+            previous=compile_programs(source,max_physical_steps=limits['max_steps'])
+            if (current.parent_sha256!=source.sha256 or previous!=core.programs):
+                raise ValueError('critic revision must retain exactly the source recovery program')
+            source_package=source.sha256
+        checkpoint=read_checkpoint(args.source_trial,args.source_journal_sha256,program,source_package)
+        if args.closing_segment:
+            if not args.closing_segment_sha256:raise ValueError('closing segment requires SHA')
+            extend_closing_checkpoint(checkpoint,args.closing_segment,args.closing_segment_sha256)
         if limits['max_steps']!=600 or limits['max_decisions']!=64:
             raise ValueError('source episode budgets must remain 600 steps and 64 decisions')
         grasp=core.registry.resolve('arx.execute_grasp').handler
         restore_sensor_history(checkpoint,grasp); adopt_checkpoint(core,checkpoint)
-        report.update(status='admitted',checkpoint_steps=checkpoint['steps'],remaining_recovery_steps=core.recovery['remaining_steps'])
+        report.update(status='admitted',checkpoint_steps=checkpoint['steps'],remaining_recovery_steps=core.recovery['remaining_steps'],
+                      package_sha256=core.package_sha256,source_package_sha256=source_package,
+                      closing_segment=None if not args.closing_segment else str(args.closing_segment),
+                      closing_segment_sha256=args.closing_segment_sha256)
         if args.check_only:
             report.update(status='read_only_verified',termination_reason='check_only',robot_commands_sent=False)
         while not args.check_only and core.recovery is not None and not core.closed:
@@ -81,6 +95,7 @@ def main():
     for key in ('source-trial','bundle','grasp-config','frozen','output','hardware-config','runtime-config'):
         p.add_argument('--'+key,type=Path,required=True)
     p.add_argument('--source-journal-sha256',required=True);p.add_argument('--hardware-sha256',required=True)
+    p.add_argument('--source-bundle',type=Path);p.add_argument('--closing-segment',type=Path);p.add_argument('--closing-segment-sha256')
     mode=p.add_mutually_exclusive_group(required=True)
     mode.add_argument('--execute',action='store_true');mode.add_argument('--check-only',action='store_true');a=p.parse_args()
     report=run(a);print(json.dumps({k:report[k] for k in ('status','task_success','termination_reason')}))

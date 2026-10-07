@@ -95,12 +95,14 @@ def restore_sensor_history(checkpoint, grasp):
     provider = grasp.observer.provider
     seen, clouds = set(), {}
     wanted = {v['observation_id']:pid for pid,v in checkpoint['proposals'].items()}
-    for kind,item in checkpoint['records']:
+    history = [(gateway,kind,item) for gateway,records in checkpoint.get('histories', [(checkpoint['gateway'],checkpoint['records'])])
+               for kind,item in records]
+    for gateway,kind,item in history:
         if kind != 'grasp_sensor_evidence': continue
         observation = item['observation']; oid = observation['observation_id']
-        if oid in seen: continue
-        seen.add(oid); path = checkpoint['gateway'] / item['path']
-        if not path.resolve().is_relative_to(checkpoint['gateway'].resolve()):
+        if (gateway,oid) in seen: continue
+        seen.add((gateway,oid)); path = gateway / item['path']
+        if not path.resolve().is_relative_to(gateway.resolve()):
             raise ValueError('checkpoint sensor path escapes evidence directory')
         if file_sha256(path) != item['sha256']: raise ValueError('checkpoint sensor SHA differs')
         with np.load(path, allow_pickle=False) as archive: images = {k:archive[k] for k in archive.files}
@@ -114,6 +116,51 @@ def restore_sensor_history(checkpoint, grasp):
     # Review capabilities expire across interruption. A fresh review is mandatory.
     grasp.reviews.clear(); checkpoint['outputs'].pop('grasp_review_token', None)
     provider.success_hold_frames = 0; provider.success_latched = False
+
+
+def extend_closing_checkpoint(checkpoint, segment, expected_sha256):
+    """Chain one interrupted closing segment; charge its commands and decision."""
+    segment=Path(segment); gateway=segment/'private/gateway'; journal=gateway/'journal.sqlite3'
+    if file_sha256(journal)!=expected_sha256: raise ValueError('closing segment SHA differs')
+    report=json.loads((segment/'result.json').read_text())
+    if (report['schema_version']!='arx.grasp.bundle-continuation.v1'
+            or report['termination_reason']!='critic_interrupted'
+            or report['source_journal_sha256']!=checkpoint['journal_sha256']
+            or report['checkpoint_steps']!=checkpoint['steps']):
+        raise ValueError('closing segment provenance differs')
+    with sqlite3.connect(f'file:{journal}?mode=ro',uri=True) as db:
+        records=[(k,json.loads(v)) for k,v in db.execute('select kind,payload from records order by sequence')]
+        operations=[json.loads(v) for v, in db.execute('select request from operations')]
+        snapshot=json.loads(db.execute('select payload from snapshot').fetchone()[0])
+    calls=[v for k,v in records if k=='tool_result']
+    if len(calls)!=1 or len(operations)!=1 or calls[0]['tool']!='arx.set_gripper' or calls[0]['status']!='interrupted':
+        raise ValueError('closing segment contains other operations')
+    entry=checkpoint['program'].calls[checkpoint['cursor']]
+    from robots.arx.gateway.contracts import GripperArgs
+    if GripperArgs.model_validate(operations[0]['arguments'])!=GripperArgs.model_validate(entry.arguments):
+        raise ValueError('closing segment exceeded frozen closing arguments')
+    interrupted=[v for k,v in records if k=='interrupt']
+    if (len(interrupted)!=1 or interrupted[0].get('code')!='RECOVERY_ESCALATION_REQUIRED'
+            or {v['rule_id'] for v in interrupted[0]['proposals']}!={'closed_contact_no_lift'}):
+        raise ValueError('closing segment has an unrelated interruption')
+    commands=[v for k,v in records if k=='command_sent']; arrivals=[v for k,v in records if k=='arrival_observed']
+    spent=calls[0]['executed_steps']
+    if (len(commands)!=spent or len(arrivals)!=spent or not all(v['verified'] is True for v in arrivals)
+            or report['total_physical_steps']!=checkpoint['steps']+spent
+            or 64-snapshot['budget_remaining']['decisions']!=checkpoint['decisions']+1):
+        raise ValueError('closing segment physical/decision counts are unverified')
+    remaining=entry.arguments['max_steps']-spent
+    if remaining<=0: raise ValueError('closing call budget exhausted')
+    calls=list(checkpoint['program'].calls);calls[checkpoint['cursor']]=replace(entry,arguments={**entry.arguments,'max_steps':remaining})
+    checkpoint['program']=replace(checkpoint['program'],calls=tuple(calls))
+    checkpoint['histories']=[(checkpoint['gateway'],checkpoint['records']),(gateway,records)]
+    checkpoint['steps']+=spent; checkpoint['decisions']+=1
+    checkpoint['closing_steps_consumed']+=spent;checkpoint['closing_steps_remaining']=remaining
+    checkpoint['recovery']['remaining_steps']-=spent;checkpoint['recovery']['remaining_decisions']-=1
+    checkpoint['expected_feedback']=snapshot['observation']['hardware']['measured_state']
+    checkpoint['closing_segment']=str(segment);checkpoint['closing_segment_sha256']=expected_sha256
+    if checkpoint['recovery']['remaining_decisions']<1 or checkpoint['recovery']['remaining_steps']<1:
+        raise ValueError('closing segment exhausted recovery budget')
 
 
 def adopt_checkpoint(core, checkpoint):
