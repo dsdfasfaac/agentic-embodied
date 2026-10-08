@@ -40,6 +40,7 @@ class RealCoreFactory:
     feature_provider: str | None = None
     expected_feature_provider_sha256: str | None = None
     preflight_only: bool = False
+    allow_learned_pregrasp_commissioning: bool = False
     grasp_config: str | None = None
     expected_grasp_config_sha256: str | None = None
 
@@ -181,6 +182,20 @@ class RealCoreFactory:
                 settings = GraspRecoveryConfig.model_validate_json(
                     Path(self.grasp_config).read_text()
                 )
+                if (
+                    settings.learned_pregrasp_commissioning
+                    and not settings.learned_gripper_transfer_verified
+                    and not self.allow_learned_pregrasp_commissioning
+                ):
+                    raise ValueError(
+                        "unverified learned transfer requires the pregrasp commissioning harness"
+                    )
+                settings.validate_execution_phases(
+                    call.arguments.get("phase", "pregrasp")
+                    for program in programs.values()
+                    for call in program.calls
+                    if call.tool == "arx.execute_grasp"
+                )
                 if provider is None or task.name != "pickup_test_tube":
                     raise ValueError(
                         "PickTube grasp tools require the real PickTube observer"
@@ -191,6 +206,9 @@ class RealCoreFactory:
                     closed_policy=config.right_gripper_closed_policy,
                     open_policy=config.right_gripper_open_policy,
                     control_hz=config.timing.control_hz,
+                    joint_bounds=tuple(
+                        zip(config.right.joint_min_rad, config.right.joint_max_rad)
+                    ),
                 )
                 reentry = GraspReentry(reentry, grasp)
             gripper = PolicyGripperPlanner(

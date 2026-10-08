@@ -1,0 +1,200 @@
+{
+  "audits": [
+    {
+      "audit": "obs-1-half-turn32-controller-bounds.json",
+      "robot_commands_sent": false,
+      "feasible_candidate_count": 0,
+      "candidate_count": 32,
+      "rejections": {
+        "learned mapped TCP is outside selected target distance": 8,
+        "grasp path exceeds configured Cartesian travel budget": 12,
+        "bounded IK did not converge": 3,
+        "grasp path exceeds physical step budget": 6,
+        "grasp IK exceeds joint increment limit": 3
+      },
+      "object_point_count": 51,
+      "model_response_evidence": {
+        "backend": "nvlabs-graspgen-local",
+        "base_seed": 42,
+        "checkpoint_sha256": {
+          "config": "93804f423ec02def08add164d83379212204ddc33779cd273ffffdacf94f67f3",
+          "discriminator": "52f68d3cd3decb71499e084fdb88808d174419a72cd9ef38f821083a4409895d",
+          "generator": "fe8497108e39d8fc50be06cd7df22a2f680e0495e713d24c3104616f291e00dd"
+        },
+        "collision_filter_applied": false,
+        "grasp_approach_axis": "+Z",
+        "grasp_closing_axis": "X",
+        "gripper_id": "robotiq_2f_140",
+        "inference_s": 0.03717207399313338,
+        "input_cloud_sha256": "703344d45fb10ffc3e40b6e2bf6be76cf2d926542d1978236831eeed3714f0ec",
+        "input_points": 51,
+        "model_gripper_depth_m": 0.195,
+        "model_sha256": "6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd",
+        "proposal_only": true,
+        "ready": true,
+        "request_index": 5,
+        "seed": 47,
+        "target_only_cloud": true,
+        "transform_grasp_from_model_tcp": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.195
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "audit": "obs-100-half-turn-rate32-controller-bounds.json",
+      "robot_commands_sent": false,
+      "feasible_candidate_count": 0,
+      "candidate_count": 32,
+      "rejections": {
+        "learned mapped TCP is outside selected target distance": 4,
+        "grasp TCP sweep intersects observed scene points": 9,
+        "grasp IK exceeds joint increment limit": 8,
+        "bounded IK did not converge": 11
+      },
+      "object_point_count": 61,
+      "model_response_evidence": {
+        "backend": "nvlabs-graspgen-local",
+        "base_seed": 42,
+        "checkpoint_sha256": {
+          "config": "93804f423ec02def08add164d83379212204ddc33779cd273ffffdacf94f67f3",
+          "discriminator": "52f68d3cd3decb71499e084fdb88808d174419a72cd9ef38f821083a4409895d",
+          "generator": "fe8497108e39d8fc50be06cd7df22a2f680e0495e713d24c3104616f291e00dd"
+        },
+        "collision_filter_applied": false,
+        "grasp_approach_axis": "+Z",
+        "grasp_closing_axis": "X",
+        "gripper_id": "robotiq_2f_140",
+        "inference_s": 0.041228490008506924,
+        "input_cloud_sha256": "7e74318e8bca62093de20a99d6bd7f001a7d5e86bff145cc7f341166f19e0776",
+        "input_points": 61,
+        "model_gripper_depth_m": 0.195,
+        "model_sha256": "6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd",
+        "proposal_only": true,
+        "ready": true,
+        "request_index": 6,
+        "seed": 48,
+        "target_only_cloud": true,
+        "transform_grasp_from_model_tcp": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.195
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "audit": "obs-100-half-turn32-controller-bounds.json",
+      "robot_commands_sent": false,
+      "feasible_candidate_count": 0,
+      "candidate_count": 32,
+      "rejections": {
+        "grasp path exceeds physical step budget": 18,
+        "grasp TCP sweep intersects observed scene points": 7,
+        "bounded IK did not converge": 7
+      },
+      "object_point_count": 61,
+      "model_response_evidence": {
+        "backend": "nvlabs-graspgen-local",
+        "base_seed": 42,
+        "checkpoint_sha256": {
+          "config": "93804f423ec02def08add164d83379212204ddc33779cd273ffffdacf94f67f3",
+          "discriminator": "52f68d3cd3decb71499e084fdb88808d174419a72cd9ef38f821083a4409895d",
+          "generator": "fe8497108e39d8fc50be06cd7df22a2f680e0495e713d24c3104616f291e00dd"
+        },
+        "collision_filter_applied": false,
+        "grasp_approach_axis": "+Z",
+        "grasp_closing_axis": "X",
+        "gripper_id": "robotiq_2f_140",
+        "inference_s": 0.04111864502192475,
+        "input_cloud_sha256": "7e74318e8bca62093de20a99d6bd7f001a7d5e86bff145cc7f341166f19e0776",
+        "input_points": 61,
+        "model_gripper_depth_m": 0.195,
+        "model_sha256": "6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd",
+        "proposal_only": true,
+        "ready": true,
+        "request_index": 4,
+        "seed": 46,
+        "target_only_cloud": true,
+        "transform_grasp_from_model_tcp": [
+          [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            1.0,
+            0.0,
+            0.0
+          ],
+          [
+            0.0,
+            0.0,
+            1.0,
+            0.195
+          ],
+          [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ]
+        ]
+      }
+    },
+    {
+      "audit": "obs-200-history-failure-audit.json",
+      "robot_commands_sent": false,
+      "feasible_candidate_count": 0,
+      "candidate_count": 0,
+      "rejections": {},
+      "reason": "pink tube target position changed inconsistently"
+    }
+  ],
+  "strict_paired_comparison": false,
+  "robot_motion_executed": false
+}

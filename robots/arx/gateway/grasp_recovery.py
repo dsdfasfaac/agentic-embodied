@@ -9,7 +9,13 @@ from copy import deepcopy
 
 import numpy as np
 
-from robots.manipulation.grasp_proposals import LocalGraspService, geometry_proposal, rigid_pose
+from robots.manipulation.grasp_proposals import (
+    LocalGraspService,
+    geometry_proposal,
+    rigid_pose,
+    transfer_grasp_pose,
+    parallel_jaw_candidates,
+)
 from .grasp_contracts import GraspRecoveryConfig
 from .motion import rotation
 from .tools import ArrayPlan
@@ -29,24 +35,53 @@ class MeasuredPosePlan(ArrayPlan):
         if self.reached:
             measured = np.asarray(context.observation["hardware"]["measured_state"])
             p, r, _ = self.kinematics.fk(measured[7:13])
-            self.reached = bool(np.linalg.norm(p - self.goal[:3, 3]) <= self.pose_tolerance
-                                and np.linalg.norm(r - self.goal[:3, :3]) <= .05)
+            self.reached = bool(
+                np.linalg.norm(p - self.goal[:3, 3]) <= self.pose_tolerance
+                and np.linalg.norm(r - self.goal[:3, :3]) <= 0.05
+            )
 
 
 class GraspRecovery:
     """Episode-local proposal store, single-use review tokens and bounded IK."""
 
-    def __init__(self, config: GraspRecoveryConfig, observer, *, closed_policy, open_policy,
-                 control_hz=15., clock=time.monotonic, engines=None):
+    def __init__(
+        self,
+        config: GraspRecoveryConfig,
+        observer,
+        *,
+        closed_policy,
+        open_policy,
+        control_hz=15.0,
+        clock=time.monotonic,
+        engines=None,
+        joint_bounds=None,
+    ):
         self.config, self.observer = config, observer
         self.kinematics = observer.provider.tool_fk
         self.closed, self.open = closed_policy, open_policy
         self.hz, self.clock = control_hz, clock
+        self.joint_bounds = (
+            None if joint_bounds is None else np.asarray(joint_bounds, dtype=float)
+        )
+        if self.joint_bounds is not None and (
+            self.joint_bounds.shape != (6, 2)
+            or not np.isfinite(self.joint_bounds).all()
+            or np.any(self.joint_bounds[:, 0] >= self.joint_bounds[:, 1])
+        ):
+            raise ValueError("grasp requires six finite ordered joint bounds")
         self.engines = engines or {
-            "contact_graspnet": LocalGraspService("contact_graspnet", config.contact_graspnet_endpoint,
-                expected_gripper=config.learned_gripper_id, expected_model_sha256=config.learned_model_sha256),
-            "graspgen": LocalGraspService("graspgen", config.graspgen_endpoint,
-                expected_gripper=config.learned_gripper_id, expected_model_sha256=config.learned_model_sha256),
+            "contact_graspnet": LocalGraspService(
+                "contact_graspnet",
+                config.contact_graspnet_endpoint,
+                expected_gripper=config.learned_gripper_id,
+                expected_model_sha256=config.learned_model_sha256,
+            ),
+            "graspgen": LocalGraspService(
+                "graspgen",
+                config.graspgen_endpoint,
+                expected_gripper=config.learned_gripper_id,
+                expected_model_sha256=config.learned_model_sha256,
+            ),
         }
         self.proposals, self.reviews = {}, {}
         self.completed_phases = {}
@@ -55,62 +90,113 @@ class GraspRecovery:
         hardware = observation["hardware"]
         age = (time.monotonic_ns() - hardware["observation_completed_ns"]) / 1e6
         health = hardware["device_health"]
-        if (not 0 <= age <= max(1000., 4 * self.config.sensor_max_age_ms)
-                or hardware["sensor_age_ms"] > self.config.sensor_max_age_ms
-                or hardware["sensor_skew_ms"] > self.config.sensor_max_skew_ms
-                or not health["transport_responsive"] or health["fault_codes"]):
-            raise ValueError("grasp requires fresh synchronized healthy device observations")
+        if (
+            not 0 <= age <= max(1000.0, 4 * self.config.sensor_max_age_ms)
+            or hardware["sensor_age_ms"] > self.config.sensor_max_age_ms
+            or hardware["sensor_skew_ms"] > self.config.sensor_max_skew_ms
+            or not health["transport_responsive"]
+            or health["fault_codes"]
+        ):
+            raise ValueError(
+                "grasp requires fresh synchronized healthy device observations"
+            )
         state = np.asarray(hardware["measured_state"], dtype=float)
         if state.shape != (14,) or not np.isfinite(state).all():
             raise ValueError("grasp requires measured 14D joint state")
-        if (hardware.get("auxiliary_monotonic_ns", {}).get("right_gripper_current_native") !=
-                hardware.get("state_monotonic_ns") or hardware.get("state_monotonic_ns") is None):
-            raise ValueError("grasp requires current and joints from the same fresh sample")
+        if (
+            hardware.get("auxiliary_monotonic_ns", {}).get(
+                "right_gripper_current_native"
+            )
+            != hardware.get("state_monotonic_ns")
+            or hardware.get("state_monotonic_ns") is None
+        ):
+            raise ValueError(
+                "grasp requires current and joints from the same fresh sample"
+            )
         return state
 
     def propose(self, args, context):
         observation, images = context["observation"], context["images"]
         state = self._fresh(observation)
-        current = observation["hardware"].get("auxiliary_feedback", {}).get("right_gripper_current_native")
+        current = (
+            observation["hardware"]
+            .get("auxiliary_feedback", {})
+            .get("right_gripper_current_native")
+        )
         fraction = (state[13] - self.closed) / (self.open - self.closed)
         if current is None or not np.isfinite(current):
             raise ValueError("fresh gripper current is required before recovery")
-        if fraction <= .30 and abs(current) >= .16:
-            raise ValueError("possible held object: confirm unloading before opening the gripper")
+        if fraction <= 0.30 and abs(current) >= 0.16:
+            raise ValueError(
+                "possible held object: confirm unloading before opening the gripper"
+            )
         cloud = self.observer.cloud(observation, images)
         _, orientation, _ = self.kinematics.fk(state[7:13])
         if args.engine == "tube_geometry":
-            candidates = geometry_proposal(cloud, orientation,
+            candidates = geometry_proposal(
+                cloud,
+                orientation,
                 surface_offset_m=self.config.target_surface_offset_m,
-                orientation_search_rad=self.config.geometry_orientation_search_rad)[:args.max_candidates]
+                orientation_search_rad=self.config.geometry_orientation_search_rad,
+            )[: args.max_candidates]
         else:
-            candidates = self.engines[args.engine].propose(cloud, max_candidates=args.max_candidates)
-        candidates = [dict(item, transform_base=(cloud.camera_to_base @
-                       rigid_pose(item["transform_camera"])).tolist()) for item in candidates]
+            candidates = self.engines[args.engine].propose(
+                cloud, max_candidates=args.max_candidates
+            )
+            if args.engine == "graspgen" and self.config.learned_parallel_jaw_half_turn:
+                candidates = parallel_jaw_candidates(
+                    candidates, max_candidates=args.max_candidates
+                )
+        candidates = [
+            dict(
+                item,
+                transform_base=(
+                    cloud.camera_to_base @ rigid_pose(item["transform_camera"])
+                ).tolist(),
+            )
+            for item in candidates
+        ]
         identity = "grasp-" + uuid.uuid4().hex
-        output = {"proposal_id": identity, "observation_id": observation["observation_id"],
-                  "target_id": cloud.target_id, "engine": args.engine,
-                  "proposal_only": True, "environment_advanced": False,
-                  "candidates": candidates, "evidence": cloud.evidence}
+        output = {
+            "proposal_id": identity,
+            "observation_id": observation["observation_id"],
+            "target_id": cloud.target_id,
+            "engine": args.engine,
+            "proposal_only": True,
+            "environment_advanced": False,
+            "candidates": candidates,
+            "evidence": cloud.evidence,
+        }
         if args.engine != "tube_geometry":
-            output["evidence"]["model_service"] = deepcopy(getattr(self.engines[args.engine], "last_evidence", {}))
-        self.proposals[identity] = {"output": deepcopy(output), "cloud": cloud,
-                                    "created": self.clock()}
+            output["evidence"]["model_service"] = deepcopy(
+                getattr(self.engines[args.engine], "last_evidence", {})
+            )
+        self.proposals[identity] = {
+            "output": deepcopy(output),
+            "cloud": cloud,
+            "created": self.clock(),
+        }
         return output
 
     def _goal(self, candidate, engine, phase, state):
         goal = rigid_pose(candidate["transform_base"])
         if engine != "tube_geometry":
-            if not self.config.learned_gripper_transfer_verified:
-                raise ValueError("learned gripper to ARX transfer has not been verified")
-            goal = goal @ rigid_pose(self.config.learned_grasp_to_tcp)
+            if not self.config.learned_gripper_transfer_verified and not (
+                phase == "pregrasp" and self.config.learned_pregrasp_commissioning
+            ):
+                raise ValueError(
+                    "learned gripper to ARX transfer has not been verified"
+                )
+            goal = transfer_grasp_pose(
+                candidate["transform_base"], np.eye(4), self.config.learned_grasp_to_tcp
+            )
         if phase == "pregrasp":
             # ARX tool centre's +X axis is forward from link-six to the fingers.
             goal[:3, 3] -= self.config.pregrasp_distance_m * goal[:3, 0]
         elif phase == "lift":
             p, r, _ = self.kinematics.fk(state[7:13])
             goal[:3, :3] = r
-            goal[:3, 3] = p + np.array([0., 0., self.config.lift_distance_m])
+            goal[:3, 3] = p + np.array([0.0, 0.0, self.config.lift_distance_m])
         return goal
 
     def _plan(self, command, state, goal, cloud, phase, max_steps):
@@ -121,9 +207,13 @@ class GraspRecovery:
             raise ValueError("grasp path exceeds configured Cartesian travel budget")
         # Stable SO(3) interpolation avoids the cross-product IK ambiguity at pi.
         from scipy.spatial.transform import Rotation
+
         rv = Rotation.from_matrix(goal[:3, :3] @ r.T).as_rotvec()
-        count = max(1, math.ceil(travel / min(.002, self.config.speed_m_s / self.hz)),
-                    math.ceil(np.linalg.norm(rv) / .01))
+        count = max(
+            1,
+            math.ceil(travel / min(0.002, self.config.speed_m_s / self.hz)),
+            math.ceil(np.linalg.norm(rv) / (self.config.angular_speed_rad_s / self.hz)),
+        )
         if count + 30 > max_steps:
             raise ValueError("grasp path exceeds physical step budget")
         scene = _base_points(cloud.scene_camera_m, cloud.camera_to_base)
@@ -133,14 +223,22 @@ class GraspRecovery:
             obstacles = scene
         else:
             relative = scene - target
-            excluded = np.linalg.norm(relative, axis=1) <= self.config.target_exclusion_radius_m
+            excluded = (
+                np.linalg.norm(relative, axis=1)
+                <= self.config.target_exclusion_radius_m
+            )
             if phase == "lift" and self.config.held_target_upper_extent_m is not None:
                 # A label-centred sphere cuts through the held tube's own
                 # upper glass wall. The commissioned upright target column
                 # moves with the grip; nearby objects outside it remain obstacles.
-                excluded |= ((np.linalg.norm(relative[:, :2], axis=1) <= self.config.target_exclusion_radius_m)
-                             & (relative[:, 2] >= 0)
-                             & (relative[:, 2] <= self.config.held_target_upper_extent_m))
+                excluded |= (
+                    (
+                        np.linalg.norm(relative[:, :2], axis=1)
+                        <= self.config.target_exclusion_radius_m
+                    )
+                    & (relative[:, 2] >= 0)
+                    & (relative[:, 2] <= self.config.held_target_upper_extent_m)
+                )
             obstacles = scene[~excluded]
         if len(obstacles) < 32:
             raise ValueError("insufficient scene points for TCP clearance review")
@@ -156,6 +254,13 @@ class GraspRecovery:
             q = self.kinematics.solve(q, desired, rotation(alpha * rv) @ r)
             if np.max(np.abs(q - previous)) > self.config.max_joint_step_rad:
                 raise ValueError("grasp IK exceeds joint increment limit")
+            if self.joint_bounds is not None and (
+                np.any(q < self.joint_bounds[:, 0])
+                or np.any(q > self.joint_bounds[:, 1])
+            ):
+                raise ValueError(
+                    "grasp IK exceeds real controller joint command bounds"
+                )
             row = command.copy()
             row[7:13] = q
             targets.append(row)
@@ -165,7 +270,7 @@ class GraspRecovery:
 
     def _phase_gate(self, proposal_id, phase, observation, state, images):
         fraction = (state[13] - self.closed) / (self.open - self.closed)
-        if phase in {"pregrasp", "engage"} and fraction < .6:
+        if phase in {"pregrasp", "engage"} and fraction < 0.6:
             raise ValueError("pregrasp/engage requires an observed open gripper")
         completed = self.completed_phases.get(proposal_id, set())
         if phase == "engage" and "pregrasp" not in completed:
@@ -189,23 +294,71 @@ class GraspRecovery:
             target = _base_points(cloud.target_camera_m[None], cloud.camera_to_base)[0]
             original = _base_points(old.target_camera_m[None], old.camera_to_base)[0]
             if np.linalg.norm(target - original) > self.config.target_drift_m:
-                raise ValueError("pink target moved since proposal; generate a new proposal")
+                raise ValueError(
+                    "pink target moved since proposal; generate a new proposal"
+                )
             if cloud.target_id != old.target_id:
                 raise ValueError("grasp target identity changed")
             failures = []
-            for candidate in sorted(stored["output"]["candidates"], key=lambda c: c.get("score", 0.), reverse=True):
+            for candidate in sorted(
+                stored["output"]["candidates"],
+                key=lambda c: c.get("score", 0.0),
+                reverse=True,
+            ):
                 try:
-                    goal = self._goal(candidate, stored["output"]["engine"], args.phase, state)
-                    targets, clearance = self._plan(np.asarray(context["command"]), state,
-                                                   goal, cloud, args.phase, args.max_steps)
-                    selected = {"goal": goal, "targets": targets, "state": state,
-                                "target": target, "cloud": cloud, "args": args,
-                                "created": self.clock(), "used": False,
-                                "observation_id": observation["observation_id"]}
-                    checks.append({"check": "bounded-joint-ik-and-tcp-clearance", "pass": True,
-                                   "planned_steps": len(targets), "minimum_tcp_clearance_m": clearance,
-                                   "held_target_upper_extent_m": self.config.held_target_upper_extent_m if args.phase == "lift" else None,
-                                   "goal_tcp_base": goal.tolist(), "target_evidence": cloud.evidence})
+                    goal = self._goal(
+                        candidate, stored["output"]["engine"], args.phase, state
+                    )
+                    if stored["output"]["engine"] != "tube_geometry":
+                        mapped_tcp = np.asarray(
+                            candidate["transform_base"]
+                        ) @ rigid_pose(self.config.learned_grasp_to_tcp)
+                        offset = float(np.linalg.norm(mapped_tcp[:3, 3] - original))
+                        if offset > self.config.learned_target_distance_max_m:
+                            raise ValueError(
+                                "learned mapped TCP is outside selected target distance"
+                            )
+                    targets, clearance = self._plan(
+                        np.asarray(context["command"]),
+                        state,
+                        goal,
+                        cloud,
+                        args.phase,
+                        args.max_steps,
+                    )
+                    selected = {
+                        "goal": goal,
+                        "targets": targets,
+                        "state": state,
+                        "target": target,
+                        "cloud": cloud,
+                        "args": args,
+                        "created": self.clock(),
+                        "used": False,
+                        "observation_id": observation["observation_id"],
+                    }
+                    checks.append(
+                        {
+                            "check": "bounded-joint-ik-and-tcp-clearance",
+                            "pass": True,
+                            "planned_steps": len(targets),
+                            "minimum_tcp_clearance_m": clearance,
+                            "held_target_upper_extent_m": (
+                                self.config.held_target_upper_extent_m
+                                if args.phase == "lift"
+                                else None
+                            ),
+                            "goal_tcp_base": goal.tolist(),
+                            "target_evidence": cloud.evidence,
+                        }
+                    )
+                    if stored["output"]["engine"] != "tube_geometry":
+                        checks[-1].update(
+                            learned_transfer_physically_verified=self.config.learned_gripper_transfer_verified,
+                            learned_pregrasp_commissioning=self.config.learned_pregrasp_commissioning,
+                            mapped_target_distance_m=offset,
+                            selected_candidate=deepcopy(candidate),
+                        )
                     break
                 except ValueError as exc:
                     failures.append(str(exc))
@@ -215,34 +368,60 @@ class GraspRecovery:
             self.reviews[token] = selected
         except (KeyError, ValueError) as exc:
             checks.append({"check": "grasp-review", "pass": False, "reason": str(exc)})
-        return {"proposal_id": args.proposal_id, "observation_id": observation["observation_id"],
-                "phase": args.phase, "eligible": selected is not None,
-                "review_token": token, "checks": checks,
-                "certificate_level": "sensor_tcp_clearance_and_joint_ik",
-                "limitations": ["No full arm/finger collision certificate.",
-                                "D405 sees only exposed target surfaces.",
-                                "Learned scores are model-gripper specific."]}
+        return {
+            "proposal_id": args.proposal_id,
+            "observation_id": observation["observation_id"],
+            "phase": args.phase,
+            "eligible": selected is not None,
+            "review_token": token,
+            "checks": checks,
+            "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+            "limitations": [
+                "No full arm/finger collision certificate.",
+                "D405 sees only exposed target surfaces.",
+                "Learned scores are model-gripper specific.",
+            ],
+        }
 
     def prepare(self, args, context):
         if not self.config.motion_enabled:
             raise ValueError("grasp motion is disabled in the frozen configuration")
         review = self.reviews.get(args.review_token)
-        if (review is None or review["used"] or self.clock() - review["created"] > self.config.review_ttl_s
-                or args.phase != review["args"].phase or args.max_steps != review["args"].max_steps):
+        if (
+            review is None
+            or review["used"]
+            or self.clock() - review["created"] > self.config.review_ttl_s
+            or args.phase != review["args"].phase
+            or args.max_steps != review["args"].max_steps
+        ):
             raise ValueError("grasp review token is stale, reused or mismatched")
         state = self._fresh(context.observation)
-        if np.max(np.abs(state[7:13] - review["state"][7:13])) > .01:
+        if np.max(np.abs(state[7:13] - review["state"][7:13])) > 0.01:
             raise ValueError("arm moved since grasp review")
-        self._phase_gate(review["args"].proposal_id, args.phase, context.observation, state, context.images)
+        self._phase_gate(
+            review["args"].proposal_id,
+            args.phase,
+            context.observation,
+            state,
+            context.images,
+        )
         current_cloud = self.observer.cloud(context.observation, context.images)
-        target = _base_points(current_cloud.target_camera_m[None], current_cloud.camera_to_base)[0]
+        target = _base_points(
+            current_cloud.target_camera_m[None], current_cloud.camera_to_base
+        )[0]
         if np.linalg.norm(target - review["target"]) > self.config.target_drift_m:
             raise ValueError("target moved since grasp review")
         if current_cloud.target_id != review["cloud"].target_id:
             raise ValueError("grasp target identity changed since review")
         # Recheck the entire sweep against current points, not the old proposal scene.
-        targets, _ = self._plan(context.command, state, review["goal"], current_cloud,
-                                args.phase, args.max_steps)
+        targets, _ = self._plan(
+            context.command,
+            state,
+            review["goal"],
+            current_cloud,
+            args.phase,
+            args.max_steps,
+        )
         # Preserve the current grip command; an intervening opening/closure invalidates old plans.
         targets = targets.copy()
         targets[:, [6, 13]] = context.command[[6, 13]]
@@ -254,9 +433,13 @@ class GraspRecovery:
             def on_commit(self, current):
                 super().on_commit(current)
                 if self.reached:
-                    owner.completed_phases.setdefault(proposal_id, set()).add(args.phase)
+                    owner.completed_phases.setdefault(proposal_id, set()).add(
+                        args.phase
+                    )
 
-        return Plan(targets, self.kinematics, review["goal"], self.config.pose_tolerance_m)
+        return Plan(
+            targets, self.kinematics, review["goal"], self.config.pose_tolerance_m
+        )
 
 
 class ProposeHandler:
@@ -296,16 +479,30 @@ class GraspReentry:
             cloud = grasp.observer.cloud(observation, images)
             original = grasp.proposals[proposal_id]["cloud"]
             target = _base_points(cloud.target_camera_m[None], cloud.camera_to_base)[0]
-            before = _base_points(original.target_camera_m[None], original.camera_to_base)[0]
+            before = _base_points(
+                original.target_camera_m[None], original.camera_to_base
+            )[0]
             p, _, _ = grasp.kinematics.fk(state[7:13])
-            passed = bool(cloud.target_id == original.target_id
-                          and np.linalg.norm(target - before) <= grasp.config.target_drift_m
-                          and np.linalg.norm(target - p) <= grasp.config.pregrasp_distance_m + grasp.config.pose_tolerance_m)
+            passed = bool(
+                cloud.target_id == original.target_id
+                and np.linalg.norm(target - before) <= grasp.config.target_drift_m
+                and np.linalg.norm(target - p)
+                <= grasp.config.pregrasp_distance_m + grasp.config.pose_tolerance_m
+            )
         except (ValueError, KeyError):
             passed = False
-        result["checks"].append({"check_id": "target-specific-pregrasp", "status": "pass" if passed else "fail",
-                                 "evidence_ids": [observation["observation_id"]],
-                                 "reason_code": "target_pregrasp_verified" if passed else "target_pregrasp_unverified"})
+        result["checks"].append(
+            {
+                "check_id": "target-specific-pregrasp",
+                "status": "pass" if passed else "fail",
+                "evidence_ids": [observation["observation_id"]],
+                "reason_code": (
+                    "target_pregrasp_verified"
+                    if passed
+                    else "target_pregrasp_unverified"
+                ),
+            }
+        )
         if not passed:
             result["status"] = "ineligible"
         return result
@@ -326,22 +523,37 @@ class TargetVerifiedGripperPlanner:
         grasp = self.grasp
         state = grasp._fresh(context.observation)
         fraction = (state[13] - grasp.closed) / (grasp.open - grasp.closed)
-        evidence = {"observation_id": context.observation["observation_id"],
-                    "measured_open_fraction": float(fraction), "requested_opening": args.opening}
-        if args.opening > fraction + .01 and fraction < .60:
-            values = grasp.observer.provider.observe(context.observation, context.images)
+        evidence = {
+            "observation_id": context.observation["observation_id"],
+            "measured_open_fraction": float(fraction),
+            "requested_opening": args.opening,
+        }
+        if args.opening > fraction + 0.01 and fraction < 0.60:
+            values = grasp.observer.provider.observe(
+                context.observation, context.images
+            )
             stop = grasp.config.empty_stop_max_open_fraction
-            empty = (stop is not None and -.01 <= fraction <= stop
-                     and values.get("privileged.interaction.gripper_contact") is False
-                     and values.get("privileged.interaction.grasped") is False
-                     and values.get("privileged.interaction.success") is False
-                     and type(values.get("privileged.interaction.lift_m")) in (int, float)
-                     and abs(values["privileged.interaction.lift_m"]) <= grasp.config.release_target_lift_max_m
-                     and type(values.get("privileged.selected.target_gripper_distance_m")) in (int, float)
-                     and values["privileged.selected.target_gripper_distance_m"] >= grasp.config.release_target_distance_min_m)
+            empty = (
+                stop is not None
+                and -0.01 <= fraction <= stop
+                and values.get("privileged.interaction.gripper_contact") is False
+                and values.get("privileged.interaction.grasped") is False
+                and values.get("privileged.interaction.success") is False
+                and type(values.get("privileged.interaction.lift_m")) in (int, float)
+                and abs(values["privileged.interaction.lift_m"])
+                <= grasp.config.release_target_lift_max_m
+                and type(values.get("privileged.selected.target_gripper_distance_m"))
+                in (int, float)
+                and values["privileged.selected.target_gripper_distance_m"]
+                >= grasp.config.release_target_distance_min_m
+            )
             if not empty:
-                raise ValueError("opening requires observed empty stop and separated unlifted target; possible held object")
-            evidence.update(reason="calibrated_empty_stop_and_target_separation", features=values)
+                raise ValueError(
+                    "opening requires observed empty stop and separated unlifted target; possible held object"
+                )
+            evidence.update(
+                reason="calibrated_empty_stop_and_target_separation", features=values
+            )
         else:
             evidence["reason"] = "closing_or_already_open"
         plan = self.planner.prepare(args, context)

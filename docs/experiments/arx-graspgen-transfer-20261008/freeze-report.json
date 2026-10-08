@@ -1,0 +1,144 @@
+{
+  "audit_scope": "static declarations only; live joint feedback and EEF kinematics not attested",
+  "bundle": "docs/experiments/arx-graspgen-transfer-20261008/bundle-pregrasp.json",
+  "bundle_file_sha256": "49f02ea8f142ef0e93445df5b9399fc86c916776c5ac3f2a53124c6f2fba5a54",
+  "bundle_semantic_sha256": "024ad0326cdf9fcf9fe22b19bcc93c1a102677b6f274ed96398dd394f6a8b7d8",
+  "catalog": "docs/experiments/arx-graspgen-transfer-20261008/frozen/tool-catalog.json",
+  "catalog_sha256": "b60a5187d7456e688ec9415093a51e8cc931dafa2a6b699f9fe0fa7a41b0f406",
+  "feature_provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+  "grasp_config_sha256": "e73ca21bf38f7d7791637938bfac2a73f5260e7405ddc8a745da7f8b9742b0ee",
+  "real_input_contract": "docs/experiments/arx-graspgen-transfer-20261008/frozen/real-input-contract.json",
+  "real_input_contract_sha256": "ee581e96d157ab7877c43dde455b5c433407c8dc48b54559c87d5b8c22d04b25",
+  "recovery_plans": [
+    {
+      "recovery_id": "pink_pregrasp_then_vla",
+      "steps": [
+        {
+          "tool": "arx.propose_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.review_reentry",
+          "tool_calls": 1
+        },
+        {
+          "tool": "arx.zeva",
+          "tool_calls": 1
+        }
+      ],
+      "tool_calls": 5
+    }
+  ],
+  "used_features": [
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_closed",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "right_gripper_policy"
+      ],
+      "source_kind": "joint_feedback",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.gripper_contact",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.grasped",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.interaction.success",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "boolean",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "boolean"
+    },
+    {
+      "max_age_ms": 150,
+      "name": "privileged.selected.target_gripper_distance_m",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+      "scalar_type": "number",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "source_kind": "rgbd_fused",
+      "units": "m"
+    }
+  ]
+}

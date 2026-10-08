@@ -1,0 +1,10 @@
+{
+  "error_type": "ValueError",
+  "feasible_candidate_count": 0,
+  "live_motion_eligible": false,
+  "offline": true,
+  "reason": "pink tube target position changed inconsistently",
+  "robot_commands_sent": false,
+  "schema_version": "arx.grasp.offline-audit.v1",
+  "status": "failed"
+}
