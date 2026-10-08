@@ -23,7 +23,7 @@ This package tests learned Robotiq proposals transferred to the ARX TCP. It is s
 
 The Robotiq model SHA is `6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd`. The nominal metric transform is under physical validation, not marked verified. CAD checks cover the visible scene and gripper hulls, not hidden obstacles or a full arm certificate. Wider generalization needs additional scenes and trials.
 
-## Current physical pause
+## Historical pause after pregrasp-live03
 
 The empty open pregrasp was followed by an attempted measured home. The 2 mrad progress cutoff first rejected a 1.907 mrad encoder movement; the staging check now requires 1.5 mrad **toward** the goal, while retaining tracking and final-home tolerances. Subsequent bounded commands still did not move right joint six away from 0.451858 rad, so this is not resolved by the quantization adjustment. Other joints responded. Motion is paused, controller remains enabled, both grippers remain open, and the target is still observed without contact. Onsite cable/contact inspection is required before another movement. No learned closure or lift has been executed or declared successful.
 
@@ -66,3 +66,22 @@ Every command records its ROS receipt separately from fresh feedback and
 arrival checks. Tracking pauses the replay clock and faults if stalled; failure
 holds fresh measured posture and keeps the controller enabled. Controller
 startup/disable is a separate action and may affect posture.
+
+
+### Latest physical result
+
+`home-commission-result.json` records the deployed `a8c5a88` result. After the
+operator-authorized controller restart, feedback was already near home; only
+the short home alignment was physically executed. Empty-gripper opening took
+110 measured staging steps and completed. Full GraspGen attempt `full-grasp-live02`
+ended after 16 hold/settling steps: complete-path preview rejected the candidates
+before pregrasp movement, closing or lifting. The retained collision audit
+locates intersections on the selected tube's lower surface and nearby tubes;
+these points have not been erased or declared false positives.
+
+Post-episode cleanup completed, independently measured task-start eligibility,
+and then disabled controller PID 274650. The robot is currently disabled.
+The full taught return corridor has passed offline planning tests from the
+previous learned pregrasp and the interrupted home posture; it still needs
+physical replay from a future grasp episode. GraspGen closure/lift acceptance
+and general gripper-transfer verification remain pending.

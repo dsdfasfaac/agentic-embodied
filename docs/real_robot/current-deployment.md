@@ -109,3 +109,8 @@ PickTube 000015 return segment through `replay_arx_picktube_home.py`. It lifts
 before retracting, preserves grippers until arm home, and verifies actual
 arrival before opening the empty grippers and disabling. See the GraspGen live
 experiment README for provenance, entry checks and commissioning evidence.
+
+The latest `full-grasp-live02` was rejected at review before pregrasp motion.
+Its new post-episode cleanup verified the task start and disabled the controller.
+Physical homing validation in this attempt covered only near-home alignment,
+not the entire taught return corridor; see `home-commission-result.json`.

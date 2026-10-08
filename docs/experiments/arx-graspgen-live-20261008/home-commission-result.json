@@ -1,0 +1,59 @@
+{
+  "schema_version": "arx.recorded.home.commission.result.v1",
+  "source_commit": "a8c5a88",
+  "host": "dodo",
+  "hardware_sha256": "18b47ac84ce7dbec7631d2b10c875e3cd3b938ae72e0374b9f97b2d70f94a431",
+  "trajectory_sha256": "302209078d5148338b885b4302fb545fe54cb8f34a37bcc13531f9a54518277d",
+  "source_data_sha256": "72aa96b6816c65af8314824eda6fa53a9c613e165d4edb9137066f634b2fa761",
+  "physical_scope": "Near-home alignment and post-episode cleanup only; full return corridor not physically replayed this attempt",
+  "initial_homing_status": "complete",
+  "empty_gripper_opening_steps": 110,
+  "post_episode_cleanup": {
+    "controller_disabled": true,
+    "controller_stop": {
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "stopped pid=274650\n"
+    },
+    "homing_is_rollout_step": false,
+    "operator_confirmed_unloaded": false,
+    "schema_version": "arx.real.post_episode.v1",
+    "status": "homed_and_disabled",
+    "termination_reason": "gateway_rejected_or_interrupted",
+    "trial": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/full-grasp-live02"
+  },
+  "task_start_verified_before": true,
+  "task_start_verified_after": true,
+  "final_measured_state": [
+    0.032235145568847656,
+    0.00514984130859375,
+    0.00324249267578125,
+    -0.037957191467285156,
+    -0.02384185791015625,
+    -0.00820159912109375,
+    -2.9421300888061523,
+    0.01621246337890625,
+    0.00171661376953125,
+    0.00324249267578125,
+    -0.03070831298828125,
+    -0.00133514404296875,
+    0.056649208068847656,
+    -2.4633779525756836
+  ],
+  "cleanup_homing_status": "complete",
+  "cleanup_homing_steps": 2,
+  "cleanup_already_near_home": true,
+  "grasp_trial_status": "stopped",
+  "grasp_trial_steps": 16,
+  "grasp_trial_contact": false,
+  "grasp_trial_success": false,
+  "grasp_trial_executed_scope": "Initial critic hold and bundle settling hold; review rejected before pregrasp execution",
+  "retained_logs": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008",
+  "retained_sha256": {
+    "cleanup-full02-recorded/result.json": "337d6ffaf18394937e32eea47dc64143aa28edf618901f6b7d5afa9418ced9ec",
+    "cleanup-full02-recorded/after.json": "0133d155fc8f0201d188be05296d5a78a6f892c55d9e0f7ddebfc8b1bf0be3c5",
+    "cleanup-full02-recorded/recorded-homing.json": "2db580ea9c91b838ceef09091e212e46fd5c400509c09e0d801ddeca7373d966",
+    "full-grasp-live02/result.json": "76e1093392107fb6ea463531b2a8dab09b5af24ed105001ca00e6029f8417924",
+    "full-grasp-live02/collision-audit.json": "c538e5964065e1fd7a9fe77ef3746be11d895845de111aebc099cf82b642cf6b"
+  }
+}
