@@ -21,13 +21,17 @@ def setup_trial(tmp_path, monkeypatch, *, held=False, home="complete", arrived=T
         return {"task_start_eligible": arrived,
                 "features": {"privileged.interaction.gripper_closed": False,
                              "privileged.selected.target_gripper_distance_m": .4}}
-    def stage(*args):
+    def replay(*args, **kwargs):
         calls.append("home")
         return {"status": home}
+    def stage(*args):
+        calls.append("open")
+        return {"status": "complete"}
     def disable(*args, **kwargs):
         calls.append("disable")
         return SimpleNamespace(returncode=0, stdout="stopped", stderr="")
     monkeypatch.setattr(cleanup, "audit", audit)
+    monkeypatch.setattr(cleanup, "replay_home", replay)
     monkeypatch.setattr(cleanup, "stage", stage)
     monkeypatch.setattr(cleanup.subprocess, "run", disable)
     args = dict(trial=trial, hardware=Path("hardware"), hardware_sha="sha",
@@ -39,7 +43,7 @@ def setup_trial(tmp_path, monkeypatch, *, held=False, home="complete", arrived=T
 def test_home_and_verify_precede_disable(tmp_path, monkeypatch):
     args, calls = setup_trial(tmp_path, monkeypatch)
     result = cleanup.finish(**args)
-    assert calls == ["audit", "home", "audit", "disable"]
+    assert calls == ["audit", "home", "open", "audit", "disable"]
     assert result["status"] == "homed_and_disabled"
     assert result["homing_is_rollout_step"] is False
 
@@ -55,7 +59,7 @@ def test_homing_failure_keeps_controller_enabled(tmp_path, monkeypatch):
 def test_bad_measured_home_keeps_controller_enabled(tmp_path, monkeypatch):
     args, calls = setup_trial(tmp_path, monkeypatch, arrived=False)
     result = cleanup.finish(**args)
-    assert calls == ["audit", "home", "audit"]
+    assert calls == ["audit", "home", "open", "audit"]
     assert result["controller_disabled"] is False
 
 
@@ -81,7 +85,7 @@ def test_confirmed_unloading_does_not_require_target_visibility(tmp_path, monkey
     monkeypatch.setattr(cleanup, "audit", hardware_audit)
     result = cleanup.finish(**args, operator_unloaded=True)
     assert scopes == [False, False]
-    assert calls == ["home", "disable"]
+    assert calls == ["home", "open", "disable"]
     assert result["status"] == "homed_and_disabled"
 
 

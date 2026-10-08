@@ -66,6 +66,7 @@ class GraspRecoveryConfig(StrictModel):
     graspgen_samples: int = Field(default=128, ge=64, le=1024)
     graspgen_horizontal_closing_max: float | None = Field(default=None, ge=0, le=0.5)
     graspgen_approach_alignment_min: float | None = Field(default=None, ge=0.5, le=0.99)
+    validate_pregrasp_engage: bool = False
     target_cloud_mode: Literal["label_only", "upright_tube"] = "label_only"
     pregrasp_planner: Literal["cartesian", "joint_then_cartesian"] = "cartesian"
     gripper_geometry_file: str | None = None

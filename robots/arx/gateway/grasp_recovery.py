@@ -472,6 +472,15 @@ class GraspRecovery:
                         args.phase,
                         args.max_steps,
                     )
+                    engage_preview = None
+                    if args.phase == "pregrasp" and self.config.validate_pregrasp_engage:
+                        preview_state = targets[-1].copy()
+                        engage_goal = self._goal(candidate, stored["output"]["engine"], "engage", preview_state)
+                        engage_targets, engage_clearance = self._plan(
+                            targets[-1], preview_state, engage_goal, cloud, "engage", 90)
+                        engage_preview = {"planned_steps": len(engage_targets),
+                            "minimum_tcp_clearance_m": engage_clearance,
+                            "scope": "same learned pose against currently observed scene; fresh engage review still required"}
                     selected = {
                         "goal": goal,
                         "candidate": deepcopy(candidate),
@@ -501,6 +510,7 @@ class GraspRecovery:
                             ),
                             "goal_tcp_base": goal.tolist(),
                             "target_evidence": cloud.evidence,
+                            "engage_preview": engage_preview,
                         }
                     )
                     if stored["output"]["engine"] != "tube_geometry":

@@ -38,7 +38,7 @@ case "$ACTION" in
         echo "$iface is not UP" >&2; exit 2;
       }
     done
-    if pgrep -f '[X]5Controller' >/dev/null; then
+    if pgrep -x X5Controller >/dev/null; then
       echo "another X5Controller is already running" >&2; exit 2
     fi
     mkdir -p "$STATE_DIR"
@@ -52,7 +52,7 @@ case "$ACTION" in
       exec ros2 launch arx_x5_controller v2_joint_control.launch.py
     ' arx-dodo-controller "$PID_FILE" "$ARX_WS" >>"$LOG_FILE" 2>&1 </dev/null &
     for _ in {1..100}; do
-      if running && pgrep -f '[X]5Controller' >/dev/null; then
+      if running && pgrep -x X5Controller >/dev/null; then
         "$0" status
         exit 0
       fi

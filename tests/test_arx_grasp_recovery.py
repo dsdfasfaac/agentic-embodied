@@ -660,3 +660,27 @@ def test_full_commissioning_requires_model_identity_and_retains_contact_gate():
     result = rec.review(ReviewGraspArgs(proposal_id=identity, phase="lift"), ctx)
     assert not result["eligible"]
     assert "target-specific observed contact" in result["checks"][-1]["reason"]
+
+
+def test_pregrasp_preview_skips_pose_with_blocked_engage_path():
+    rec = recovery(validate_pregrasp_engage=True)
+    ctx = context()
+    proposal = rec.propose(ProposeGraspArgs(), ctx)
+    original = rec.proposals[proposal['proposal_id']]['output']['candidates'][0]
+    alternate = dict(original, score=-1.)
+    pose = np.asarray(original['transform_base']).copy(); pose[0, 3] += .01
+    alternate['transform_base'] = pose.tolist()
+    rec.proposals[proposal['proposal_id']]['output']['candidates'].append(alternate)
+    phases = []
+    def plan(command, state, goal, cloud, phase, max_steps, **kwargs):
+        phases.append(phase)
+        if phase == 'engage' and np.isclose(goal[0, 3], .10):
+            raise ValueError('observed rack blocks engagement')
+        end = command.copy(); end[7:10] = goal[:3, 3]
+        return np.repeat(end[None], 30, axis=0), .03
+    rec._plan = plan
+    review = rec.review(ReviewGraspArgs(proposal_id=proposal['proposal_id']), ctx)
+    assert review['eligible']
+    assert phases == ['pregrasp', 'engage', 'pregrasp', 'engage']
+    assert rec.reviews[review['review_token']]['goal'][0, 3] == pytest.approx(.08)
+    assert review['checks'][0]['engage_preview']['planned_steps'] == 30

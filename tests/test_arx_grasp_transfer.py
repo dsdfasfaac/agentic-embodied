@@ -239,13 +239,14 @@ def test_offline_history_replays_unique_past_only_and_checks_sensor_sha(tmp_path
 
     journal, target, path = make_history(tmp_path)
     stamps = []
-    provider = SimpleNamespace(
-        target_sample=lambda images, hardware: stamps.append(
-            hardware["state_monotonic_ns"]
-        )
-    )
+    def sample(images, hardware):
+        stamps.append(hardware["state_monotonic_ns"])
+        return {"point_left": np.array([.1, .2, .3]), "stamp": hardware["state_monotonic_ns"]}
+    provider = SimpleNamespace(target_sample=sample)
     evidence = replay_target_history(provider, journal, target, "a" * 64)
     assert stamps == [10]
+    assert provider.last_target_left == pytest.approx([.1, .2, .3])
+    assert provider.last_target_ns == 10
     assert evidence["past_sample_count"] == 1
     path.write_bytes(b"corrupted")
     with pytest.raises(ValueError, match="history sensor SHA"):

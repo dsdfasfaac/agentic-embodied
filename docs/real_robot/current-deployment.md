@@ -1,8 +1,8 @@
 # 当前 ARX 部署（2026-10-08）
 
-当前正在进行 [GraspGen 真机验收](../experiments/arx-graspgen-live-20261008/README.md)。已实测完成 learned pose 的张爪预抓取，195 个执行步到位；完整夹紧和抬升尚未验收。控制器保持使能，归位因右腕反馈停止进展而暂停，正在核对现场线缆与接触情况。
+当前正在进行 [GraspGen 真机验收](../experiments/arx-graspgen-live-20261008/README.md)。已实测完成 learned pose 的张爪预抓取，195 个执行步到位；完整夹紧和抬升尚未验收。现场已授权失能再使能；重新启用后，起始姿态和空夹爪张开实测通过，正在执行完整抓取验收。之前右腕反馈停止进展的根因尚未确定。
 
-新配置与冻结契约位于 `docs/experiments/arx-graspgen-live-20261008/`；完整验收使用 `bundle-full-commission.json`、`grasp-config-full-commission.json`、`hardware.json` 和 `frozen-full/`。由 `commission_arx_pregrasp.py --full-grasp` 执行，须有人看护并明确授权运动；该范围不调用 VLA，不将未验证的 transfer 自动晋升为正式配置。
+新配置与冻结契约位于 `docs/experiments/arx-graspgen-live-20261008/`；完整验收使用 `bundle-full-commission.json`、`grasp-config-full-commission.json`、`hardware-sdk-bounded.json` 和 `frozen-full-sdk/`。由 `commission_arx_pregrasp.py --full-grasp` 执行，须有人看护并明确授权运动；该范围不调用 VLA，不将未验证的 transfer 自动晋升为正式配置。
 
 注意：下面保留的是 **10 月 7 日的历史部署记录**。特征 provider 和工具 schema 已变化，旧 SHA 命令不能直接用于当前源码。历史成功来自几何恢复；当前 GraspGen 已执行 learned pregrasp，但尚不能宣称完整抓取成功。
 
@@ -103,3 +103,9 @@ export PYTHONPATH=.:/home/dodo/chenfu/.venv_data_collect_py312/lib/python3.12/si
 成功后保持夹持等待卸载；收到明确卸载确认后，`finish --unloaded --execute` 从实时反馈核验归位并关闭控制器。卸载后可用 hardware-home 范围核验，不要求移走的试管仍然可见；正常任务观测继续要求真实特征。收尾参数与记录见[已完成记录](../experiments/arx-no-lift-timing-20261007/README.md#controller-cleanup)。
 
 当前实测只支持这一组标定、夹爪和试管布局。引入新机械臂、移动相机或更换夹爪时，需要新的适配器/标定及验收，不能沿用这次成功作为新配置证明。
+
+2026-10-08 homing update: `finish_arx_real_episode.py` now uses the pinned
+PickTube 000015 return segment through `replay_arx_picktube_home.py`. It lifts
+before retracting, preserves grippers until arm home, and verifies actual
+arrival before opening the empty grippers and disabling. See the GraspGen live
+experiment README for provenance, entry checks and commissioning evidence.

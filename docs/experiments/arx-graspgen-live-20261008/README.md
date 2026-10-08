@@ -30,3 +30,39 @@ The empty open pregrasp was followed by an attempted measured home. The 2 mrad p
 The source is committed and deployed; the current GraspGen service was restarted from the synchronized source and its health/model SHA confirmed. Full commissioning reserves 546 physical steps in 12 compiled calls under a 600-step runtime cap.
 
 `baseline-geometric-bundle.json`, `baseline-geometric-grasp-config.json` and `frozen-baseline/` preserve a runnable static contract for the previous geometric candidate against the current provider/schema. Its hardware remains the previous wrist-observer configuration, not the expanded learned-motion profile. This refresh is a static check, not another physical acceptance. Historical experiment files were not rewritten.
+
+## SDK bound follow-up and re-enable
+
+Onsite confirmation and explicit disable/re-enable authorization were received. A single supervised stage probe with small lag corrections (at most 5 mrad per correction, never outside the existing feedback tolerance minus 5 mrad) did not restore right wrist progress. The controller was then disabled and restarted, followed by fresh feedback, a successful single-step stage, and measured open-gripper start completion. Root cause of the prior stalled feedback remains unconfirmed; restart restored the start checks, not a proven diagnosis.
+
+Inspection of the **actually loaded** dodo SDK library found position-control clipping ranges: lower `[-2.618, -0.1, -0.1, -1.29, -1.4835298642, -1.7453292520]`, upper `[3.14, 3.6, 3.0, 1.29, 1.4835298642, 1.7453292520]` radians. The pinned inspection artifact is `robots/arx/manifests/real/dodo_sdk_position_limits.json`; its library SHA and constructor/control addresses are recorded. These are installed SDK command bounds, not universally valid physical hard limits.
+
+Use `hardware-sdk-bounded.json` and `frozen-full-sdk/` for subsequent full commissioning. Fourth and fifth joint commands now use the intersection of CAD, installed SDK and selected envelope, with margins. Hardware loading checks the installed SDK binary SHA. Earlier frozen packages remain historical and cannot be substituted for the current provider SHA.
+
+### Recorded PickTube homing (2026-10-08)
+
+The operator identified an obstruction below the end effector. Post-episode
+cleanup now calls `replay_arx_picktube_home.py` before opening empty grippers
+at home and disabling the controller. The previous straight joint interpolation
+from an arbitrary rollout pose to the task start is no longer the cleanup path.
+
+The pinned compact trajectory is
+`robots/arx/manifests/real/dodo_picktube_recorded_home.json`: accepted PickTube
+`000015`, source frames 165–300, measured `observation.state[:,7:13]` in radians.
+Raw source SHA: `72aa96b6816c65af8314824eda6fa53a9c613e165d4edb9137066f634b2fa761`.
+The return lifts from the rack, retracts, and descends near home. Replay preserves
+left arm and both grippers; recorded closing commands are discarded. Grippers
+are opened only after measured arm-home verification and unloading checks.
+
+A nearby measured pose joins the corresponding recorded frame. Other poses
+need a precomputed vertical escape at their own x/y, followed by an entry
+bridge that stays above the escape plane. The remaining recorded frames retain
+their ordering, at at most 0.2 rad/s and 15 Hz. Invalid IK, limits or entry
+geometry reject the plan before commands. A pose already near home needs only
+a short final alignment. This is an empty-gripper taught corridor, not a
+certificate of full-arm collision clearance in a changed scene.
+
+Every command records its ROS receipt separately from fresh feedback and
+arrival checks. Tracking pauses the replay clock and faults if stalled; failure
+holds fresh measured posture and keeps the controller enabled. Controller
+startup/disable is a separate action and may affect posture.

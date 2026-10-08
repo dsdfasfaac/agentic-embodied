@@ -71,7 +71,11 @@ def replay_target_history(provider, journal_path, observation, snapshot_sha256):
         with np.load(path, allow_pickle=False) as snapshot:
             images = {key: snapshot[key].copy() for key in snapshot.files}
         try:
-            provider.target_sample(images, item["observation"]["hardware"])
+            sample = provider.target_sample(images, item["observation"]["hardware"])
+            # Match the real observer's successful target-tracking update.
+            # Without this, right-only identity cannot be replayed after front occlusion.
+            provider.last_target_left = np.asarray(sample["point_left"]).copy()
+            provider.last_target_ns = sample["stamp"]
         except ValueError as exc:
             if not str(exc).startswith(("pink tube", "yellow test-tube rack")):
                 raise

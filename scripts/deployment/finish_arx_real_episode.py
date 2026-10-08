@@ -19,6 +19,7 @@ if __package__ in (None, ""):
 
 from scripts.deployment.audit_arx_live_observation import audit
 from scripts.deployment.stage_arx_picktube_start import stage
+from scripts.deployment.replay_arx_picktube_home import replay_home
 
 
 def finish(*, trial: Path, hardware: Path, hardware_sha: str,
@@ -56,9 +57,24 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
                 fresh["privileged.selected.target_gripper_distance_m"] <= 0.05):
             report["status"] = "requires_unloading"
             return report
-        homing = stage(hardware, hardware_sha, task, 150, output / "homing.json", 0.035)
+        homing = replay_home(hardware, hardware_sha, task,
+                             output / "recorded-homing.json", execute=True)
         if homing["status"] != "complete":
             raise ValueError("homing incomplete; leave controller enabled")
+        # The recorded path preserved grippers. Only once the arm is home may
+        # the already-unloaded grippers be staged to the frozen open start.
+        from robots.arx.contracts import load_task_manifest
+        from robots.arx.gateway.real_config import load_real_hardware_config
+        import numpy as np
+        if "final_state" in homing:
+            expected = np.asarray(load_task_manifest(task).start_state)
+            tolerance = np.asarray(load_real_hardware_config(hardware, hardware_sha).timing.position_tolerance)
+            axes = [i for i in range(14) if i not in (6, 13)]
+            if np.any(np.abs(np.asarray(homing["final_state"])[axes] - expected[axes]) > tolerance[axes]):
+                raise ValueError("arm not at home; gripper staging refused")
+        opened = stage(hardware, hardware_sha, task, 150, output / "open-at-home.json", 0.015)
+        if opened["status"] != "complete":
+            raise ValueError("empty gripper staging incomplete; leave controller enabled")
         after = audit(hardware, hardware_sha, task, model,
                       require_features=not operator_unloaded)
         (output / "after.json").write_text(json.dumps(after, indent=2) + "\n")

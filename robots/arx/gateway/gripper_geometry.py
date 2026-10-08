@@ -58,7 +58,11 @@ class ArxGripperGeometry:
             indices = tree.query_ball_point(origin + r @ centre, radius + margin_m)
             if indices:
                 local = (tree.data[indices] - origin) @ r
-                if np.any(np.all(local @ eq[:, :3].T + eq[:, 3] <= margin_m, axis=1)):
+                inside = np.all(local @ eq[:, :3].T + eq[:, 3] <= margin_m, axis=1)
+                if np.any(inside):
+                    point = tree.data[np.asarray(indices)[np.flatnonzero(inside)[0]]]
                     raise ValueError(
                         "ARX gripper CAD sweep intersects observed scene: " + link
+                        + "; point_base_m=" + json.dumps(point.tolist())
+                        + "; tcp_base_m=" + json.dumps(pose[:3, 3].tolist())
                     )
