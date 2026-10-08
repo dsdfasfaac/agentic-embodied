@@ -338,6 +338,17 @@ def test_frozen_learned_commission_package_has_no_normal_runner_permission(
     provider = root / "robots/arx/deployment/picktube_rgbd_provider.py"
     contract = experiment / "frozen/real-input-contract.json"
     config = experiment / "grasp-config-commission.json"
+    from scripts.deployment.freeze_arx_picktube_inputs import freeze
+
+    fresh = tmp_path / "frozen"
+    freeze(
+        experiment / "bundle-pregrasp.json",
+        fresh,
+        grasp_config=config,
+        depth_cameras=("front_depth_mm", "right_depth_mm"),
+        hardware_config=hardware,
+    )
+    contract = fresh / "real-input-contract.json"
 
     def forbid_backend(**kw):
         raise AssertionError("preflight must not acquire hardware")
@@ -383,7 +394,7 @@ def test_frozen_learned_commission_package_has_no_normal_runner_permission(
             root / "robots/arx/manifests/real/dodo_right_controller_ee_fk.json"
         ),
         bundle=str(experiment / "bundle-pregrasp.json"),
-        tool_catalog=str(experiment / "frozen/tool-catalog.json"),
+        tool_catalog=str(fresh / "tool-catalog.json"),
         real_input_contract=str(contract),
         expected_real_input_sha256=file_sha256(contract),
         feature_provider=str(provider),

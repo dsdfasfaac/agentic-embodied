@@ -27,18 +27,21 @@ def run(args):
     provider = root / "robots/arx/deployment/picktube_rgbd_provider.py"
     settings = json.loads(args.grasp_config.read_text())
     if (
-        settings.get("learned_pregrasp_commissioning") is True
+        (
+            settings.get("learned_pregrasp_commissioning") is True
+            or settings.get("learned_grasp_commissioning") is True
+        )
         and not settings.get("learned_gripper_transfer_verified", False)
         and getattr(args, "resume_vla_once", False)
     ):
-        raise ValueError("unverified learned pregrasp commissioning cannot resume VLA")
+        raise ValueError("unverified learned commissioning cannot resume VLA")
     args.output.mkdir(parents=True, exist_ok=False)
     gateway = args.output / "private/gateway"
     gateway.mkdir(parents=True)
     core = None
     results = []
     report = {
-        "schema_version": "arx.pregrasp.commission.v1",
+        "schema_version": "arx.grasp.commission.v2",
         "status": "initializing",
         "termination_reason": "commissioning",
         "vla_called": False,
@@ -117,7 +120,7 @@ def run(args):
             tool=tool,
             arguments=arguments,
             evidence_ids=[core.current["observation_id"]],
-            reason="Supervised frozen bundle pregrasp commissioning",
+            reason="Supervised frozen bundle grasp commissioning",
         )
         core.journal.register_decision(
             request, source="runner", evidence=request.evidence_ids
@@ -141,10 +144,18 @@ def run(args):
 
     try:
         core = factory(cancelled, phase_changed)
-        # This harness admits only the open-gripper pregrasp prefix.
+        # Inspect the complete authorized commissioning prefix before motion.
         # Inspect all programs before reset or the first hold sends a command.
         settings = json.loads(args.grasp_config.read_text())
-        learned_commissioning = settings.get("learned_pregrasp_commissioning") is True
+        full_grasp = getattr(args, "full_grasp", False)
+        if full_grasp != (settings.get("learned_grasp_commissioning") is True):
+            raise ValueError(
+                "full grasp commissioning requires matching explicit configuration"
+            )
+        learned_commissioning = (
+            settings.get("learned_pregrasp_commissioning") is True or full_grasp
+        )
+        report["learned_grasp_commissioning"] = full_grasp
         report["learned_pregrasp_commissioning"] = learned_commissioning
         for program in core.programs.values():
             pregrasp_indices = [
@@ -156,10 +167,43 @@ def run(args):
             if not pregrasp_indices:
                 raise ValueError("bundle has no pregrasp commissioning prefix")
             final_pregrasp = pregrasp_indices[-1]
+            end = (
+                next(
+                    (
+                        i
+                        for i, c in enumerate(program.calls)
+                        if c.tool == "arx.review_reentry"
+                    ),
+                    len(program.calls),
+                )
+                if full_grasp
+                else final_pregrasp + 1
+            )
+            if full_grasp:
+                prefix = program.calls[:end]
+                signature = [(c.tool, c.arguments.get("phase")) for c in prefix]
+                required = [
+                    ("arx.hold", None),
+                    ("arx.propose_grasp", None),
+                    ("arx.review_grasp", "pregrasp"),
+                    ("arx.execute_grasp", "pregrasp"),
+                    ("arx.review_grasp", "engage"),
+                    ("arx.execute_grasp", "engage"),
+                    ("arx.set_gripper", None),
+                    ("arx.review_grasp", "lift"),
+                    ("arx.execute_grasp", "lift"),
+                    ("arx.hold", None),
+                ]
+                if signature != required or prefix[6].arguments.get("opening") != 0.0:
+                    raise ValueError(
+                        "full grasp prefix requires ordered pregrasp, engage, close, contact-gated lift and hold"
+                    )
             reached_pregrasp = False
-            for entry in program.calls[: final_pregrasp + 1]:
+            for entry in program.calls[:end]:
                 allowed = (
-                    entry.tool == "arx.propose_grasp"
+                    entry.tool == "arx.hold"
+                    and entry.arguments.get("steps", 1) <= 15
+                    or entry.tool == "arx.propose_grasp"
                     and (
                         entry.arguments.get("engine", "tube_geometry")
                         == "tube_geometry"
@@ -167,15 +211,22 @@ def run(args):
                         and entry.arguments.get("engine") == "graspgen"
                     )
                     or entry.tool == "arx.set_gripper"
-                    and entry.arguments.get("opening") == 1.0
+                    and (
+                        entry.arguments.get("opening") == 1.0
+                        or full_grasp
+                        and entry.arguments.get("opening") == 0.0
+                    )
                     or entry.tool in {"arx.review_grasp", "arx.execute_grasp"}
-                    and entry.arguments.get("phase", "pregrasp") == "pregrasp"
+                    and (
+                        entry.arguments.get("phase", "pregrasp") == "pregrasp"
+                        or full_grasp
+                    )
                 )
                 if not allowed:
                     raise ValueError(
                         "commissioning admits only open geometric pregrasp calls"
                     )
-                reached_pregrasp = entry.tool == "arx.execute_grasp"
+                reached_pregrasp = reached_pregrasp or entry.tool == "arx.execute_grasp"
             if not reached_pregrasp:
                 raise ValueError("bundle has no pregrasp commissioning prefix")
             if getattr(args, "resume_vla_once", False):
@@ -206,6 +257,7 @@ def run(args):
             if (
                 entry.tool == "arx.execute_grasp"
                 and entry.arguments.get("phase") != "pregrasp"
+                and not full_grasp
             ):
                 raise ValueError("commissioning supports pregrasp only")
             result = call(
@@ -228,7 +280,15 @@ def run(args):
                     ),
                 )
                 break
-            if entry.tool == "arx.execute_grasp":
+            if (result.get("result") or {}).get("completion") == "task_success":
+                report.update(
+                    status="grasp_lift_verified", termination_reason="task_success"
+                )
+                break
+            if (
+                entry.tool == "arx.execute_grasp"
+                and entry.arguments.get("phase", "pregrasp") == "pregrasp"
+            ):
                 outcome = result["result"] or {}
                 report.update(
                     status="stopped", termination_reason="pregrasp_unverified"
@@ -253,7 +313,8 @@ def run(args):
                         termination_reason="measured_pregrasp",
                     )
                 if index == final_pregrasp and (
-                    not target_verified or not getattr(args, "resume_vla_once", False)
+                    not target_verified
+                    or not (full_grasp or getattr(args, "resume_vla_once", False))
                 ):
                     break
             elif entry.tool == "arx.review_reentry":
@@ -306,11 +367,16 @@ def main():
     parser.add_argument("--hardware-config", type=Path)
     parser.add_argument("--retain-step-sensors", action="store_true")
     parser.add_argument("--resume-vla-once", action="store_true")
+    parser.add_argument(
+        "--full-grasp",
+        action="store_true",
+        help="Supervised contact-gated closure and lift; no VLA",
+    )
     parser.add_argument("--max-physical-steps", type=int, default=6)
     parser.add_argument("--execute", action="store_true")
     args = parser.parse_args()
-    if not args.execute or not 2 <= args.max_physical_steps <= 301:
-        parser.error("supervised motion requires --execute and a step cap in 2..301")
+    if not args.execute or not 2 <= args.max_physical_steps <= 600:
+        parser.error("supervised motion requires --execute and a step cap in 2..600")
     report = run(args)
     print(
         json.dumps(

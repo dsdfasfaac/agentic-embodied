@@ -183,12 +183,15 @@ class RealCoreFactory:
                     Path(self.grasp_config).read_text()
                 )
                 if (
-                    settings.learned_pregrasp_commissioning
+                    (
+                        settings.learned_pregrasp_commissioning
+                        or settings.learned_grasp_commissioning
+                    )
                     and not settings.learned_gripper_transfer_verified
                     and not self.allow_learned_pregrasp_commissioning
                 ):
                     raise ValueError(
-                        "unverified learned transfer requires the pregrasp commissioning harness"
+                        "unverified learned transfer requires the supervised commissioning harness"
                     )
                 settings.validate_execution_phases(
                     call.arguments.get("phase", "pregrasp")
@@ -202,7 +205,9 @@ class RealCoreFactory:
                     )
                 grasp = GraspRecovery(
                     settings,
-                    PickTubeGraspObserver(provider.impl),
+                    PickTubeGraspObserver(
+                        provider.impl, cloud_mode=settings.target_cloud_mode
+                    ),
                     closed_policy=config.right_gripper_closed_policy,
                     open_policy=config.right_gripper_open_policy,
                     control_hz=config.timing.control_hz,

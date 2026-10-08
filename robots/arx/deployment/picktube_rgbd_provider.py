@@ -33,6 +33,8 @@ CONTROLLER_FK_PATH = Path(__file__).resolve().parents[1] / "manifests/real/dodo_
 CONTROLLER_FK_SHA256 = "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86"
 NOMINAL_CHAIN_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_one_nominal_chain.json"
 NOMINAL_CHAIN_SHA256 = "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
+URDF_LIMITS_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_one_urdf_limits.json"
+URDF_LIMITS_SHA256 = "a806164f6159d3e661211c0c6cd5426e8439c3df2be6848eda524e70019598e8"
 RIGHT_JOINT_IDS = [f"right_joint_{i}" for i in range(1, 7)]
 RIGHT_GRIPPER_CURRENT = "right_gripper_current_native"
 # The validated wrist D405 reaches 70 mm; contact observations were being
@@ -114,7 +116,24 @@ class PickTubeRgbdProvider:
             bounds = [(link.limits[0], link.limits[1]) for link in self.controller_fk.calibration.links]
             configured = list(zip(config.right.joint_min_rad, config.right.joint_max_rad))
             if not np.allclose(configured, bounds, rtol=0, atol=1e-8):
-                raise ValueError("right controller joint limits differ from audited FK envelope")
+                if getattr(config, "right_joint_limit_profile_sha256", None) != URDF_LIMITS_SHA256:
+                    raise ValueError("right controller joint limits differ from audited FK envelope")
+                source = _pinned_json(URDF_LIMITS_PATH, URDF_LIMITS_SHA256)
+                physical = source["right_arm_rad"]
+                for pair, recorded, joint in zip(configured, bounds, physical):
+                    # Retain the already accepted zero/feedback offset interval;
+                    # expansions must stay inside CAD limits with 20 mrad margin.
+                    lower = min(recorded[0], joint["lower"] + .02)
+                    upper = max(recorded[1], joint["upper"] - .02)
+                    if pair[0] < lower or pair[1] > upper:
+                        raise ValueError("configured joint bounds exceed pinned AC one limits")
+                calibrated = self.controller_fk.calibration
+                links = [link.model_copy(update={"limits": list(pair)})
+                         for link, pair in zip(calibrated.links, configured)]
+                calibrated = calibrated.model_copy(update={"links": links})
+                tcp = self.tool_fk.calibration.tcp_offset
+                self.controller_fk = CommandKinematics(calibrated)
+                self.tool_fk = CommandKinematics(calibrated.model_copy(update={"tcp_offset": tcp}))
         right = config.cameras[2] if len(config.cameras) == 3 else None
         if right is not None and getattr(right, "robot_mount_calibration_file", None) is not None:
             if (right.name != "right_rgb" or right.serial != RIGHT_SERIAL or not right.depth_enabled
@@ -225,7 +244,7 @@ class PickTubeRgbdProvider:
                 # when a pink sticker elsewhere in view has similar size.
                 if (not rack_x - 5 <= cx <= rack_x + rack_w + 5
                         or not rack_y - 40 <= cy <= rack_y + 20
-                        or not 25 <= area <= 200
+                        or not 12 <= area <= 200
                         or width > 30 or height > 24):
                     continue
                 score = -area

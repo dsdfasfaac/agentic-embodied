@@ -1,0 +1,177 @@
+{
+  "candidate_id": "graspgen-upright-cad-full-20261008",
+  "causal_hypothesis": "Measured GraspGen pregrasp succeeded in live03. Test the same learned candidate through reviewed engage, settled closure, target-specific contact and lift.",
+  "critic_rules": [
+    {
+      "activation_conditions": [
+        {
+          "feature": "privileged.interaction.gripper_closed",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.gripper_contact",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.grasped",
+          "operator": "eq",
+          "threshold": false
+        },
+        {
+          "feature": "privileged.interaction.success",
+          "operator": "eq",
+          "threshold": false
+        }
+      ],
+      "cooldown_steps": 96,
+      "dwell_steps": 1,
+      "evidence_ids": [
+        "trial02-obs26",
+        "trial02-obs600",
+        "trial02-journal-36a05e676297244bcc3f8d53a118f24f073da3565919d8a96573919baad97a74"
+      ],
+      "feature": "privileged.selected.target_gripper_distance_m",
+      "operator": "gt",
+      "proposal": "Interrupt the initial hold to enter the frozen pregrasp commissioning recovery.",
+      "rule_id": "commission_far_open",
+      "safety_only": false,
+      "threshold": 0.1,
+      "title": "Supervised pregrasp commissioning request"
+    }
+  ],
+  "diagnosis_sha256": "781346201fb8825fc9733b19ca2e5472b91657ff7d565dbadc7c6fa62187cf7a",
+  "generation": 2,
+  "mechanism_change": "Learned proposals with explicit parallel-jaw half-turn variants, nominal metric TCP transfer and measured pregrasp verification.",
+  "parent_sha256": "0a6ebf6f90ebad498d26dcfaa6b8c10687fe8f90469f58b83ee2460bb9e5ab12",
+  "recovery_rules": [
+    {
+      "evidence_ids": [
+        "g0001-paired-execution-audit-retry03",
+        "g0001-pilot-gate-retry03"
+      ],
+      "fallback": "Record failure and end the attempt. Use existing verified homing/unload cleanup; do not bypass review or silently switch engines.",
+      "precondition": "Supervised empty open start with fresh observed pink target.",
+      "recovery_id": "pink_pregrasp_then_vla",
+      "safety_constraints": [
+        "Only the gateway executes motor targets.",
+        "Fresh single-use tokens, joint limits and step budgets are enforced.",
+        "No automatic opening if current suggests an object may be held.",
+        "TCP clearance is not a full arm/finger collision certificate.",
+        "Dedicated supervised commissioning tests the unverified transfer; no VLA continuation."
+      ],
+      "steps": [
+        {
+          "tool": "arx.hold",
+          "parameters": {
+            "steps": 15
+          },
+          "stop_when": "Fresh feedback settles at the already requested start pose before learned proposal."
+        },
+        {
+          "parameters": {
+            "engine": "graspgen",
+            "max_candidates": 32
+          },
+          "stop_when": "Fresh pink target cloud and metric proposal are recorded.",
+          "tool": "arx.propose_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 300,
+            "phase": "pregrasp",
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh same-target joint IK and TCP clearance are eligible.",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "parameters": {
+            "max_steps": 300,
+            "phase": "pregrasp",
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches pregrasp; sent commands and feedback are recorded separately.",
+          "tool": "arx.execute_grasp"
+        },
+        {
+          "tool": "arx.review_grasp",
+          "parameters": {
+            "phase": "engage",
+            "max_steps": 90,
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh scene and measured phase prerequisites admit the same selected learned candidate."
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "parameters": {
+            "phase": "engage",
+            "max_steps": 90,
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches reviewed goal; lift requires target-specific contact."
+        },
+        {
+          "tool": "arx.set_gripper",
+          "parameters": {
+            "opening": 0.0,
+            "max_steps": 60
+          },
+          "stop_when": "Measured settled closure with the configured +0.9 preload."
+        },
+        {
+          "tool": "arx.review_grasp",
+          "parameters": {
+            "phase": "lift",
+            "max_steps": 60,
+            "proposal_id": "proposal-from-last"
+          },
+          "stop_when": "Fresh scene and measured phase prerequisites admit the same selected learned candidate."
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "parameters": {
+            "phase": "lift",
+            "max_steps": 60,
+            "review_token": "grasp-token-from-review"
+          },
+          "stop_when": "Measured TCP reaches reviewed goal; lift requires target-specific contact."
+        },
+        {
+          "tool": "arx.hold",
+          "parameters": {
+            "steps": 5
+          },
+          "stop_when": "Pink tube lifted at least 1cm for five fresh measured frames."
+        },
+        {
+          "parameters": {
+            "observation_ids": [
+              "post-recovery"
+            ]
+          },
+          "stop_when": "Same-target measured pregrasp, healthy sensors and critic clearance permit reentry.",
+          "tool": "arx.review_reentry"
+        },
+        {
+          "parameters": {
+            "max_chunks": 1,
+            "reentry_token": "token-from-review"
+          },
+          "stop_when": "One bounded fresh VLA chunk or runtime terminal verdict.",
+          "tool": "arx.zeva"
+        }
+      ],
+      "stop_condition": "Only measured pink lift held five fresh frames is success; retain enable on failure or held object.",
+      "title": "Reacquire the observed pink target",
+      "trigger_rule_ids": [
+        "commission_far_open"
+      ]
+    }
+  ],
+  "schema_version": 1,
+  "tool_plugin": null,
+  "validation_plan": "Dedicated full commissioning; no promotion until learned grasp and observed lift success."
+}

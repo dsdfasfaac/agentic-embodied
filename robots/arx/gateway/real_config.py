@@ -10,18 +10,29 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
-from robots.arx.contracts import ARX_CAMERA_NAMES, load_model_contract, load_task_manifest
+from robots.arx.contracts import (
+    ARX_CAMERA_NAMES,
+    load_model_contract,
+    load_task_manifest,
+)
 from zetta.evolution.jsonio import file_sha256
 
 from .arx_ros2_device import ArxRos2Device, Ros2Topics
 from .arx_x5_device import ArmCalibration, ArxX5Device
 from .contracts import StrictModel
-from .real_backend import CameraIdentity, GripperClosureSpec, RealBackend, RealBackendConfig
+from .real_backend import (
+    CameraIdentity,
+    GripperClosureSpec,
+    RealBackend,
+    RealBackendConfig,
+)
 from .real_camera import RealSenseCameraSource, RealSenseCameraSpec
 
 REAL_JOINT_CHANNELS = tuple(
-    [f"left_joint_{i}" for i in range(1, 7)] + ["left_gripper_policy"]
-    + [f"right_joint_{i}" for i in range(1, 7)] + ["right_gripper_policy"]
+    [f"left_joint_{i}" for i in range(1, 7)]
+    + ["left_gripper_policy"]
+    + [f"right_joint_{i}" for i in range(1, 7)]
+    + ["right_gripper_policy"]
 )
 REAL_ARX_CURRENT_CHANNELS = ("right_gripper_current_native",)
 
@@ -37,7 +48,9 @@ class ArmSettings(StrictModel):
     gripper_policy_offset: float
 
     def calibration(self, command_offset: float = 0.0) -> ArmCalibration:
-        return ArmCalibration(**self.model_dump(), gripper_command_offset=command_offset)
+        return ArmCalibration(
+            **self.model_dump(), gripper_command_offset=command_offset
+        )
 
 
 class CameraSettings(StrictModel):
@@ -53,18 +66,26 @@ class CameraSettings(StrictModel):
     capture_fps: int = Field(gt=0)
     depth_enabled: bool = False
     robot_mount_calibration_file: Path | None = None
-    robot_mount_calibration_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    robot_mount_calibration_sha256: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$"
+    )
 
     @model_validator(mode="after")
     def mount_pair(self):
-        if (self.robot_mount_calibration_file is None) != (self.robot_mount_calibration_sha256 is None):
+        if (self.robot_mount_calibration_file is None) != (
+            self.robot_mount_calibration_sha256 is None
+        ):
             raise ValueError("camera mount calibration requires both file and SHA")
         return self
 
     def identity(self) -> CameraIdentity:
         return CameraIdentity(
-            self.name, self.serial, self.calibration_id,
-            self.calibration_sha256, self.width, self.height,
+            self.name,
+            self.serial,
+            self.calibration_id,
+            self.calibration_sha256,
+            self.width,
+            self.height,
         )
 
 
@@ -104,6 +125,9 @@ class RealHardwareConfig(StrictModel):
     command_right: bool
     cameras: tuple[CameraSettings, CameraSettings, CameraSettings]
     timing: TimingSettings
+    right_joint_limit_profile_sha256: str | None = Field(
+        default=None, pattern=r"^[0-9a-f]{64}$"
+    )
     right_gripper_closed_policy: float
     right_gripper_open_policy: float
     ros2_topics: dict[str, str] | None = None
@@ -121,7 +145,9 @@ class RealHardwareConfig(StrictModel):
             raise ValueError("at least one arm must be commandable")
         if self.right_gripper_closed_policy == self.right_gripper_open_policy:
             raise ValueError("right gripper endpoints must differ")
-        if len({spec.channel for spec in self.gripper_closures}) != len(self.gripper_closures):
+        if len({spec.channel for spec in self.gripper_closures}) != len(
+            self.gripper_closures
+        ):
             raise ValueError("duplicate gripper closure channels")
         for spec in self.gripper_closures:
             spec.specification()
@@ -131,9 +157,14 @@ class RealHardwareConfig(StrictModel):
                 spec.closed_feedback_policy != self.right_gripper_closed_policy
                 or spec.open_feedback_policy != self.right_gripper_open_policy
             ):
-                raise ValueError("right gripper closure endpoints differ from calibrated endpoints")
+                raise ValueError(
+                    "right gripper closure endpoints differ from calibrated endpoints"
+                )
         if self.ros2_topics is not None and set(self.ros2_topics) != {
-            "left_status", "right_status", "left_command", "right_command"
+            "left_status",
+            "right_status",
+            "left_command",
+            "right_command",
         }:
             raise ValueError("four ROS2 topic names are required")
         return self
@@ -146,7 +177,9 @@ def load_real_hardware_config(path: Path, expected_sha256: str) -> RealHardwareC
 
 
 def validate_real_hardware_config(
-    config: RealHardwareConfig, task_path: Path, model_path: Path,
+    config: RealHardwareConfig,
+    task_path: Path,
+    model_path: Path,
 ) -> None:
     task = load_task_manifest(task_path)
     model = load_model_contract(model_path)
@@ -157,10 +190,11 @@ def validate_real_hardware_config(
     if abs(config.timing.control_hz - model.conditioning_fps) > 1e-6:
         raise ValueError("real control frequency differs from VLA contract")
     for actual, expected in zip(config.cameras, model.cameras):
-        if (
-            actual.name, actual.width, actual.height, actual.calibration_id
-        ) != (
-            expected.name, expected.width, expected.height, expected.calibration_id
+        if (actual.name, actual.width, actual.height, actual.calibration_id) != (
+            expected.name,
+            expected.width,
+            expected.height,
+            expected.calibration_id,
         ):
             raise ValueError(f"camera differs from VLA contract: {actual.name}")
         if file_sha256(actual.calibration_file) != actual.calibration_sha256:
@@ -174,32 +208,53 @@ def validate_real_hardware_config(
         camera = calibration.get("camera", {})
         intrinsics = camera.get("intrinsics")
         if not isinstance(intrinsics, dict) or set(intrinsics) != {
-            "fx", "fy", "ppx", "ppy", "coeffs", "distortion_model"
+            "fx",
+            "fy",
+            "ppx",
+            "ppy",
+            "coeffs",
+            "distortion_model",
         }:
             raise ValueError(f"RGB intrinsics incomplete: {actual.name}")
         numbers = [intrinsics[key] for key in ("fx", "fy", "ppx", "ppy")]
         coeffs = intrinsics["coeffs"]
         if (
-            not all(isinstance(value, (int, float)) and math.isfinite(value) for value in numbers)
-            or numbers[0] <= 0 or numbers[1] <= 0
-            or not isinstance(coeffs, list) or len(coeffs) != 5
-            or not all(isinstance(value, (int, float)) and math.isfinite(value) for value in coeffs)
+            not all(
+                isinstance(value, (int, float)) and math.isfinite(value)
+                for value in numbers
+            )
+            or numbers[0] <= 0
+            or numbers[1] <= 0
+            or not isinstance(coeffs, list)
+            or len(coeffs) != 5
+            or not all(
+                isinstance(value, (int, float)) and math.isfinite(value)
+                for value in coeffs
+            )
             or not isinstance(intrinsics["distortion_model"], str)
             or not intrinsics["distortion_model"]
         ):
             raise ValueError(f"RGB intrinsics invalid: {actual.name}")
         if (
-            camera.get("logical_name"), camera.get("serial"),
-            camera.get("width"), camera.get("height"),
+            camera.get("logical_name"),
+            camera.get("serial"),
+            camera.get("width"),
+            camera.get("height"),
         ) != (
-            actual.name, actual.serial,
-            actual.capture_width, actual.capture_height,
+            actual.name,
+            actual.serial,
+            actual.capture_width,
+            actual.capture_height,
         ):
-            raise ValueError(f"camera calibration identity/geometry differs: {actual.name}")
+            raise ValueError(
+                f"camera calibration identity/geometry differs: {actual.name}"
+            )
     left = config.left.calibration(task.control.gripper_command_offsets[0])
     right = config.right.calibration(task.control.gripper_command_offsets[1])
-    for calibration, start_gripper in ((left, task.start_state[6]),
-                                       (right, task.start_state[13])):
+    for calibration, start_gripper in (
+        (left, task.start_state[6]),
+        (right, task.start_state[13]),
+    ):
         calibration.to_native_command(start_gripper)
     right.to_native_command(config.right_gripper_closed_policy)
     right.to_native(config.right_gripper_open_policy)
@@ -207,15 +262,20 @@ def validate_real_hardware_config(
 
 
 def build_real_backend(
-    *, config: RealHardwareConfig, task_path: Path, model_path: Path,
+    *,
+    config: RealHardwareConfig,
+    task_path: Path,
+    model_path: Path,
 ) -> RealBackend:
     validate_real_hardware_config(config, task_path, model_path)
     task = load_task_manifest(task_path)
     timing = config.timing
     backend_config = RealBackendConfig(
         cameras=tuple(camera.identity() for camera in config.cameras),
-        state_units=("rad",) * 6 + ("policy_gripper",)
-        + ("rad",) * 6 + ("policy_gripper",),
+        state_units=("rad",) * 6
+        + ("policy_gripper",)
+        + ("rad",) * 6
+        + ("policy_gripper",),
         control_hz=timing.control_hz,
         max_sensor_skew_ms=timing.max_sensor_skew_ms,
         max_sensor_age_ms=timing.max_sensor_age_ms,
@@ -223,25 +283,41 @@ def build_real_backend(
         arrival_timeout_s=timing.arrival_timeout_s,
         feedback_poll_s=timing.feedback_poll_s,
         position_tolerance=timing.position_tolerance,
-        joint_command_bounds=tuple(zip(
-            config.left.joint_min_rad + config.right.joint_min_rad,
-            config.left.joint_max_rad + config.right.joint_max_rad,
-        )),
-        depth_cameras=tuple(camera.name for camera in config.cameras if camera.depth_enabled),
-        gripper_closures=tuple(spec.specification() for spec in config.gripper_closures),
+        joint_command_bounds=tuple(
+            zip(
+                config.left.joint_min_rad + config.right.joint_min_rad,
+                config.left.joint_max_rad + config.right.joint_max_rad,
+            )
+        ),
+        depth_cameras=tuple(
+            camera.name for camera in config.cameras if camera.depth_enabled
+        ),
+        gripper_closures=tuple(
+            spec.specification() for spec in config.gripper_closures
+        ),
     )
     if config.arm_transport == "arx_ros2":
         arms = ArxRos2Device.from_ros2(
-            topics=Ros2Topics(**config.ros2_topics) if config.ros2_topics else Ros2Topics(),
-            left_calibration=config.left.calibration(task.control.gripper_command_offsets[0]),
-            right_calibration=config.right.calibration(task.control.gripper_command_offsets[1]),
+            topics=(
+                Ros2Topics(**config.ros2_topics) if config.ros2_topics else Ros2Topics()
+            ),
+            left_calibration=config.left.calibration(
+                task.control.gripper_command_offsets[0]
+            ),
+            right_calibration=config.right.calibration(
+                task.control.gripper_command_offsets[1]
+            ),
             command_left=config.command_left,
             command_right=config.command_right,
         )
     else:
         arms = ArxX5Device.from_official_sdk(
-            left_calibration=config.left.calibration(task.control.gripper_command_offsets[0]),
-            right_calibration=config.right.calibration(task.control.gripper_command_offsets[1]),
+            left_calibration=config.left.calibration(
+                task.control.gripper_command_offsets[0]
+            ),
+            right_calibration=config.right.calibration(
+                task.control.gripper_command_offsets[1]
+            ),
             command_left=config.command_left,
             command_right=config.command_right,
         )
@@ -249,8 +325,12 @@ def build_real_backend(
         cameras = RealSenseCameraSource(
             tuple(
                 RealSenseCameraSpec(
-                    camera.identity(), camera.serial, camera.calibration_file,
-                    camera.capture_width, camera.capture_height, camera.capture_fps,
+                    camera.identity(),
+                    camera.serial,
+                    camera.calibration_file,
+                    camera.capture_width,
+                    camera.capture_height,
+                    camera.capture_fps,
                     camera.depth_enabled,
                 )
                 for camera in config.cameras

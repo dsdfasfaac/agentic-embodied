@@ -104,7 +104,7 @@ def probe(args):
         history_evidence = replay_target_history(
             provider, args.history_journal, observation, hashlib.sha256(raw).hexdigest()
         )
-    observer = PickTubeGraspObserver(provider)
+    observer = PickTubeGraspObserver(provider, cloud_mode=settings.target_cloud_mode)
     cloud = observer.cloud(observation, images)
     state = np.asarray(observation["hardware"]["measured_state"], dtype=float)
     _, orientation, _ = provider.tool_fk.fk(state[7:13])
@@ -123,7 +123,25 @@ def probe(args):
             endpoint,
             expected_gripper=settings.learned_gripper_id,
             expected_model_sha256=settings.learned_model_sha256,
+            sampling_options={
+                "num_model_samples": settings.graspgen_samples,
+                "horizontal_closing_max": settings.graspgen_horizontal_closing_max,
+            },
         )
+        if (
+            args.engine == "graspgen"
+            and settings.graspgen_approach_alignment_min is not None
+        ):
+            start_p, _, _ = provider.tool_fk.fk(state[7:13])
+            target_base = (cloud.camera_to_base @ np.r_[cloud.target_camera_m, 1.0])[:3]
+            direction = target_base - start_p
+            service.sampling_options.update(
+                preferred_approach_camera=(
+                    cloud.camera_to_base[:3, :3].T
+                    @ (direction / np.linalg.norm(direction))
+                ).tolist(),
+                approach_alignment_min=settings.graspgen_approach_alignment_min,
+            )
         candidates = service.propose(
             cloud, max_candidates=getattr(args, "max_candidates", 8)
         )
@@ -231,7 +249,7 @@ def main():
         default="tube_geometry",
     )
     parser.add_argument(
-        "--max-steps", type=int, choices=range(20, 241), default=240, metavar="20..240"
+        "--max-steps", type=int, choices=range(20, 361), default=240, metavar="20..360"
     )
     parser.add_argument(
         "--max-candidates", type=int, choices=range(1, 33), default=8, metavar="1..32"

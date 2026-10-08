@@ -15,13 +15,13 @@ class ProposeGraspArgs(StrictModel):
 class ReviewGraspArgs(StrictModel):
     proposal_id: ID
     phase: Literal["pregrasp", "engage", "lift"] = "pregrasp"
-    max_steps: int = Field(default=180, ge=20, le=240)
+    max_steps: int = Field(default=180, ge=20, le=360)
 
 
 class ExecuteGraspArgs(StrictModel):
     review_token: ID
     phase: Literal["pregrasp", "engage", "lift"] = "pregrasp"
-    max_steps: int = Field(default=180, ge=20, le=240)
+    max_steps: int = Field(default=180, ge=20, le=360)
 
 
 class GraspProposalOutput(StrictModel):
@@ -58,8 +58,19 @@ class GraspRecoveryConfig(StrictModel):
     # Explicit commissioning scope: permits reviewed open pregrasp only.
     # It never certifies engagement, closing, lifting or an evolved candidate.
     learned_pregrasp_commissioning: bool = False
+    # Dedicated supervised harness may test contact-gated engagement and lift.
+    # This is not a verified transfer or permission for production VLA reentry.
+    learned_grasp_commissioning: bool = False
     learned_target_distance_max_m: float = Field(default=0.025, gt=0, le=0.04)
     learned_parallel_jaw_half_turn: bool = False
+    graspgen_samples: int = Field(default=128, ge=64, le=1024)
+    graspgen_horizontal_closing_max: float | None = Field(default=None, ge=0, le=0.5)
+    graspgen_approach_alignment_min: float | None = Field(default=None, ge=0.5, le=0.99)
+    target_cloud_mode: Literal["label_only", "upright_tube"] = "label_only"
+    pregrasp_planner: Literal["cartesian", "joint_then_cartesian"] = "cartesian"
+    gripper_geometry_file: str | None = None
+    gripper_geometry_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    target_surface_exclusion_m: float = Field(default=0.0, ge=0, le=0.006)
     motion_enabled: bool = False
     pregrasp_distance_m: float = Field(default=0.03, ge=0.02, le=0.08)
     lift_distance_m: float = Field(default=0.02, ge=0.01, le=0.03)
@@ -118,6 +129,7 @@ class GraspRecoveryConfig(StrictModel):
         if (
             self.learned_gripper_transfer_verified
             or self.learned_pregrasp_commissioning
+            or self.learned_grasp_commissioning
         ) and (
             self.learned_grasp_to_tcp is None
             or not self.learned_gripper_id
@@ -139,6 +151,7 @@ class GraspRecoveryConfig(StrictModel):
         if (
             self.learned_pregrasp_commissioning
             and not self.learned_gripper_transfer_verified
+            and not self.learned_grasp_commissioning
             and set(phases) - {"pregrasp"}
         ):
             raise ValueError(

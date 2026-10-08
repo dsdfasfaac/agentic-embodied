@@ -81,10 +81,22 @@ class GraspRecovery:
                 config.graspgen_endpoint,
                 expected_gripper=config.learned_gripper_id,
                 expected_model_sha256=config.learned_model_sha256,
+                sampling_options={
+                    "num_model_samples": config.graspgen_samples,
+                    "horizontal_closing_max": config.graspgen_horizontal_closing_max,
+                },
             ),
         }
         self.proposals, self.reviews = {}, {}
         self.completed_phases = {}
+        self.selected_candidates = {}
+        self.geometry = None
+        if config.gripper_geometry_file:
+            from .gripper_geometry import ArxGripperGeometry
+
+            self.geometry = ArxGripperGeometry(
+                config.gripper_geometry_file, config.gripper_geometry_sha256
+            )
 
     def _fresh(self, observation):
         hardware = observation["hardware"]
@@ -140,6 +152,27 @@ class GraspRecovery:
                 orientation_search_rad=self.config.geometry_orientation_search_rad,
             )[: args.max_candidates]
         else:
+            if (
+                args.engine == "graspgen"
+                and self.config.graspgen_approach_alignment_min is not None
+            ):
+                p, _, _ = self.kinematics.fk(state[7:13])
+                target_base = _base_points(
+                    cloud.target_camera_m[None], cloud.camera_to_base
+                )[0]
+                direction = target_base - p
+                if np.linalg.norm(direction) < 0.01:
+                    raise ValueError(
+                        "cannot condition approach at near-zero target distance"
+                    )
+                if isinstance(self.engines[args.engine], LocalGraspService):
+                    self.engines[args.engine].sampling_options.update(
+                        preferred_approach_camera=(
+                            cloud.camera_to_base[:3, :3].T
+                            @ (direction / np.linalg.norm(direction))
+                        ).tolist(),
+                        approach_alignment_min=self.config.graspgen_approach_alignment_min,
+                    )
             candidates = self.engines[args.engine].propose(
                 cloud, max_candidates=args.max_candidates
             )
@@ -182,7 +215,9 @@ class GraspRecovery:
         goal = rigid_pose(candidate["transform_base"])
         if engine != "tube_geometry":
             if not self.config.learned_gripper_transfer_verified and not (
-                phase == "pregrasp" and self.config.learned_pregrasp_commissioning
+                self.config.learned_grasp_commissioning
+                or phase == "pregrasp"
+                and self.config.learned_pregrasp_commissioning
             ):
                 raise ValueError(
                     "learned gripper to ARX transfer has not been verified"
@@ -199,7 +234,95 @@ class GraspRecovery:
             goal[:3, 3] = p + np.array([0.0, 0.0, self.config.lift_distance_m])
         return goal
 
-    def _plan(self, command, state, goal, cloud, phase, max_steps):
+    def _plan(
+        self, command, state, goal, cloud, phase, max_steps, final_joint_hint=None
+    ):
+        try:
+            return self._cartesian_plan(command, state, goal, cloud, phase, max_steps)
+        except ValueError as original:
+            if (
+                phase != "pregrasp"
+                or self.config.pregrasp_planner != "joint_then_cartesian"
+            ):
+                raise
+            from robots.manipulation.joint_paths import joint_paths
+            from scipy.spatial import cKDTree
+
+            obstacles = _base_points(cloud.scene_camera_m, cloud.camera_to_base)
+            tree = self._scene_tree(obstacles, cloud, state)
+            failures = []
+            for path in joint_paths(
+                self.kinematics,
+                state[7:13],
+                goal,
+                hz=self.hz,
+                speed_m_s=self.config.speed_m_s,
+                angular_speed_rad_s=self.config.angular_speed_rad_s,
+                max_joint_step_rad=self.config.max_joint_step_rad,
+                max_steps=max_steps,
+                final_joint_hint=final_joint_hint,
+            ):
+                clearance = float("inf")
+                try:
+                    positions = np.asarray(
+                        [
+                            self.kinematics.fk(q)[:2][0]
+                            for q in np.vstack((state[7:13], path))
+                        ]
+                    )
+                    arc_length = float(
+                        np.linalg.norm(np.diff(positions, axis=0), axis=1).sum()
+                    )
+                    if arc_length > self.config.max_travel_m:
+                        raise ValueError(
+                            "joint pregrasp arc exceeds Cartesian travel budget"
+                        )
+                    for q in path:
+                        p, r, _ = self.kinematics.fk(q)
+                        distance = float(tree.query(p)[0])
+                        clearance = min(clearance, distance)
+                        if distance < self.config.tcp_clearance_m:
+                            raise ValueError(
+                                "joint pregrasp TCP sweep intersects observed scene points"
+                            )
+                        if self.geometry:
+                            pose = np.eye(4)
+                            pose[:3, :3] = r
+                            pose[:3, 3] = p
+                            self.geometry.check(tree, pose)
+                    targets = np.repeat(command[None], len(path), axis=0)
+                    targets[:, 7:13] = path
+                    targets = np.r_[targets, np.repeat(targets[-1:], [30], axis=0)]
+                    return targets.astype(np.float32), clearance
+                except ValueError as exc:
+                    failures.append(str(exc))
+            raise ValueError(
+                "joint pregrasp failed after "
+                + str(original)
+                + ": "
+                + "; ".join(failures or ["no path within rate and step budgets"])
+            )
+
+    def _scene_tree(self, obstacles, cloud, state):
+        from scipy.spatial import cKDTree
+
+        if self.geometry is not None:
+            p, r, _ = self.kinematics.fk(state[7:13])
+            pose = np.eye(4)
+            pose[:3, :3] = r
+            pose[:3, 3] = p
+            own = self.geometry.occupied_mask(obstacles, pose)
+            target = _base_points(cloud.object_camera_m, cloud.camera_to_base)
+            # Never erase the selected object as robot self geometry.
+            own &= cKDTree(target).query(obstacles)[0] > 0.006
+            obstacles = obstacles[~own]
+        if len(obstacles) < 32:
+            raise ValueError(
+                "insufficient observed obstacles after self geometry filtering"
+            )
+        return cKDTree(obstacles)
+
+    def _cartesian_plan(self, command, state, goal, cloud, phase, max_steps):
         q = state[7:13].copy()
         p, r, _ = self.kinematics.fk(q)
         travel = float(np.linalg.norm(goal[:3, 3] - p))
@@ -239,19 +362,36 @@ class GraspRecovery:
                     & (relative[:, 2] >= 0)
                     & (relative[:, 2] <= self.config.held_target_upper_extent_m)
                 )
+            if self.config.target_surface_exclusion_m:
+                from scipy.spatial import cKDTree
+
+                target_points = _base_points(
+                    cloud.object_camera_m, cloud.camera_to_base
+                )
+                excluded |= (
+                    cKDTree(target_points).query(scene)[0]
+                    <= self.config.target_surface_exclusion_m
+                )
             obstacles = scene[~excluded]
         if len(obstacles) < 32:
             raise ValueError("insufficient scene points for TCP clearance review")
+        tree = self._scene_tree(obstacles, cloud, state)
         targets, minimum_clearance = [], float("inf")
         previous = q.copy()
         for index in range(1, count + 1):
             alpha = index / count
             desired = p + alpha * (goal[:3, 3] - p)
-            clearance = float(np.min(np.linalg.norm(obstacles - desired, axis=1)))
+            clearance = float(tree.query(desired)[0])
             minimum_clearance = min(minimum_clearance, clearance)
             if clearance < self.config.tcp_clearance_m:
                 raise ValueError("grasp TCP sweep intersects observed scene points")
-            q = self.kinematics.solve(q, desired, rotation(alpha * rv) @ r)
+            target_r = rotation(alpha * rv) @ r
+            if self.geometry:
+                pose = np.eye(4)
+                pose[:3, :3] = target_r
+                pose[:3, 3] = desired
+                self.geometry.check(tree, pose)
+            q = self.kinematics.solve(q, desired, target_r)
             if np.max(np.abs(q - previous)) > self.config.max_joint_step_rad:
                 raise ValueError("grasp IK exceeds joint increment limit")
             if self.joint_bounds is not None and (
@@ -300,8 +440,14 @@ class GraspRecovery:
             if cloud.target_id != old.target_id:
                 raise ValueError("grasp target identity changed")
             failures = []
+            candidates = (
+                [self.selected_candidates[args.proposal_id]]
+                if args.phase != "pregrasp"
+                and args.proposal_id in self.selected_candidates
+                else stored["output"]["candidates"]
+            )
             for candidate in sorted(
-                stored["output"]["candidates"],
+                candidates,
                 key=lambda c: c.get("score", 0.0),
                 reverse=True,
             ):
@@ -328,6 +474,7 @@ class GraspRecovery:
                     )
                     selected = {
                         "goal": goal,
+                        "candidate": deepcopy(candidate),
                         "targets": targets,
                         "state": state,
                         "target": target,
@@ -340,6 +487,10 @@ class GraspRecovery:
                     checks.append(
                         {
                             "check": "bounded-joint-ik-and-tcp-clearance",
+                            "gripper_cad_geometry_sha256": (
+                                None if self.geometry is None else self.geometry.sha256
+                            ),
+                            "pregrasp_planner": self.config.pregrasp_planner,
                             "pass": True,
                             "planned_steps": len(targets),
                             "minimum_tcp_clearance_m": clearance,
@@ -421,6 +572,7 @@ class GraspRecovery:
             current_cloud,
             args.phase,
             args.max_steps,
+            final_joint_hint=review["targets"][-1, 7:13],
         )
         # Preserve the current grip command; an intervening opening/closure invalidates old plans.
         targets = targets.copy()
@@ -433,6 +585,9 @@ class GraspRecovery:
             def on_commit(self, current):
                 super().on_commit(current)
                 if self.reached:
+                    owner.selected_candidates[proposal_id] = deepcopy(
+                        review["candidate"]
+                    )
                     owner.completed_phases.setdefault(proposal_id, set()).add(
                         args.phase
                     )

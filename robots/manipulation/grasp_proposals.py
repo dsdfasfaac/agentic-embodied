@@ -108,6 +108,7 @@ class LocalGraspService:
         timeout_s=60.0,
         expected_gripper=None,
         expected_model_sha256=None,
+        sampling_options=None,
     ):
         self.engine, self.endpoint, self.timeout_s = engine, endpoint, timeout_s
         self.expected_gripper, self.expected_model_sha256 = (
@@ -115,6 +116,7 @@ class LocalGraspService:
             expected_model_sha256,
         )
         self.last_evidence = {}
+        self.sampling_options = sampling_options or {}
 
     def propose(self, cloud, *, max_candidates):
         if not self.endpoint:
@@ -142,6 +144,11 @@ class LocalGraspService:
                 "topk_num_grasps": max_candidates,
                 "filter_collisions": False,
             }
+            payload.update(self.sampling_options)
+            if payload.get("horizontal_closing_max") is not None:
+                payload["up_camera"] = (
+                    cloud.camera_to_base[:3, :3].T @ np.array([0.0, 0.0, 1.0])
+                ).tolist()
             route = "/generate"
         elif self.engine == "contact_graspnet":
             centroid = np.zeros(3)
