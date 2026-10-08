@@ -1,6 +1,6 @@
 {
-  "candidate_id": "graspgen-tube-preshape-seed45-20261008",
-  "causal_hypothesis": "Full opening sweeps neighbouring tubes. Use measured empty-jaw depth displacement to estimate a narrower opening before the wrist GraspGen pass; preserve learned poses and real contact-gated lift.",
+  "candidate_id": "graspgen-narrow-before-approach-20261008",
+  "causal_hypothesis": "The full-open front approach can disturb the rack/target before wrist refinement. Narrow the empty jaw at home before both learned approach phases.",
   "critic_rules": [
     {
       "activation_conditions": [
@@ -42,9 +42,9 @@
     }
   ],
   "diagnosis_sha256": "781346201fb8825fc9733b19ca2e5472b91657ff7d565dbadc7c6fa62187cf7a",
-  "generation": 5,
-  "mechanism_change": "One bounded preshape at the measured front pregrasp, then a fresh wrist proposal; measured feedback scopes CAD slider bounds with 4 mm per-finger uncertainty. Supervised CAD checks are advisory; TCP scene clearance and hardware bounds remain enforced.",
-  "parent_sha256": "cfe8924e8d49352277d2c85dc8bc86b38399807a21a464ca373fc95952e538f1",
+  "generation": 6,
+  "mechanism_change": "Move the same bounded preshape before the front GraspGen proposal; all subsequent proposals and reviews use fresh measured observations.",
+  "parent_sha256": "82d89203beeb92b055dd37373d9713790e4067aac5f8d30bc9c3d2ec27252a03",
   "recovery_rules": [
     {
       "evidence_ids": [
@@ -68,6 +68,14 @@
             "steps": 15
           },
           "stop_when": "Fresh feedback settles at the already requested start pose before learned proposal."
+        },
+        {
+          "tool": "arx.set_gripper",
+          "parameters": {
+            "opening": 0.8235294117647058,
+            "max_steps": 40
+          },
+          "stop_when": "Empty jaw reaches narrow native -1.9 while still at home, before approaching the tube rack; +0.9 preload retained."
         },
         {
           "parameters": {
@@ -96,14 +104,6 @@
           },
           "stop_when": "Measured TCP reaches pregrasp; sent commands and feedback are recorded separately.",
           "tool": "arx.execute_grasp"
-        },
-        {
-          "tool": "arx.set_gripper",
-          "parameters": {
-            "opening": 0.8235294117647058,
-            "max_steps": 40
-          },
-          "stop_when": "Measured native jaw approaches -1.9 with +0.9 preload; only jaw closes at the already observed open pregrasp."
         },
         {
           "tool": "arx.propose_grasp",

@@ -66,3 +66,25 @@ def test_full_grasp_rejects_closure_before_measured_engage(tmp_path, monkeypatch
     with pytest.raises(ValueError, match='ordered pregrasp, engage, close'):
         module.run(args)
     assert events == ['backend_closed', 'journal_closed']
+
+
+def test_frozen_narrow_at_home_program_validates_before_hardware_reset(tmp_path, monkeypatch):
+    from pathlib import Path
+    from robots.arx.deployment.real_input import _load_bundle
+    from robots.arx.deployment.bundle_program import compile_programs
+    root=Path(__file__).resolve().parents[1]
+    d=root/'docs/experiments/arx-graspgen-live-20261008'
+    candidate,_=_load_bundle(d/'bundle-preshape-commission.json')
+    programs=compile_programs(candidate,max_tool_calls=16,max_physical_steps=600,nominal_chunk_steps=16)
+    events=[]
+    def reset():
+        events.append('reset');raise RuntimeError('validated_before_motion')
+    core=SimpleNamespace(programs=programs,current=None,closed=False,
+        backend=SimpleNamespace(close=lambda:events.append('backend_closed')),
+        journal=SimpleNamespace(close=lambda:events.append('journal_closed')),reset=reset)
+    monkeypatch.setattr(module,'RealCoreFactory',lambda **kw:lambda *a:core)
+    args=SimpleNamespace(bundle=d/'bundle-preshape-commission.json',
+        grasp_config=d/'grasp-config-preshape-commission.json',frozen=d/'frozen-preshape',
+        output=tmp_path/'out',hardware_sha256='0'*64,max_physical_steps=600,full_grasp=True)
+    with pytest.raises(RuntimeError,match='validated_before_motion'):module.run(args)
+    assert events==['reset','backend_closed','journal_closed']

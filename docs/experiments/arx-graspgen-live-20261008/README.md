@@ -172,3 +172,13 @@ return still escapes vertically at current x/y first, but its entry bridge
 now stays above max(80 mm, initial TCP height +40 mm) before joining the taught
 return. All interpolated points remain joint bounded and slow; this is an
 empty-jaw corridor check, not full-arm collision certification.
+
+`full-grasp-preshape-live04` stopped at step 190 during the still-full-open
+front approach: both views lost world-position continuity; no preshape,
+closure or lift command was sent. The images show a changed target posture;
+physical contact is possible but not established by these unknown features.
+Controller remains enabled pending the operator's clearance. Generation 6
+moves the exact same preshape to the empty home posture, before the front
+proposal, so neither approach uses the maximum jaw opening. It is frozen and
+ready, but has not been physically run. See `evidence/preshape-trials.json` for
+journal/result SHAs, measured phases, failures and final states.

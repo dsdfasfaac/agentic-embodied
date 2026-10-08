@@ -1,0 +1,358 @@
+{
+  "schema_version": "arx.grasp.preshape.evidence.v1",
+  "reports": [
+    {
+      "trial": "full-grasp-preshape-live02",
+      "source_directory": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/full-grasp-preshape-live02",
+      "result_sha256": "ca985520d4824b2e7dfdbbfac9db879b67fb0db37bf4c95f4677fa285fc2db7b",
+      "journal_sha256": "b3ca0b91a1f0f0605427a9eff1228f5fd40b8e7045e6743b9c859e29054bb42b",
+      "status": "stopped",
+      "termination_reason": "gateway_rejected_or_interrupted",
+      "physical_steps": 16,
+      "bundle_file_sha256": "4620a162353d78af9b2050aa1303f83d4650f9b6a372e1c9e71ad02367fb2e89",
+      "grasp_config_sha256": "01a4f6425fa42c765c83ea6b590013bcee3d0cd753d8e6a11e00941879cd1a0b",
+      "tools": [
+        {
+          "tool": "arx.hold",
+          "status": "interrupted",
+          "executed_steps": 1,
+          "completion": "critic_interrupted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.hold",
+          "status": "completed",
+          "executed_steps": 15,
+          "completion": "plan_exhausted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "status": "completed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.review_grasp",
+          "status": "failed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        }
+      ],
+      "errors": [
+        {
+          "observation_id": "obs-16-read-2",
+          "output": {
+            "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+            "checks": [
+              {
+                "check": "grasp-review",
+                "pass": false,
+                "reason": "no feasible grasp candidate: vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after joint pregrasp failed after grasp TCP sweep intersects observed scene points: no path within rate and step budgets: joint pregrasp failed after grasp path exceeds physical step budget: no path within rate and step budgets; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after joint pregrasp failed after grasp IK exceeds joint increment limit: no path within rate and step budgets: joint pregrasp failed after grasp path exceeds physical step budget: no path within rate and step budgets; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose; vertical escape could not reach learned pose after no bounded final IK solution for learned pose: no bounded final IK solution for learned pose"
+              }
+            ],
+            "eligible": false,
+            "limitations": [
+              "No full arm/finger collision certificate.",
+              "D405 sees only exposed target surfaces.",
+              "Learned scores are model-gripper specific."
+            ],
+            "observation_id": "obs-16-read-2",
+            "phase": "pregrasp",
+            "proposal_id": "grasp-dbed738feb5b4971a26efc5b0e9cb4b8",
+            "review_token": null
+          },
+          "reason": "target grasp review rejected execution",
+          "tool": "arx.review_grasp"
+        },
+        {
+          "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 427, in execute\n    next_token = verify_call_result(\n                 ^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/bundle_program.py\", line 184, in verify_call_result\n    raise ValueError(\"target grasp review rejected execution\")\nValueError: target grasp review rejected execution\n\nThe above exception was the direct cause of the following exception:\n\nTraceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 436, in execute\n    raise GatewayError(\"BUNDLE_STEP_FAILED\") from exc\nrobots.arx.gateway.contracts.GatewayError: Request cannot be executed\n"
+        }
+      ],
+      "final_features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.4016643748141941
+      },
+      "final_state": [
+        0.032235145568847656,
+        0.00514984130859375,
+        0.00324249267578125,
+        -0.037957191467285156,
+        -0.02384185791015625,
+        -0.00820159912109375,
+        -2.942511558532715,
+        0.01583099365234375,
+        0.00286102294921875,
+        0.00400543212890625,
+        -0.03108978271484375,
+        -0.00476837158203125,
+        0.01735687255859375,
+        -2.4805450439453125
+      ]
+    },
+    {
+      "trial": "full-grasp-preshape-live03",
+      "source_directory": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/full-grasp-preshape-live03",
+      "result_sha256": "490a93b2d645985ad3c34a5b991b711d2563a526c390e193db0ac24232389609",
+      "journal_sha256": "74378484ddd24ae3227d6c6ba25af55981f28b9f0f0e86994d1cc15ec6189f24",
+      "status": "stopped",
+      "termination_reason": "gateway_rejected_or_interrupted",
+      "physical_steps": 228,
+      "bundle_file_sha256": "503a84ae15443d7a17e849111f09fe7994fb94ddfd56beea93aa73a501ac9e3f",
+      "grasp_config_sha256": "01a4f6425fa42c765c83ea6b590013bcee3d0cd753d8e6a11e00941879cd1a0b",
+      "tools": [
+        {
+          "tool": "arx.hold",
+          "status": "interrupted",
+          "executed_steps": 1,
+          "completion": "critic_interrupted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.hold",
+          "status": "completed",
+          "executed_steps": 15,
+          "completion": "plan_exhausted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "status": "completed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.review_grasp",
+          "status": "completed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": true,
+          "planned_steps": 210,
+          "cad_advisories": [
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.4050650928512593, 0.20366445099058367, -0.02387820636804386]; tcp_base_m=[0.3668978795397468, 0.19948038959585482, -0.001976972970648019]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.40792236395216014, 0.19974739922423343, -0.020853003784027685]; tcp_base_m=[0.36842876605593433, 0.20075369892535994, -0.0020407209464925677]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.41106000777563517, 0.19523701462803184, -0.021933263292706368]; tcp_base_m=[0.3699596525721218, 0.20202700825486505, -0.002104468922337113]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.41282147619739545, 0.19548257122534551, -0.018574105157337345]; tcp_base_m=[0.3714905390883093, 0.20330031758437014, -0.00216821689818166]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.41217456058129326, 0.1910289860821831, -0.022247526262646977]; tcp_base_m=[0.37302142560449675, 0.20457362691387523, -0.002231964874026205]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.4117118175943703, 0.17841659734178267, -0.02580746359679048]; tcp_base_m=[0.37455231212068424, 0.20584693624338032, -0.002295712849870752]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.41341082353467784, 0.19022541647301644, -0.026796264755768046]; tcp_base_m=[0.37608319863687173, 0.20712024557288541, -0.002359460825715299]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.41341082353467784, 0.19022541647301644, -0.026796264755768046]; tcp_base_m=[0.3776140851530593, 0.20839355490239053, -0.002423208801559846]"
+          ]
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "status": "completed",
+          "executed_steps": 194,
+          "completion": "plan_exhausted",
+          "arrival_verified": true,
+          "command_target_reached": true,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.set_gripper",
+          "status": "completed",
+          "executed_steps": 18,
+          "completion": "plan_exhausted",
+          "arrival_verified": true,
+          "command_target_reached": true,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "status": "failed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        }
+      ],
+      "errors": [
+        {
+          "traceback": "Traceback (most recent call last):\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/session_core.py\", line 396, in execute\n    value = entry.handler.inspect(args, {\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/grasp_recovery.py\", line 708, in inspect\n    return self.recovery.propose(args, context)\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/grasp_recovery.py\", line 161, in propose\n    cloud = self._cloud(observation, images, camera=args.camera, region=args.object_region)\n            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/gateway/grasp_recovery.py\", line 136, in _cloud\n    return self.observer.cloud(observation, images, preferred_camera=camera,\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_grasp_observer.py\", line 32, in cloud\n    else provider.target_sample(images, hardware, preferred_camera=preferred_camera))\n         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\n  File \"/home/dodo/chenfu/Agentic-Embodied/robots/arx/deployment/picktube_rgbd_provider.py\", line 404, in target_sample\n    raise ValueError(\"wrist target needs fresh cross-view validated identity\")\nValueError: wrist target needs fresh cross-view validated identity\n"
+        }
+      ],
+      "final_features": {
+        "privileged.interaction.grasped": false,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": false,
+        "privileged.interaction.lift_m": 0.0,
+        "privileged.interaction.success": false,
+        "privileged.selected.target_gripper_distance_m": 0.055827214072489785
+      },
+      "final_state": [
+        0.032235145568847656,
+        0.00553131103515625,
+        0.00324249267578125,
+        -0.038338661193847656,
+        -0.02422332763671875,
+        -0.00820159912109375,
+        -2.942511558532715,
+        0.21114635467529297,
+        2.138742446899414,
+        1.6176471710205078,
+        -0.16956615447998047,
+        -0.8615627288818359,
+        -0.3423738479614258,
+        -1.9293127059936523
+      ],
+      "cleanup": {
+        "status": "homed_and_disabled",
+        "controller_disabled": true,
+        "error": null,
+        "homing_status": "complete",
+        "phase_counts": {
+          "vertical_escape": 111,
+          "recorded_entry": 116,
+          "recorded_return": 241,
+          "home_alignment": 7
+        }
+      }
+    },
+    {
+      "trial": "full-grasp-preshape-live04",
+      "source_directory": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/full-grasp-preshape-live04",
+      "result_sha256": "2bdc2fbc7f3fb8db2f9094a1649fc26a7ea9c479865f051dc50bbb9aa880d57a",
+      "journal_sha256": "0029b085b646375ebe755b6f786b1a4673a4e06d93f35941078d225fa5d517f0",
+      "status": "stopped",
+      "termination_reason": "observation_unavailable",
+      "physical_steps": 190,
+      "bundle_file_sha256": "503a84ae15443d7a17e849111f09fe7994fb94ddfd56beea93aa73a501ac9e3f",
+      "grasp_config_sha256": "01a4f6425fa42c765c83ea6b590013bcee3d0cd753d8e6a11e00941879cd1a0b",
+      "tools": [
+        {
+          "tool": "arx.hold",
+          "status": "interrupted",
+          "executed_steps": 1,
+          "completion": "critic_interrupted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.hold",
+          "status": "completed",
+          "executed_steps": 15,
+          "completion": "plan_exhausted",
+          "arrival_verified": true,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.propose_grasp",
+          "status": "completed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        },
+        {
+          "tool": "arx.review_grasp",
+          "status": "completed",
+          "executed_steps": 0,
+          "completion": null,
+          "arrival_verified": null,
+          "command_target_reached": null,
+          "eligible": true,
+          "planned_steps": 211,
+          "cad_advisories": [
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42477683632776564, 0.18206039000372876, -0.04401997021572826]; tcp_base_m=[0.3779493660679938, 0.19023560439681889, -0.01852715827958043]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.3795315812940585, 0.1914294362133549, -0.018696646837076857]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.3811137965201233, 0.1926232680298909, -0.018866135394573283]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.38269601174618806, 0.19381709984642692, -0.01903562395206971]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.3842782269722528, 0.19501093166296293, -0.019205112509566143]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.38586044219831755, 0.19620476347949894, -0.01937460106706257]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.38744265742438233, 0.19739859529603498, -0.019544089624559002]",
+            "ARX gripper CAD sweep intersects observed scene: right_link18:component-1; point_base_m=[0.42585034571211083, 0.17688902277074603, -0.04878831600803535]; tcp_base_m=[0.3890248726504471, 0.198592427112571, -0.01971357818205543]"
+          ]
+        },
+        {
+          "tool": "arx.execute_grasp",
+          "status": "interrupted",
+          "executed_steps": 174,
+          "completion": "observation_unavailable",
+          "arrival_verified": true,
+          "command_target_reached": false,
+          "eligible": null,
+          "planned_steps": null,
+          "cad_advisories": []
+        }
+      ],
+      "errors": [],
+      "final_features": {
+        "privileged.interaction.grasped": null,
+        "privileged.interaction.gripper_closed": false,
+        "privileged.interaction.gripper_contact": null,
+        "privileged.interaction.lift_m": null,
+        "privileged.interaction.success": null,
+        "privileged.selected.target_gripper_distance_m": null
+      },
+      "final_state": [
+        0.032235145568847656,
+        0.00514984130859375,
+        0.00324249267578125,
+        -0.038338661193847656,
+        -0.02422332763671875,
+        -0.00820159912109375,
+        -2.942511558532715,
+        0.11959266662597656,
+        2.2920961380004883,
+        1.424239158630371,
+        0.6616697311401367,
+        -1.168269157409668,
+        -0.22182846069335938,
+        -2.48016357421875
+      ]
+    }
+  ]
+}

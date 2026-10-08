@@ -198,6 +198,8 @@ def run(args):
                            for n in (1, 2)]
                 allowed.append([("arx.hold", None)] + pregrasp_group
                                + [("arx.set_gripper", None)] + pregrasp_group + tail)
+                allowed.append([("arx.hold", None), ("arx.set_gripper", None)]
+                               + pregrasp_group * 2 + tail)
                 close_index = len(prefix) - 4
                 if signature not in allowed or prefix[close_index].arguments.get("opening") != 0.0:
                     raise ValueError(
