@@ -85,3 +85,45 @@ The full taught return corridor has passed offline planning tests from the
 previous learned pregrasp and the interrupted home posture; it still needs
 physical replay from a future grasp episode. GraspGen closure/lift acceptance
 and general gripper-transfer verification remain pending.
+
+### Two-view GraspGen commissioning refinement
+
+`bundle-two-view-commission.json`, `grasp-config-two-view-commission.json` and
+`frozen-two-view/` define a front proposal followed by a fresh wrist upper-tube
+proposal. The second pregrasp review requires an engage preview. The learned
+metric pose and model score are preserved; measured upper-tube points are a
+subset of the observed target surface. Full target surfaces remain separate
+from cropped model inputs for contact/collision accounting. No missing depth
+is completed. `upright_tube_column` explicitly admits disconnected measured
+points in a narrow pink-identified upright column.
+
+Model sampling is bounded to eight batches, records all seeds, and retains
+pose diversity rather than repeated nearby high-score poses. The first proposal
+uses seed 44; the second uses seed 43, horizontal closing and approach-axis
+conditions. The complete compiled budget is below 600 steps and 16 calls.
+
+`ac_one_gripper_component_hulls.json` uses the SAME SHA-pinned vendor STL meshes
+as the old hulls, split into 9/5/5 connected watertight components. Each source
+vertex is enclosed by its component hull. This preserves inter-part voids while
+retaining the entire 0..44 mm slider union and the 5 mm collision margin. Rebuild
+with `build_arx_gripper_components.py` and the AC one vendor mesh directory.
+
+The pinned `wrist-self-open-reference.json` comes from 12 read-only empty,
+near-home samples on dodo. It is scoped to feedback -2.46338 +/-0.08. Removal
+requires CURRENT measured depth within 5 mm of a retained measured self surface,
+matching camera/intrinsics/mount identities, and protected target/scene colours.
+Outside the calibrated opening, only CAD self filtering applies. The reference
+is not a jaw-width law or a replacement for swept CAD checks. Build and inspect
+its overlay using `calibrate_arx_wrist_self.py` before applying a new reference.
+
+An additional preview bug was repaired: filtering observed robot points uses
+the actually observed joint pose, including when an engage path starts from a
+virtual pregrasp waypoint. A future planned pose must not erase current scene
+obstacles or leave the current robot incorrectly classified as an obstacle.
+
+Retained offline studies remain under
+`/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/`. The old near-rack snapshot
+still has no fully CAD-eligible learned engagement after these changes; this
+result is not promoted or represented as a physical success. Empty gripper
+partial-close/open calibration only occurred near home. The next strict live
+commissioning result is recorded separately.

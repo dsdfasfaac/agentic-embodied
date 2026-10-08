@@ -183,19 +183,21 @@ def run(args):
             if full_grasp:
                 prefix = program.calls[:end]
                 signature = [(c.tool, c.arguments.get("phase")) for c in prefix]
-                required = [
-                    ("arx.hold", None),
-                    ("arx.propose_grasp", None),
-                    ("arx.review_grasp", "pregrasp"),
-                    ("arx.execute_grasp", "pregrasp"),
-                    ("arx.review_grasp", "engage"),
-                    ("arx.execute_grasp", "engage"),
-                    ("arx.set_gripper", None),
-                    ("arx.review_grasp", "lift"),
-                    ("arx.execute_grasp", "lift"),
-                    ("arx.hold", None),
-                ]
-                if signature != required or prefix[6].arguments.get("opening") != 0.0:
+                # One or two measured pregrasp passes. A second proposal uses
+                # the fresh close-up, without borrowing the first proposal's
+                # completion or grasp token.
+                pregrasp_group = [("arx.propose_grasp", None),
+                                  ("arx.review_grasp", "pregrasp"),
+                                  ("arx.execute_grasp", "pregrasp")]
+                tail = [("arx.review_grasp", "engage"),
+                        ("arx.execute_grasp", "engage"),
+                        ("arx.set_gripper", None),
+                        ("arx.review_grasp", "lift"),
+                        ("arx.execute_grasp", "lift"), ("arx.hold", None)]
+                allowed = [[("arx.hold", None)] + pregrasp_group * n + tail
+                           for n in (1, 2)]
+                close_index = len(prefix) - 4
+                if signature not in allowed or prefix[close_index].arguments.get("opening") != 0.0:
                     raise ValueError(
                         "full grasp prefix requires ordered pregrasp, engage, close, contact-gated lift and hold"
                     )

@@ -24,21 +24,23 @@ class ArxGripperGeometry:
     def _parts_at(self, tcp_pose):
         r = tcp_pose[:3, :3]
         origin = tcp_pose[:3, 3] - r @ self.tcp_offset
-        for part in self.parts:
-            equations = np.asarray(part["convex_halfspaces"]).copy()
-            axis = np.asarray(part["slider_axis_link6"])
-            # Conservative union across the entire possible slider opening.
-            shifts = (equations[:, :3] @ axis)[:, None] * np.asarray(self.slider)
-            equations[:, 3] -= shifts.max(axis=1)
-            bounds = np.asarray(part["bounds_local_m"])
-            low = bounds[0] + np.minimum(axis * self.slider[0], axis * self.slider[1])
-            high = bounds[1] + np.maximum(axis * self.slider[0], axis * self.slider[1])
-            offset = np.asarray(part["origin_link6_m"])
-            centre = (low + high) / 2
-            yield part[
-                "link"
-            ], equations, r, origin + r @ offset, centre, np.linalg.norm(high - low) / 2
-
+        for parent in self.parts:
+            for component_index, component in enumerate(parent.get("convex_components", [parent])):
+                part = {**parent, **component}
+                equations = np.asarray(part["convex_halfspaces"]).copy()
+                axis = np.asarray(part["slider_axis_link6"])
+                # Conservative union across the entire possible slider opening.
+                shifts = (equations[:, :3] @ axis)[:, None] * np.asarray(self.slider)
+                equations[:, 3] -= shifts.max(axis=1)
+                bounds = np.asarray(part["bounds_local_m"])
+                low = bounds[0] + np.minimum(axis * self.slider[0], axis * self.slider[1])
+                high = bounds[1] + np.maximum(axis * self.slider[0], axis * self.slider[1])
+                offset = np.asarray(part["origin_link6_m"])
+                centre = (low + high) / 2
+                link = part["link"]
+                if "convex_components" in parent:
+                    link += f":component-{component_index}"
+                yield link, equations, r, origin + r @ offset, centre, np.linalg.norm(high - low) / 2
     def occupied_mask(self, points, pose, *, margin_m=0.005):
         result = np.zeros(len(points), dtype=bool)
         tree = cKDTree(points)

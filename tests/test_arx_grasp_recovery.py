@@ -110,6 +110,23 @@ def test_geometry_model_pose_preserves_arx_rotation_and_metric_target():
         rigid_pose(invalid)
 
 
+def test_engage_preview_filters_self_at_observed_not_future_robot_pose():
+    rec = recovery()
+    ctx = context()
+    proposal = rec.propose(ProposeGraspArgs(), ctx)
+    observed = []
+    original = rec._scene_tree
+    def scene_tree(points, cloud, state):
+        observed.append(state.copy())
+        return original(points, cloud, state)
+    rec._scene_tree = scene_tree
+    review = rec.review(ReviewGraspArgs(proposal_id=proposal["proposal_id"],
+                                       require_engage_preview=True), ctx)
+    assert review["eligible"]
+    assert len(observed) == 2
+    assert all(np.array_equal(state, ctx["command"]) for state in observed)
+
+
 def test_review_token_is_single_use_and_plan_completion_requires_measured_pose():
     rec = recovery()
     ctx, proposal, review = proposed_review(rec)
@@ -560,7 +577,7 @@ def test_local_graspgen_protocol_centres_only_target_points_and_checks_model_ide
         service.propose(cloud, max_candidates=8)
 
 
-def test_frozen_real_candidate_catalog_and_contract_pass_static_preflight():
+def test_historical_real_candidate_can_be_refrozen_for_current_catalog(tmp_path):
     import json
     from pathlib import Path
     from robots.arx.deployment.real_input import (
@@ -572,7 +589,10 @@ def test_frozen_real_candidate_catalog_and_contract_pass_static_preflight():
 
     root = Path(__file__).resolve().parents[1]
     directory = root / "docs/experiments/arx-grasp-recovery-20261006"
-    path = directory / "real-input-contract.json"
+    from scripts.deployment.freeze_arx_picktube_inputs import freeze
+    freeze(directory / "candidate.json", tmp_path,
+           grasp_config=directory / "grasp-config.json")
+    path = tmp_path / "real-input-contract.json"
     contract = RealInputContract.model_validate_json(path.read_text())
     live = LiveCapabilities(
         schema_version="arx.real.capabilities.v1",
@@ -588,7 +608,7 @@ def test_frozen_real_candidate_catalog_and_contract_pass_static_preflight():
         bundle_path=directory / "candidate.json",
         task_manifest_path=root / "robots/arx/manifests/pickup_test_tube.yaml",
         model_contract_path=root / "robots/arx/manifests/task7_model_a.yaml",
-        tool_catalog_path=directory / "tool-catalog.json",
+        tool_catalog_path=tmp_path / "tool-catalog.json",
         real_contract_path=path,
         live_capabilities=live,
         expected_real_contract_sha256=file_sha256(path),
@@ -684,3 +704,36 @@ def test_pregrasp_preview_skips_pose_with_blocked_engage_path():
     assert phases == ['pregrasp', 'engage', 'pregrasp', 'engage']
     assert rec.reviews[review['review_token']]['goal'][0, 3] == pytest.approx(.08)
     assert review['checks'][0]['engage_preview']['planned_steps'] == 30
+
+
+def test_vertical_escape_avoids_obstacle_and_preserves_learned_final_pose():
+    rec = recovery(pregrasp_escape_m=.04, speed_m_s=.03)
+    ctx = context();state = np.array(ctx['observation']['hardware']['measured_state'])
+    rec.observer.scene = np.r_[rec.observer.scene, [[.07, 0., .10]]]
+    cloud = rec.observer.cloud(ctx['observation'], {})
+    goal = np.eye(4);goal[:3, 3] = [.10, 0., .10]
+    targets, clearance = rec._plan(state, state, goal, cloud, 'pregrasp', 120)
+    assert len(targets) <= 120 and clearance >= rec.config.tcp_clearance_m
+    assert targets[:, 9].max() >= .139
+    np.testing.assert_allclose(targets[-1, 7:10], goal[:3, 3], atol=1e-6)
+    assert np.max(np.abs(np.diff(targets[:, 7:13], axis=0))) <= rec.config.max_joint_step_rad
+    with pytest.raises(ValueError, match='budget'):
+        rec._plan(state, state, goal, cloud, 'pregrasp', 50)
+
+
+def test_model_crop_retains_full_measured_target_for_contact_review():
+    rec = recovery(target_exclusion_radius_m=.005, target_surface_exclusion_m=.005)
+    ctx = context();state = np.array(ctx['observation']['hardware']['measured_state'])
+    cloud = rec.observer.cloud(ctx['observation'], {})
+    wall = np.array([.075, 0., .10])
+    cropped = replace(cloud, scene_camera_m=np.r_[cloud.scene_camera_m, wall[None]],
+                      target_surface_camera_m=np.r_[cloud.object_camera_m, wall[None]])
+    goal = np.eye(4);goal[:3, 3] = [.10, 0., .10]
+    # Actual selected target surface may be contacted during engage; it is
+    # still an obstacle for open pregrasp. Other scene points are unchanged.
+    rec._plan(state, state, goal, cropped, 'engage', 90)
+    with pytest.raises(ValueError, match='scene'):
+        rec._plan(state, state, goal, cropped, 'pregrasp', 90)
+    unverified = replace(cropped, target_surface_camera_m=None)
+    with pytest.raises(ValueError, match='scene'):
+        rec._plan(state, state, goal, unverified, 'engage', 90)

@@ -327,7 +327,7 @@ class PickTubeRgbdProvider:
                 "transform_left": transform, "point_camera": point,
                 "point_left": (transform @ np.r_[point, 1.])[:3], "deproject": deproject}
 
-    def target_sample(self, images, hardware):
+    def target_sample(self, images, hardware, *, preferred_camera="auto"):
         """Use the wrist only after fresh cross-camera agreement established identity."""
         transient = ("pink tube", "yellow test-tube rack")
         front, front_error, wrist = None, None, None
@@ -396,7 +396,15 @@ class PickTubeRgbdProvider:
                     # depth and its own bounded world-position continuity on
                     # every observation; no cached target is substituted.
                     self.wrist_validations = 0
+        if preferred_camera not in {"auto", "front_rgb", "right_rgb"}:
+            raise ValueError("unknown target camera preference")
         sample = front
+        if preferred_camera == "right_rgb":
+            if wrist is None or self.wrist_validations < 3:
+                raise ValueError("wrist target needs fresh cross-view validated identity")
+            sample = wrist
+        if sample is None and preferred_camera == "front_rgb":
+            raise front_error or ValueError("pink tube label unavailable in requested front camera")
         if sample is None and wrist is not None and self.wrist_validations >= 3:
             if self.last_target_left is not None and np.linalg.norm(wrist["point_left"] - self.last_target_left) <= .025:
                 sample = wrist

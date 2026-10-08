@@ -203,10 +203,16 @@ class RealCoreFactory:
                     raise ValueError(
                         "PickTube grasp tools require the real PickTube observer"
                     )
+                self_reference = None
+                if settings.wrist_self_reference_file:
+                    from robots.arx.deployment.wrist_self_mask import WristSelfMask
+                    self_reference = WristSelfMask(settings.wrist_self_reference_file,
+                                                   settings.wrist_self_reference_sha256)
                 grasp = GraspRecovery(
                     settings,
                     PickTubeGraspObserver(
-                        provider.impl, cloud_mode=settings.target_cloud_mode
+                        provider.impl, cloud_mode=settings.target_cloud_mode,
+                        self_reference=self_reference,
                     ),
                     closed_policy=config.right_gripper_closed_policy,
                     open_policy=config.right_gripper_open_policy,

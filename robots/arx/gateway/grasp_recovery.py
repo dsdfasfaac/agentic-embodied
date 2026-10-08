@@ -83,7 +83,9 @@ class GraspRecovery:
                 expected_model_sha256=config.learned_model_sha256,
                 sampling_options={
                     "num_model_samples": config.graspgen_samples,
+                    "sampling_batches": config.graspgen_sampling_batches,
                     "horizontal_closing_max": config.graspgen_horizontal_closing_max,
+                    "horizontal_approach_max": config.graspgen_horizontal_approach_max,
                 },
             ),
         }
@@ -127,6 +129,17 @@ class GraspRecovery:
             )
         return state
 
+    def _cloud(self, observation, images, *, camera="auto", region="full"):
+        if camera == "auto" and region == "full":
+            return self.observer.cloud(observation, images)
+        return self.observer.cloud(observation, images, preferred_camera=camera,
+            object_region=region, upper_crop_m=(self.config.target_upper_crop_min_m,
+                                               self.config.target_upper_crop_max_m))
+
+    def _proposal_cloud(self, stored, observation, images):
+        return self._cloud(observation, images, camera=stored.get("camera", "auto"),
+                           region=stored.get("object_region", "full"))
+
     def propose(self, args, context):
         observation, images = context["observation"], context["images"]
         state = self._fresh(observation)
@@ -142,7 +155,9 @@ class GraspRecovery:
             raise ValueError(
                 "possible held object: confirm unloading before opening the gripper"
             )
-        cloud = self.observer.cloud(observation, images)
+        if args.object_region != "full" and args.engine == "tube_geometry":
+            raise ValueError("upper tube region is a learned-grasp input, not a geometric TCP offset")
+        cloud = self._cloud(observation, images, camera=args.camera, region=args.object_region)
         _, orientation, _ = self.kinematics.fk(state[7:13])
         if args.engine == "tube_geometry":
             candidates = geometry_proposal(
@@ -152,6 +167,16 @@ class GraspRecovery:
                 orientation_search_rad=self.config.geometry_orientation_search_rad,
             )[: args.max_candidates]
         else:
+            if args.engine == "graspgen" and isinstance(self.engines[args.engine], LocalGraspService):
+                if args.horizontal_approach_max is not None and self.config.graspgen_horizontal_closing_max is None:
+                    raise ValueError("horizontal approach requires configured closing-axis condition")
+                options = self.engines[args.engine].sampling_options
+                options["horizontal_approach_max"] = (self.config.graspgen_horizontal_approach_max
+                    if args.horizontal_approach_max is None else args.horizontal_approach_max)
+                if args.sampling_seed is None:
+                    options.pop("seed", None)
+                else:
+                    options["seed"] = args.sampling_seed
             if (
                 args.engine == "graspgen"
                 and self.config.graspgen_approach_alignment_min is not None
@@ -208,6 +233,8 @@ class GraspRecovery:
             "output": deepcopy(output),
             "cloud": cloud,
             "created": self.clock(),
+            "camera": args.camera,
+            "object_region": args.object_region,
         }
         return output
 
@@ -234,11 +261,44 @@ class GraspRecovery:
             goal[:3, 3] = p + np.array([0.0, 0.0, self.config.lift_distance_m])
         return goal
 
-    def _plan(
-        self, command, state, goal, cloud, phase, max_steps, final_joint_hint=None
+    def _plan(self, command, state, goal, cloud, phase, max_steps, final_joint_hint=None,
+              *, scene_state=None):
+        observed_state = state if scene_state is None else scene_state
+        try:
+            return self._direct_plan(command, state, goal, cloud, phase, max_steps,
+                                     final_joint_hint=final_joint_hint, scene_state=observed_state)
+        except ValueError as original:
+            if phase != "pregrasp" or self.config.pregrasp_escape_m <= 0:
+                raise
+            raised = np.eye(4)
+            raised[:3, 3], raised[:3, :3], _ = self.kinematics.fk(state[7:13])
+            raised[2, 3] += self.config.pregrasp_escape_m
+            first, clearance = self._cartesian_plan(command, state, raised, cloud,
+                                                    phase, max_steps, scene_state=observed_state)
+            # One settling tail at the final learned pose, not at the waypoint.
+            first = first[:-30]
+            next_state = state.copy()
+            next_state[7:13] = first[-1, 7:13]
+            try:
+                second, other_clearance = self._direct_plan(first[-1], next_state, goal,
+                    cloud, phase, max_steps-len(first), final_joint_hint=final_joint_hint,
+                    scene_state=observed_state)
+            except ValueError as exc:
+                raise ValueError(f"vertical escape could not reach learned pose after {original}: {exc}") from exc
+            targets = np.vstack((first, second))
+            positions = np.array([self.kinematics.fk(q[7:13])[0]
+                                  for q in np.vstack((state, targets))])
+            arc = np.linalg.norm(np.diff(positions, axis=0), axis=1).sum()
+            if arc > self.config.max_travel_m:
+                raise ValueError("escaped pregrasp arc exceeds Cartesian travel budget")
+            return targets, min(clearance, other_clearance)
+
+    def _direct_plan(
+        self, command, state, goal, cloud, phase, max_steps, final_joint_hint=None,
+        scene_state=None,
     ):
         try:
-            return self._cartesian_plan(command, state, goal, cloud, phase, max_steps)
+            return self._cartesian_plan(command, state, goal, cloud, phase, max_steps, scene_state=scene_state)
         except ValueError as original:
             if (
                 phase != "pregrasp"
@@ -249,7 +309,7 @@ class GraspRecovery:
             from scipy.spatial import cKDTree
 
             obstacles = _base_points(cloud.scene_camera_m, cloud.camera_to_base)
-            tree = self._scene_tree(obstacles, cloud, state)
+            tree = self._scene_tree(obstacles, cloud, state if scene_state is None else scene_state)
             failures = []
             for path in joint_paths(
                 self.kinematics,
@@ -312,9 +372,13 @@ class GraspRecovery:
             pose[:3, :3] = r
             pose[:3, 3] = p
             own = self.geometry.occupied_mask(obstacles, pose)
-            target = _base_points(cloud.object_camera_m, cloud.camera_to_base)
+            target = _base_points(cloud.target_surface_camera_m if cloud.target_surface_camera_m is not None else cloud.object_camera_m, cloud.camera_to_base)
             # Never erase the selected object as robot self geometry.
             own &= cKDTree(target).query(obstacles)[0] > 0.006
+            if cloud.robot_self_camera_m is not None and len(cloud.robot_self_camera_m):
+                measured_self = _base_points(cloud.robot_self_camera_m, cloud.camera_to_base)
+                own |= ((cKDTree(measured_self).query(obstacles)[0] < 1e-6)
+                        & (cKDTree(target).query(obstacles)[0] > .006))
             obstacles = obstacles[~own]
         if len(obstacles) < 32:
             raise ValueError(
@@ -322,7 +386,7 @@ class GraspRecovery:
             )
         return cKDTree(obstacles)
 
-    def _cartesian_plan(self, command, state, goal, cloud, phase, max_steps):
+    def _cartesian_plan(self, command, state, goal, cloud, phase, max_steps, *, scene_state=None):
         q = state[7:13].copy()
         p, r, _ = self.kinematics.fk(q)
         travel = float(np.linalg.norm(goal[:3, 3] - p))
@@ -366,7 +430,7 @@ class GraspRecovery:
                 from scipy.spatial import cKDTree
 
                 target_points = _base_points(
-                    cloud.object_camera_m, cloud.camera_to_base
+                    cloud.target_surface_camera_m if cloud.target_surface_camera_m is not None else cloud.object_camera_m, cloud.camera_to_base
                 )
                 excluded |= (
                     cKDTree(target_points).query(scene)[0]
@@ -375,7 +439,7 @@ class GraspRecovery:
             obstacles = scene[~excluded]
         if len(obstacles) < 32:
             raise ValueError("insufficient scene points for TCP clearance review")
-        tree = self._scene_tree(obstacles, cloud, state)
+        tree = self._scene_tree(obstacles, cloud, state if scene_state is None else scene_state)
         targets, minimum_clearance = [], float("inf")
         previous = q.copy()
         for index in range(1, count + 1):
@@ -429,7 +493,7 @@ class GraspRecovery:
             state = self._fresh(observation)
             self._phase_gate(args.proposal_id, args.phase, observation, state, images)
             stored = self.proposals[args.proposal_id]
-            cloud = self.observer.cloud(observation, images)
+            cloud = self._proposal_cloud(stored, observation, images)
             old = stored["cloud"]
             target = _base_points(cloud.target_camera_m[None], cloud.camera_to_base)[0]
             original = _base_points(old.target_camera_m[None], old.camera_to_base)[0]
@@ -473,11 +537,12 @@ class GraspRecovery:
                         args.max_steps,
                     )
                     engage_preview = None
-                    if args.phase == "pregrasp" and self.config.validate_pregrasp_engage:
+                    if args.phase == "pregrasp" and (self.config.validate_pregrasp_engage or args.require_engage_preview):
                         preview_state = targets[-1].copy()
                         engage_goal = self._goal(candidate, stored["output"]["engine"], "engage", preview_state)
                         engage_targets, engage_clearance = self._plan(
-                            targets[-1], preview_state, engage_goal, cloud, "engage", 90)
+                            targets[-1], preview_state, engage_goal, cloud, "engage", 90,
+                            scene_state=state)
                         engage_preview = {"planned_steps": len(engage_targets),
                             "minimum_tcp_clearance_m": engage_clearance,
                             "scope": "same learned pose against currently observed scene; fresh engage review still required"}
@@ -566,7 +631,7 @@ class GraspRecovery:
             state,
             context.images,
         )
-        current_cloud = self.observer.cloud(context.observation, context.images)
+        current_cloud = self._proposal_cloud(self.proposals[review["args"].proposal_id], context.observation, context.images)
         target = _base_points(
             current_cloud.target_camera_m[None], current_cloud.camera_to_base
         )[0]

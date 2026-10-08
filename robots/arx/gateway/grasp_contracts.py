@@ -10,12 +10,17 @@ from .contracts import ID, StrictModel
 class ProposeGraspArgs(StrictModel):
     engine: Literal["tube_geometry", "contact_graspnet", "graspgen"] = "tube_geometry"
     max_candidates: int = Field(default=8, ge=1, le=32)
+    camera: Literal["auto", "front_rgb", "right_rgb"] = "auto"
+    object_region: Literal["full", "upper_tube"] = "full"
+    horizontal_approach_max: float | None = Field(default=None, ge=0, le=0.5)
+    sampling_seed: int | None = Field(default=None, ge=0, lt=2**32)
 
 
 class ReviewGraspArgs(StrictModel):
     proposal_id: ID
     phase: Literal["pregrasp", "engage", "lift"] = "pregrasp"
     max_steps: int = Field(default=180, ge=20, le=360)
+    require_engage_preview: bool = False
 
 
 class ExecuteGraspArgs(StrictModel):
@@ -61,16 +66,23 @@ class GraspRecoveryConfig(StrictModel):
     # Dedicated supervised harness may test contact-gated engagement and lift.
     # This is not a verified transfer or permission for production VLA reentry.
     learned_grasp_commissioning: bool = False
-    learned_target_distance_max_m: float = Field(default=0.025, gt=0, le=0.04)
+    learned_target_distance_max_m: float = Field(default=0.025, gt=0, le=0.05)
     learned_parallel_jaw_half_turn: bool = False
+    graspgen_sampling_batches: int = Field(default=1, ge=1, le=8)
     graspgen_samples: int = Field(default=128, ge=64, le=1024)
     graspgen_horizontal_closing_max: float | None = Field(default=None, ge=0, le=0.5)
+    graspgen_horizontal_approach_max: float | None = Field(default=None, ge=0, le=0.5)
     graspgen_approach_alignment_min: float | None = Field(default=None, ge=0.5, le=0.99)
     validate_pregrasp_engage: bool = False
-    target_cloud_mode: Literal["label_only", "upright_tube"] = "label_only"
+    target_cloud_mode: Literal["label_only", "upright_tube", "upright_tube_column"] = "label_only"
+    target_upper_crop_min_m: float = Field(default=0.03, ge=0.015, le=0.05)
+    target_upper_crop_max_m: float = Field(default=0.05, ge=0.025, le=0.06)
+    pregrasp_escape_m: float = Field(default=0.0, ge=0, le=0.05)
     pregrasp_planner: Literal["cartesian", "joint_then_cartesian"] = "cartesian"
     gripper_geometry_file: str | None = None
     gripper_geometry_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    wrist_self_reference_file: str | None = None
+    wrist_self_reference_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     target_surface_exclusion_m: float = Field(default=0.0, ge=0, le=0.006)
     motion_enabled: bool = False
     pregrasp_distance_m: float = Field(default=0.03, ge=0.02, le=0.08)
@@ -105,6 +117,12 @@ class GraspRecoveryConfig(StrictModel):
         from urllib.parse import urlparse
         import numpy as np
 
+        if self.target_upper_crop_min_m >= self.target_upper_crop_max_m:
+            raise ValueError("upper tube crop must have increasing height bounds")
+        if bool(self.wrist_self_reference_file) != bool(self.wrist_self_reference_sha256):
+            raise ValueError("wrist self reference requires path and SHA")
+        if self.graspgen_horizontal_approach_max is not None and self.graspgen_horizontal_closing_max is None:
+            raise ValueError("horizontal approach requires closing-axis/up-camera condition")
         for endpoint in (self.contact_graspnet_endpoint, self.graspgen_endpoint):
             if endpoint is not None:
                 url = urlparse(endpoint)

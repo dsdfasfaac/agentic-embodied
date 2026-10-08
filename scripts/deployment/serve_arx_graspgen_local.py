@@ -24,9 +24,34 @@ def pose_condition_mask(poses, constraints):
     keep = np.ones(len(poses), dtype=bool)
     if "up_camera" in constraints:
         keep &= np.abs(poses[:, :3, 0] @ np.asarray(constraints["up_camera"])) <= constraints["horizontal_closing_max"]
+    if "horizontal_approach_max" in constraints:
+        keep &= np.abs(poses[:, :3, 2] @ np.asarray(constraints["up_camera"])) <= constraints["horizontal_approach_max"]
     if "preferred_approach_camera" in constraints:
         keep &= poses[:, :3, 2] @ np.asarray(constraints["preferred_approach_camera"]) >= constraints["approach_alignment_min"]
     return keep
+
+
+def diverse_pose_indices(poses, scores, count):
+    """Keep high scoring, distinct parallel-jaw poses without changing them."""
+    result = []
+    half_turn = np.diag([-1., -1., 1.])
+    for index in np.argsort(-scores, kind="stable"):
+        candidate = poses[index]
+        duplicate = False
+        for old in result:
+            if np.linalg.norm(candidate[:3, 3] - poses[old, :3, 3]) >= .004:
+                continue
+            relative = candidate[:3, :3].T @ poses[old, :3, :3]
+            angles = [np.arccos(np.clip((np.trace(r)-1)/2, -1., 1.))
+                      for r in (relative, relative @ half_turn)]
+            if min(angles) < .15:
+                duplicate = True
+                break
+        if not duplicate:
+            result.append(int(index))
+        if len(result) == count:
+            break
+    return np.asarray(result, dtype=int)
 
 
 class Model:
@@ -109,6 +134,14 @@ class Model:
             ):
                 raise ValueError("invalid closing-axis condition")
             constraints.update(horizontal_closing_max=maximum, up_camera=up.tolist())
+        if payload.get("horizontal_approach_max") is not None:
+            maximum = float(payload["horizontal_approach_max"])
+            if not 0 <= maximum <= .5 or "up_camera" not in constraints:
+                raise ValueError("horizontal approach requires a valid up-camera vector")
+            constraints["horizontal_approach_max"] = maximum
+        explicit_seed = payload.get("seed")
+        if explicit_seed is not None and (type(explicit_seed) is not int or not 0 <= explicit_seed < 2**32):
+            raise ValueError("seed must be an integer in 0..2**32-1")
         if payload.get("preferred_approach_camera") is not None:
             direction = np.asarray(payload["preferred_approach_camera"], dtype=float)
             minimum = float(payload["approach_alignment_min"])
@@ -123,34 +156,42 @@ class Model:
                 preferred_approach_camera=direction.tolist(),
                 approach_alignment_min=minimum,
             )
+        batches = payload.get("sampling_batches", 1)
+        if type(batches) is not int or not 1 <= batches <= 8:
+            raise ValueError("sampling_batches must be an integer in 1..8")
         with self.lock:
             import torch
-
             request_index = self.request_index
-            seed = (self.seed + request_index) % (2**32)
+            first_seed = explicit_seed if explicit_seed is not None else (self.seed + request_index) % (2**32)
             self.request_index += 1
-            torch.manual_seed(seed)
-            np.random.seed(seed)
             started = time.monotonic()
-            grasps, scores = self.api.run_inference(
-                points,
-                self.sampler,
-                num_grasps=samples,
-                topk_num_grasps=samples,
-                min_grasps=1,
-                max_tries=1,
-                remove_outliers=False,
-            )
-        poses = grasps.detach().cpu().numpy()
-        keep = pose_condition_mask(poses, constraints)
-        indices = np.flatnonzero(keep)[:count]
-        raw_count = len(poses)
-        grasps, scores = grasps[indices], scores[indices]
+            selected_poses, selected_scores, seeds = [], [], []
+            raw_count = 0
+            for batch in range(batches):
+                seed = (first_seed + batch) % (2**32)
+                seeds.append(seed)
+                torch.manual_seed(seed)
+                np.random.seed(seed)
+                generated, scores = self.api.run_inference(
+                    points, self.sampler, num_grasps=samples, topk_num_grasps=samples,
+                    min_grasps=1, max_tries=1, remove_outliers=False,
+                )
+                poses = generated.detach().cpu().numpy()
+                scores = scores.detach().cpu().numpy().reshape(-1)
+                raw_count += len(poses)
+                keep = pose_condition_mask(poses, constraints)
+                selected_poses.extend(poses[keep])
+                selected_scores.extend(scores[keep])
+        poses = np.asarray(selected_poses)
+        scores = np.asarray(selected_scores)
+        indices = diverse_pose_indices(poses, scores, count)
+        conditioned_count = len(poses)
+        grasps, scores = poses[indices], scores[indices]
         return {
             "ok": True,
             "grasps": [
                 {
-                    "transform_model": pose.detach().cpu().numpy().tolist(),
+                    "transform_model": pose.tolist(),
                     "score": float(score),
                 }
                 for pose, score in zip(grasps, scores)
@@ -161,10 +202,13 @@ class Model:
                 "target_only_cloud": True,
                 "input_points": len(points),
                 "request_index": request_index,
-                "seed": seed,
+                "seed": first_seed,
+                "sampling_seeds": seeds,
+                "sampling_batches": batches,
                 "num_model_samples": samples,
                 "raw_candidate_count": raw_count,
-                "conditioned_candidate_count": int(keep.sum()),
+                "conditioned_candidate_count": conditioned_count,
+                "candidate_selection": "score ranked pose diversity; rigid model poses unchanged",
                 "pose_conditions": constraints,
                 "inference_s": time.monotonic() - started,
                 "input_cloud_sha256": hashlib.sha256(points.tobytes()).hexdigest(),

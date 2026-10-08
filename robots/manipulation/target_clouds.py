@@ -14,11 +14,14 @@ def upright_tube_mask(
     radius_m=0.012,
     below_m=0.008,
     above_m=0.09,
+    allow_disconnected=False,
 ):
     """Select the seed-connected metric column, excluding yellow rack pixels.
 
     points_base is HxWx3; invalid depth positions are NaN. Missing transparent
     surfaces are never filled. The physical upright prior is explicit.
+    allow_disconnected admits other MEASURED surfaces in the same narrow metric
+    column after pink-seed admission; depth holes are not filled or fabricated.
     """
     import cv2
 
@@ -45,7 +48,7 @@ def upright_tube_mask(
     ids, counts = ids[ids != 0], counts[ids != 0]
     if not len(ids):
         raise ValueError("tube depth column is disconnected from pink identity seed")
-    mask = labels == ids[np.argmax(counts)]
+    mask = roi if allow_disconnected else labels == ids[np.argmax(counts)]
     selected = points[mask]
     if len(selected) < 32 or np.ptp(selected[:, 2]) < 0.02:
         raise ValueError("insufficient measured upright tube surface extent")

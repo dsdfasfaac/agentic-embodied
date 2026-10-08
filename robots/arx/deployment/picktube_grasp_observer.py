@@ -17,16 +17,19 @@ from .picktube_rgbd_provider import (
 
 
 class PickTubeGraspObserver:
-    def __init__(self, provider, *, cloud_mode="label_only"):
-        if cloud_mode not in {"label_only", "upright_tube"}:
+    def __init__(self, provider, *, cloud_mode="label_only", self_reference=None):
+        if cloud_mode not in {"label_only", "upright_tube", "upright_tube_column"}:
             raise ValueError("unknown target cloud mode")
         self.provider = provider
         self.cloud_mode = cloud_mode
+        self.self_reference = self_reference
 
-    def cloud(self, observation, images):
+    def cloud(self, observation, images, *, preferred_camera="auto", object_region="full",
+              upper_crop_m=(.03, .05)):
         provider = self.provider
         hardware = observation["hardware"]
-        sample = provider.target_sample(images, hardware)
+        sample = (provider.target_sample(images, hardware) if preferred_camera == "auto"
+                  else provider.target_sample(images, hardware, preferred_camera=preferred_camera))
         camera, depth_key = sample["camera"], sample["depth_key"]
         serial = FRONT_SERIAL if camera == "front_rgb" else RIGHT_SERIAL
         intrinsics_sha = (
@@ -95,7 +98,7 @@ class PickTubeGraspObserver:
                 "front RGB/depth camera identity, calibration or timestamp differs"
             )
         scope = "visible_pink_label_surface"
-        if self.cloud_mode == "upright_tube":
+        if self.cloud_mode in {"upright_tube", "upright_tube_column"}:
             from robots.manipulation.target_clouds import upright_tube_mask
 
             vy, vx = np.nonzero(valid)
@@ -111,11 +114,38 @@ class PickTubeGraspObserver:
             grid = np.full((*depth.shape, 3), np.nan)
             grid[vy, vx] = base_points
             seed_base = (transform @ np.r_[target, 1.0])[:3]
-            surface_mask = upright_tube_mask(rgb, grid, seed_base, mask)
+            surface_mask = upright_tube_mask(rgb, grid, seed_base, mask,
+                **({"radius_m": .018, "allow_disconnected": True}
+                   if self.cloud_mode == "upright_tube_column" else {}))
             selected = surface_mask[vy, vx]
             object_cloud = camera_points[selected]
             mask = surface_mask
-            scope = "measured_seed_connected_upright_tube_surface"
+            scope = ("measured_pink_identified_metric_column" if self.cloud_mode == "upright_tube_column"
+                     else "measured_seed_connected_upright_tube_surface")
+        full_surface = object_cloud.copy()
+        crop_evidence = None
+        if object_region == "upper_tube":
+            if self.cloud_mode not in {"upright_tube", "upright_tube_column"}:
+                raise ValueError("upper tube input requires measured upright target surface")
+            minimum, maximum = upper_crop_m
+            if not 0 < minimum < maximum <= .06:
+                raise ValueError("invalid measured upper tube crop")
+            base_objects = (transform @ np.c_[object_cloud, np.ones(len(object_cloud))].T).T[:, :3]
+            seed_base = (transform @ np.r_[target, 1.])[:3]
+            height = base_objects[:, 2] - seed_base[2]
+            object_cloud = object_cloud[(height >= minimum) & (height <= maximum)]
+            if len(object_cloud) < 32:
+                raise ValueError("upper tube has fewer than 32 observed depth points")
+            crop_evidence = {"min_height_above_label_m": minimum,
+                             "max_height_above_label_m": maximum,
+                             "scope": "subset of measured seed-connected tube surface; no completed geometry"}
+        elif object_region != "full":
+            raise ValueError("unknown target object region")
+        self_points = None
+        if camera == "right_rgb" and self.self_reference is not None:
+            own_mask = self.self_reference.mask(rgb, depth, hardware, provider, mask)
+            selected_self = own_mask[sy, sx]
+            self_points = scene[selected_self].copy()
         return TargetCloud(
             "pink_label",
             object_cloud,
@@ -141,6 +171,13 @@ class PickTubeGraspObserver:
                 "scene_cloud_sha256": hashlib.sha256(scene.tobytes()).hexdigest(),
                 "mask_sha256": hashlib.sha256(mask.tobytes()).hexdigest(),
                 "object_point_count": len(object_cloud),
+                "target_surface_point_count": len(full_surface),
+                "target_surface_sha256": hashlib.sha256(full_surface.tobytes()).hexdigest(),
+                "model_input_region": object_region,
+                "upper_crop": crop_evidence,
+                "requested_camera": preferred_camera,
+                "wrist_self_reference_sha256": (None if self_points is None else self.self_reference.sha256),
+                "measured_self_point_count": 0 if self_points is None else len(self_points),
                 "scene_point_count": len(scene),
                 "target_pixel_xy": [float(np.median(xx)), float(np.median(yy))],
                 "target_base_xyz_m": (transform @ np.r_[target, 1.0])[:3].tolist(),
@@ -152,4 +189,6 @@ class PickTubeGraspObserver:
                     "TCP depth clearance does not certify full arm or finger collision freedom.",
                 ],
             },
+            target_surface_camera_m=full_surface,
+            robot_self_camera_m=self_points,
         )

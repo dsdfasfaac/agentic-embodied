@@ -22,9 +22,14 @@ class TargetCloud:
     target_camera_m: np.ndarray
     camera_to_base: np.ndarray
     evidence: dict
+    target_surface_camera_m: np.ndarray | None = None
+    robot_self_camera_m: np.ndarray | None = None
 
     def __post_init__(self):
-        for points in (self.object_camera_m, self.scene_camera_m):
+        for points in (self.object_camera_m, self.scene_camera_m, self.target_surface_camera_m,
+                       self.robot_self_camera_m):
+            if points is None:
+                continue
             if (
                 points.ndim != 2
                 or points.shape[1] != 3
