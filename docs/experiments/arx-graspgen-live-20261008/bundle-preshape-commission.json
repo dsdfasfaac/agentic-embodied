@@ -1,5 +1,5 @@
 {
-  "candidate_id": "graspgen-tube-preshape-20261008",
+  "candidate_id": "graspgen-tube-preshape-seed45-20261008",
   "causal_hypothesis": "Full opening sweeps neighbouring tubes. Use measured empty-jaw depth displacement to estimate a narrower opening before the wrist GraspGen pass; preserve learned poses and real contact-gated lift.",
   "critic_rules": [
     {
@@ -42,9 +42,9 @@
     }
   ],
   "diagnosis_sha256": "781346201fb8825fc9733b19ca2e5472b91657ff7d565dbadc7c6fa62187cf7a",
-  "generation": 4,
+  "generation": 5,
   "mechanism_change": "One bounded preshape at the measured front pregrasp, then a fresh wrist proposal; measured feedback scopes CAD slider bounds with 4 mm per-finger uncertainty. Supervised CAD checks are advisory; TCP scene clearance and hardware bounds remain enforced.",
-  "parent_sha256": "2181d91ba7c437d90b698a6b5c3515665d2bd23809a20bbdd39412bcea543df0",
+  "parent_sha256": "cfe8924e8d49352277d2c85dc8bc86b38399807a21a464ca373fc95952e538f1",
   "recovery_rules": [
     {
       "evidence_ids": [
@@ -74,7 +74,7 @@
             "engine": "graspgen",
             "max_candidates": 32,
             "camera": "front_rgb",
-            "sampling_seed": 44
+            "sampling_seed": 45
           },
           "stop_when": "Fresh pink target cloud and metric proposal are recorded.",
           "tool": "arx.propose_grasp"

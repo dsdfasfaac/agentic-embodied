@@ -1,14 +1,14 @@
 {
   "audit_scope": "static declarations only; live joint feedback and EEF kinematics not attested",
   "bundle": "docs/experiments/arx-graspgen-live-20261008/bundle-preshape-commission.json",
-  "bundle_file_sha256": "4620a162353d78af9b2050aa1303f83d4650f9b6a372e1c9e71ad02367fb2e89",
-  "bundle_semantic_sha256": "cfe8924e8d49352277d2c85dc8bc86b38399807a21a464ca373fc95952e538f1",
+  "bundle_file_sha256": "503a84ae15443d7a17e849111f09fe7994fb94ddfd56beea93aa73a501ac9e3f",
+  "bundle_semantic_sha256": "82d89203beeb92b055dd37373d9713790e4067aac5f8d30bc9c3d2ec27252a03",
   "catalog": "docs/experiments/arx-graspgen-live-20261008/frozen-preshape/tool-catalog.json",
   "catalog_sha256": "de231773294a0198212118f9d4c14dcc85dc2886cc3f6185e50bdb91445e4869",
   "feature_provider_sha256": "2cc40ec44776de3f2ea98e9aac9bb4c4bbd5b937cb95edad3f4b98d57441533e",
   "grasp_config_sha256": "01a4f6425fa42c765c83ea6b590013bcee3d0cd753d8e6a11e00941879cd1a0b",
   "real_input_contract": "docs/experiments/arx-graspgen-live-20261008/frozen-preshape/real-input-contract.json",
-  "real_input_contract_sha256": "abf059cad8f4f855742c7d59bebdac15274332b960d01976da6817d72a5546b8",
+  "real_input_contract_sha256": "114ce4b43ad70eaf23b2cb5e90022b808d49be0d218c5d409936db297ee7d13b",
   "recovery_plans": [
     {
       "recovery_id": "pink_pregrasp_then_vla",
