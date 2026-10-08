@@ -1,0 +1,151 @@
+{
+  "source_commit": "998d670c88b4ebfc703571e93abd471a9cc94d45",
+  "hardware_acquired": false,
+  "robot_commands_sent": false,
+  "normal_factory_rejection": "unverified learned transfer requires the pregrasp commissioning harness",
+  "commissioning_preflight": {
+    "schema_version": "arx.real.preflight.v1",
+    "eligible": true,
+    "robot_id": "can1+can3",
+    "candidate_id": "graspgen-pregrasp-commission-20261008",
+    "candidate_sha256": "024ad0326cdf9fcf9fe22b19bcc93c1a102677b6f274ed96398dd394f6a8b7d8",
+    "candidate_file_sha256": "49f02ea8f142ef0e93445df5b9399fc86c916776c5ac3f2a53124c6f2fba5a54",
+    "real_contract_sha256": "ee581e96d157ab7877c43dde455b5c433407c8dc48b54559c87d5b8c22d04b25",
+    "task_manifest_sha256": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56",
+    "model_contract_sha256": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+    "tool_catalog_sha256": "b60a5187d7456e688ec9415093a51e8cc931dafa2a6b699f9fe0fa7a41b0f406",
+    "feature_sources": [
+      {
+        "name": "privileged.interaction.gripper_closed",
+        "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+        "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+        "source_kind": "joint_feedback",
+        "source_ids": [
+          "right_gripper_policy"
+        ],
+        "scalar_type": "boolean",
+        "units": "boolean",
+        "max_age_ms": 150
+      },
+      {
+        "name": "privileged.interaction.gripper_contact",
+        "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+        "source_kind": "rgbd_fused",
+        "source_ids": [
+          "front_rgb",
+          "front_depth_mm",
+          "right_joint_1",
+          "right_joint_2",
+          "right_joint_3",
+          "right_joint_4",
+          "right_joint_5",
+          "right_joint_6",
+          "right_gripper_policy",
+          "right_gripper_current_native",
+          "right_rgb",
+          "right_depth_mm"
+        ],
+        "scalar_type": "boolean",
+        "units": "boolean",
+        "max_age_ms": 150
+      },
+      {
+        "name": "privileged.interaction.grasped",
+        "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+        "source_kind": "rgbd_fused",
+        "source_ids": [
+          "front_rgb",
+          "front_depth_mm",
+          "right_joint_1",
+          "right_joint_2",
+          "right_joint_3",
+          "right_joint_4",
+          "right_joint_5",
+          "right_joint_6",
+          "right_gripper_policy",
+          "right_gripper_current_native",
+          "right_rgb",
+          "right_depth_mm"
+        ],
+        "scalar_type": "boolean",
+        "units": "boolean",
+        "max_age_ms": 150
+      },
+      {
+        "name": "privileged.interaction.success",
+        "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+        "source_kind": "rgbd_fused",
+        "source_ids": [
+          "front_rgb",
+          "front_depth_mm",
+          "right_joint_1",
+          "right_joint_2",
+          "right_joint_3",
+          "right_joint_4",
+          "right_joint_5",
+          "right_joint_6",
+          "right_gripper_policy",
+          "right_gripper_current_native",
+          "right_rgb",
+          "right_depth_mm"
+        ],
+        "scalar_type": "boolean",
+        "units": "boolean",
+        "max_age_ms": 150
+      },
+      {
+        "name": "privileged.selected.target_gripper_distance_m",
+        "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+        "provider_sha256": "7e807a1043f0c007f01dc27b53379c0cb65c8fbb12debb42fa2caa72f01c1630",
+        "source_kind": "rgbd_fused",
+        "source_ids": [
+          "front_rgb",
+          "front_depth_mm",
+          "right_joint_1",
+          "right_joint_2",
+          "right_joint_3",
+          "right_joint_4",
+          "right_joint_5",
+          "right_joint_6",
+          "right_rgb",
+          "right_depth_mm"
+        ],
+        "scalar_type": "number",
+        "units": "m",
+        "max_age_ms": 150
+      }
+    ],
+    "recovery_plans": [
+      {
+        "recovery_id": "pink_pregrasp_then_vla",
+        "tool_calls": 5,
+        "steps": [
+          {
+            "tool": "arx.propose_grasp",
+            "tool_calls": 1
+          },
+          {
+            "tool": "arx.review_grasp",
+            "tool_calls": 1
+          },
+          {
+            "tool": "arx.execute_grasp",
+            "tool_calls": 1
+          },
+          {
+            "tool": "arx.review_reentry",
+            "tool_calls": 1
+          },
+          {
+            "tool": "arx.zeva",
+            "tool_calls": 1
+          }
+        ]
+      }
+    ],
+    "grasp_motion_enabled": true
+  }
+}

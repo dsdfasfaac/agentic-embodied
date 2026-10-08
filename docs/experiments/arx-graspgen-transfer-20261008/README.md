@@ -22,6 +22,8 @@ T_model_tcp = [[0,1,0,0], [0,0,1,0], [1,0,0,0.195], [0,0,0,1]]
 
 ## 验证与结果
 
+dodo 已通过同一冻结包的静态预检：专用预抓取验收可加载，普通 factory 明确拒绝未验证迁移配置；硬件未打开。记录见 [dodo-preflight.json](evidence/dodo-preflight.json)。
+
 本地 60 项测试通过：转换轴/位移、对称姿态、目标距离、真实关节包络、未验证阶段隔离、过去帧/SHA、失败审计、冻结 bundle/catalog/contract、既有 recovery/commissioning/输入契约。
 
 真机留存来源：
