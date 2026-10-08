@@ -60,6 +60,10 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         "task": task.name,
         "requested_execute_steps": execute_steps,
         "joint_step_limit_rad": max_joint_step_rad,
+        # Five observed encoder ticks are ~1.907 mrad. The old 2 mrad
+        # cutoff incorrectly rejected this motion; require four directed ticks
+        # while retaining independent tracking and final-home tolerances.
+        "minimum_directed_joint_progress_rad": 0.0015,
         "command_log": [],
         "status": "initializing",
     }
@@ -126,7 +130,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                 )
                 joint_progress = all(
                     abs(sample.positions[axis] - goal[axis]) <= start_tolerance[axis]
-                    or abs(sample.positions[axis] - current[axis]) >= 0.002
+                    or (sample.positions[axis] - current[axis]) * np.sign(step[axis]) >= 0.0015
                     for axis in active_joints
                 )
                 if tracking_ok and grip_progress and joint_progress:
@@ -138,7 +142,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                         or abs(last.positions[grip] - current[grip]) >= 0.015
                         for grip in (6, 13) if abs(step[grip]) >= 0.05)
                 and all(abs(last.positions[axis] - goal[axis]) <= start_tolerance[axis]
-                        or abs(last.positions[axis] - current[axis]) >= 0.002
+                        or (last.positions[axis] - current[axis]) * np.sign(step[axis]) >= 0.0015
                         for axis in active_joints)
             )
             report["command_log"].append({
