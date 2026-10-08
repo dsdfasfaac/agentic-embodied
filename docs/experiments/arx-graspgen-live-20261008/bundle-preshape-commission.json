@@ -81,7 +81,7 @@
         },
         {
           "parameters": {
-            "max_steps": 240,
+            "max_steps": 220,
             "phase": "pregrasp",
             "proposal_id": "proposal-from-last"
           },
@@ -90,7 +90,7 @@
         },
         {
           "parameters": {
-            "max_steps": 240,
+            "max_steps": 220,
             "phase": "pregrasp",
             "review_token": "grasp-token-from-review"
           },
@@ -101,7 +101,7 @@
           "tool": "arx.set_gripper",
           "parameters": {
             "opening": 0.8235294117647058,
-            "max_steps": 60
+            "max_steps": 40
           },
           "stop_when": "Measured native jaw approaches -1.9 with +0.9 preload; only jaw closes at the already observed open pregrasp."
         },
