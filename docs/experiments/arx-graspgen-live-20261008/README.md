@@ -127,3 +127,33 @@ still has no fully CAD-eligible learned engagement after these changes; this
 result is not promoted or represented as a physical success. Empty gripper
 partial-close/open calibration only occurred near home. The next strict live
 commissioning result is recorded separately.
+
+## Narrow jaw commissioning (2026-10-08)
+
+`bundle-preshape-commission.json` adds a bounded jaw preshape between the front
+and wrist learned proposals. Model opening 0.8235294 maps through the retained
++0.9 preload to native target -1.9. The observed partial RGB-D tube fit is
+18.65 mm diameter (0.85 mm median radial residual); it is a working estimate,
+not a complete diameter measurement. The practical aperture target is about
+35 mm. Empty-jaw measured native states -0.0536, -1.40 and -2.4634 give estimated
+per-finger translations 0, 15 and 28.2 mm; the slider envelope adds 4 mm per
+finger and falls back to the whole CAD range outside these observations.
+
+At the user's request, this supervised candidate records CAD intersections as
+advisories. TCP scene clearance, SDK joint bounds, rate/step limits, target
+identity, contact-gated lift and measured five-frame success remain enforced.
+This is an experimental admission, not a finger or full-arm collision
+certificate, verified model-gripper transfer, or promoted Zetta candidate.
+
+The previous two-view attempt ran 210 steps: front pregrasp arrived; wrist
+engagement review rejected all 32 candidates; no closure/lift occurred.
+The empty terminal checkpoint then allowed cleanup without a cold target
+tracker. Recorded homing physically completed 445 commands (168 escape,
+51 entry, 219 recorded return, 7 alignment), joining source frame 191, before
+home-only jaw staging and controller disable. Full data is on dodo under
+`/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/`.
+
+Dodo's Python 3.12.3 intermittently faulted during Pydantic imports before
+motion. The next trial uses a separate CPython 3.12.13 runtime with existing
+ROS and data libraries; the original environment is retained. This is a
+runtime isolation measure, not a demonstrated root-cause diagnosis.

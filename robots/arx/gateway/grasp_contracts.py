@@ -81,6 +81,12 @@ class GraspRecoveryConfig(StrictModel):
     pregrasp_planner: Literal["cartesian", "joint_then_cartesian"] = "cartesian"
     gripper_geometry_file: str | None = None
     gripper_geometry_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
+    gripper_cad_mode: Literal["enforced", "advisory"] = "enforced"
+    # Measured native feedback -> per-finger slider estimate, in metres.
+    # Missing/out-of-scope observations retain the full CAD opening union.
+    gripper_slider_feedback_curve: list[tuple[float, float]] | None = None
+    gripper_slider_uncertainty_m: float = Field(default=0.004, ge=0.003, le=0.01)
+    minimum_pregrasp_open_fraction: float = Field(default=0.6, ge=0.4, le=0.6)
     wrist_self_reference_file: str | None = None
     wrist_self_reference_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     target_surface_exclusion_m: float = Field(default=0.0, ge=0, le=0.006)
@@ -117,8 +123,19 @@ class GraspRecoveryConfig(StrictModel):
         from urllib.parse import urlparse
         import numpy as np
 
+        if self.gripper_cad_mode == "advisory" and not self.learned_grasp_commissioning:
+            raise ValueError("advisory CAD is scoped to supervised learned grasp commissioning")
+
         if self.target_upper_crop_min_m >= self.target_upper_crop_max_m:
             raise ValueError("upper tube crop must have increasing height bounds")
+        if self.gripper_slider_feedback_curve is not None:
+            curve = np.asarray(self.gripper_slider_feedback_curve)
+            if (curve.ndim != 2 or curve.shape[1] != 2 or len(curve) < 3
+                or not np.isfinite(curve).all() or np.any(np.diff(curve[:, 0]) <= 0)
+                or np.any(np.diff(curve[:, 1]) > 0)
+                or np.any(curve[:, 1] < 0) or np.any(curve[:, 1] > .044)
+                or not self.gripper_geometry_file):
+                raise ValueError("slider feedback curve requires ordered finite native feedback and bounded CAD slider estimates")
         if bool(self.wrist_self_reference_file) != bool(self.wrist_self_reference_sha256):
             raise ValueError("wrist self reference requires path and SHA")
         if self.graspgen_horizontal_approach_max is not None and self.graspgen_horizontal_closing_max is None:

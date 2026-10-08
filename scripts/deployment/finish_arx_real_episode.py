@@ -39,7 +39,8 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
             row = db.execute("SELECT payload FROM records WHERE kind='real_feature_evidence' ORDER BY sequence DESC LIMIT 1").fetchone()
             if row is None:
                 raise ValueError("no terminal feature evidence; leave controller enabled")
-            features = json.loads(row[0])["features"]
+            terminal_evidence = json.loads(row[0])
+            features = terminal_evidence["features"]
             held = db.execute("SELECT 1 FROM records WHERE kind='task_success' LIMIT 1").fetchone() is not None
         prefix = "privileged.interaction."
         held = held or any(features.get(prefix + name) is True for name in ("gripper_contact", "grasped", "success"))
@@ -49,11 +50,38 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
         # After explicit unloading, the target may have left the scene. Home
         # still requires fresh synchronized hardware feedback and healthy
         # devices, but target visibility is no longer a prerequisite.
+        checkpoint = result.get("final_observation", {}).get("hardware", {}).get("measured_state")
+        empty_open_checkpoint = (checkpoint is not None
+            and terminal_evidence.get("feature_observation", {}).get("status") == "observed"
+            and all(features.get(prefix + name) is False
+                    for name in ("gripper_closed", "gripper_contact", "grasped", "success")))
+        # A fresh hardware checkpoint can validate a still-open, unheld jaw
+        # without reacquiring the obscured target from a cold visual tracker.
+        hardware_only = operator_unloaded or empty_open_checkpoint
         before = audit(hardware, hardware_sha, task, model,
-                       require_features=not operator_unloaded)
+                       require_features=not hardware_only)
         (output / "before.json").write_text(json.dumps(before, indent=2) + "\n")
+        if empty_open_checkpoint and not operator_unloaded:
+            import numpy as np
+            from robots.arx.gateway.real_config import load_real_hardware_config
+            config = load_real_hardware_config(hardware, hardware_sha)
+            measured = np.asarray(before["measured_state"])
+            previous = np.asarray(checkpoint)
+            tolerance = np.full(14,.04); tolerance[[6,13]] = .12
+            fraction = (measured[13] - config.right_gripper_closed_policy) / (
+                config.right_gripper_open_policy - config.right_gripper_closed_policy)
+            current = before["hardware"]["auxiliary_feedback"]["right_gripper_current_native"]
+            if (measured.shape != (14,) or previous.shape != (14,)
+                    or not np.isfinite(measured).all() or not np.isfinite(previous).all()
+                    or np.any(np.abs(measured-previous) > tolerance)
+                    or fraction < .45 or not np.isfinite(current) or abs(current) >= .16):
+                raise ValueError("fresh empty open checkpoint changed; leave controller enabled")
+            report["empty_home_admission"] = {
+                "source_observation_id":terminal_evidence["observation_id"],
+                "measured_open_fraction":float(fraction), "measured_current_native":float(current),
+                "source":"observed unheld terminal state plus fresh unchanged open-jaw hardware"}
         fresh = before["features"]
-        if (not operator_unloaded and fresh[prefix + "gripper_closed"] and
+        if (not hardware_only and fresh[prefix + "gripper_closed"] and
                 fresh["privileged.selected.target_gripper_distance_m"] <= 0.05):
             report["status"] = "requires_unloading"
             return report
@@ -76,7 +104,7 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
         if opened["status"] != "complete":
             raise ValueError("empty gripper staging incomplete; leave controller enabled")
         after = audit(hardware, hardware_sha, task, model,
-                      require_features=not operator_unloaded)
+                      require_features=not hardware_only)
         (output / "after.json").write_text(json.dumps(after, indent=2) + "\n")
         if after["task_start_eligible"] is not True:
             raise ValueError("measured home verification failed; leave controller enabled")

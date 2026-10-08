@@ -92,6 +92,7 @@ class GraspRecovery:
         self.proposals, self.reviews = {}, {}
         self.completed_phases = {}
         self.selected_candidates = {}
+        self.cad_warnings = []
         self.geometry = None
         if config.gripper_geometry_file:
             from .gripper_geometry import ArxGripperGeometry
@@ -349,7 +350,7 @@ class GraspRecovery:
                             pose = np.eye(4)
                             pose[:3, :3] = r
                             pose[:3, 3] = p
-                            self.geometry.check(tree, pose)
+                            self._check_geometry(tree, pose, state)
                     targets = np.repeat(command[None], len(path), axis=0)
                     targets[:, 7:13] = path
                     targets = np.r_[targets, np.repeat(targets[-1:], [30], axis=0)]
@@ -363,6 +364,28 @@ class GraspRecovery:
                 + "; ".join(failures or ["no path within rate and step budgets"])
             )
 
+    def _slider_range(self, state):
+        curve = self.config.gripper_slider_feedback_curve
+        if curve is None or self.geometry is None:
+            return None
+        curve = np.asarray(curve)
+        feedback = float(state[13])
+        if not curve[0, 0] <= feedback <= curve[-1, 0]:
+            return None
+        slider = float(np.interp(feedback, curve[:, 0], curve[:, 1]))
+        margin = self.config.gripper_slider_uncertainty_m
+        return [max(self.geometry.slider[0], slider-margin),
+                min(self.geometry.slider[1], slider+margin)]
+
+    def _check_geometry(self, tree, pose, state):
+        try:
+            self.geometry.check(tree, pose, slider_range=self._slider_range(state))
+        except ValueError as exc:
+            if self.config.gripper_cad_mode != "advisory":
+                raise
+            if len(self.cad_warnings) < 8:
+                self.cad_warnings.append(str(exc))
+
     def _scene_tree(self, obstacles, cloud, state):
         from scipy.spatial import cKDTree
 
@@ -371,7 +394,7 @@ class GraspRecovery:
             pose = np.eye(4)
             pose[:3, :3] = r
             pose[:3, 3] = p
-            own = self.geometry.occupied_mask(obstacles, pose)
+            own = self.geometry.occupied_mask(obstacles, pose, slider_range=self._slider_range(state))
             target = _base_points(cloud.target_surface_camera_m if cloud.target_surface_camera_m is not None else cloud.object_camera_m, cloud.camera_to_base)
             # Never erase the selected object as robot self geometry.
             own &= cKDTree(target).query(obstacles)[0] > 0.006
@@ -454,7 +477,7 @@ class GraspRecovery:
                 pose = np.eye(4)
                 pose[:3, :3] = target_r
                 pose[:3, 3] = desired
-                self.geometry.check(tree, pose)
+                self._check_geometry(tree, pose, state)
             q = self.kinematics.solve(q, desired, target_r)
             if np.max(np.abs(q - previous)) > self.config.max_joint_step_rad:
                 raise ValueError("grasp IK exceeds joint increment limit")
@@ -474,7 +497,7 @@ class GraspRecovery:
 
     def _phase_gate(self, proposal_id, phase, observation, state, images):
         fraction = (state[13] - self.closed) / (self.open - self.closed)
-        if phase in {"pregrasp", "engage"} and fraction < 0.6:
+        if phase in {"pregrasp", "engage"} and fraction < self.config.minimum_pregrasp_open_fraction:
             raise ValueError("pregrasp/engage requires an observed open gripper")
         completed = self.completed_phases.get(proposal_id, set())
         if phase == "engage" and "pregrasp" not in completed:
@@ -516,6 +539,7 @@ class GraspRecovery:
                 reverse=True,
             ):
                 try:
+                    self.cad_warnings = []
                     goal = self._goal(
                         candidate, stored["output"]["engine"], args.phase, state
                     )
@@ -538,7 +562,8 @@ class GraspRecovery:
                     )
                     engage_preview = None
                     if args.phase == "pregrasp" and (self.config.validate_pregrasp_engage or args.require_engage_preview):
-                        preview_state = targets[-1].copy()
+                        preview_state = state.copy()
+                        preview_state[7:13] = targets[-1, 7:13]
                         engage_goal = self._goal(candidate, stored["output"]["engine"], "engage", preview_state)
                         engage_targets, engage_clearance = self._plan(
                             targets[-1], preview_state, engage_goal, cloud, "engage", 90,
@@ -565,6 +590,9 @@ class GraspRecovery:
                                 None if self.geometry is None else self.geometry.sha256
                             ),
                             "pregrasp_planner": self.config.pregrasp_planner,
+                            "observed_slider_range_m": self._slider_range(state),
+                            "gripper_cad_mode": self.config.gripper_cad_mode,
+                            "gripper_cad_advisories": list(self.cad_warnings),
                             "pass": True,
                             "planned_steps": len(targets),
                             "minimum_tcp_clearance_m": clearance,
@@ -746,19 +774,22 @@ class TargetVerifiedGripperPlanner:
     certify occupancy for other objects or grippers.
     """
 
-    def __init__(self, planner, grasp):
+    def __init__(self, planner, grasp, *, command_offset=0.0):
         self.planner, self.grasp = planner, grasp
+        self.command_offset = float(command_offset)
 
     def prepare(self, args, context):
         grasp = self.grasp
         state = grasp._fresh(context.observation)
         fraction = (state[13] - grasp.closed) / (grasp.open - grasp.closed)
+        requested_fraction = args.opening + self.command_offset / (grasp.open - grasp.closed)
         evidence = {
             "observation_id": context.observation["observation_id"],
             "measured_open_fraction": float(fraction),
             "requested_opening": args.opening,
+            "requested_native_open_fraction": requested_fraction,
         }
-        if args.opening > fraction + 0.01 and fraction < 0.60:
+        if requested_fraction > fraction + 0.01 and fraction < 0.60:
             values = grasp.observer.provider.observe(
                 context.observation, context.images
             )

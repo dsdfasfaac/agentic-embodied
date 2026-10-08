@@ -21,7 +21,10 @@ class ArxGripperGeometry:
         self.parts = value["parts"]
         self.slider = value["finger_slider_range_m"]
 
-    def _parts_at(self, tcp_pose):
+    def _parts_at(self, tcp_pose, slider_range=None):
+        slider = np.asarray(self.slider if slider_range is None else slider_range)
+        if slider.shape != (2,) or not np.isfinite(slider).all() or slider[0] < self.slider[0] or slider[1] > self.slider[1] or slider[0] > slider[1]:
+            raise ValueError("slider range outside pinned CAD limits")
         r = tcp_pose[:3, :3]
         origin = tcp_pose[:3, 3] - r @ self.tcp_offset
         for parent in self.parts:
@@ -30,21 +33,21 @@ class ArxGripperGeometry:
                 equations = np.asarray(part["convex_halfspaces"]).copy()
                 axis = np.asarray(part["slider_axis_link6"])
                 # Conservative union across the entire possible slider opening.
-                shifts = (equations[:, :3] @ axis)[:, None] * np.asarray(self.slider)
+                shifts = (equations[:, :3] @ axis)[:, None] * slider
                 equations[:, 3] -= shifts.max(axis=1)
                 bounds = np.asarray(part["bounds_local_m"])
-                low = bounds[0] + np.minimum(axis * self.slider[0], axis * self.slider[1])
-                high = bounds[1] + np.maximum(axis * self.slider[0], axis * self.slider[1])
+                low = bounds[0] + np.minimum(axis * slider[0], axis * slider[1])
+                high = bounds[1] + np.maximum(axis * slider[0], axis * slider[1])
                 offset = np.asarray(part["origin_link6_m"])
                 centre = (low + high) / 2
                 link = part["link"]
                 if "convex_components" in parent:
                     link += f":component-{component_index}"
                 yield link, equations, r, origin + r @ offset, centre, np.linalg.norm(high - low) / 2
-    def occupied_mask(self, points, pose, *, margin_m=0.005):
+    def occupied_mask(self, points, pose, *, margin_m=0.005, slider_range=None):
         result = np.zeros(len(points), dtype=bool)
         tree = cKDTree(points)
-        for _, eq, r, origin, centre, radius in self._parts_at(pose):
+        for _, eq, r, origin, centre, radius in self._parts_at(pose, slider_range):
             indices = np.asarray(
                 tree.query_ball_point(origin + r @ centre, radius + margin_m), dtype=int
             )
@@ -55,8 +58,8 @@ class ArxGripperGeometry:
                 )
         return result
 
-    def check(self, tree, pose, *, margin_m=0.005):
-        for link, eq, r, origin, centre, radius in self._parts_at(pose):
+    def check(self, tree, pose, *, margin_m=0.005, slider_range=None):
+        for link, eq, r, origin, centre, radius in self._parts_at(pose, slider_range):
             indices = tree.query_ball_point(origin + r @ centre, radius + margin_m)
             if indices:
                 local = (tree.data[indices] - origin) @ r

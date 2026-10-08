@@ -1,0 +1,19 @@
+{
+  "source_sha256": "948ba0860224282b31a315d4df04cd2239a07c93afdd85a1e0f1485188d8cfda",
+  "robot_commands_sent": false,
+  "circle_diameter_m": 0.01865452504696014,
+  "circle_centre_xy_m": [
+    0.4187615178584464,
+    0.27372845076033264
+  ],
+  "median_radial_residual_m": 0.0008530367843647083,
+  "observed_xy_extent_m": [
+    0.022121047032556407,
+    0.03001477254069257
+  ],
+  "xy_extent_5_95_m": [
+    0.018681142678798945,
+    0.02092631938536238
+  ],
+  "scope": "partial RGB-D cylinder estimate, not a complete physical measurement"
+}

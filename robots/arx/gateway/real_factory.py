@@ -228,7 +228,9 @@ class RealCoreFactory:
                 max_policy_step=task.control.max_gripper_step,
             )
             if grasp is not None:
-                gripper = TargetVerifiedGripperPlanner(gripper, grasp)
+                gripper = TargetVerifiedGripperPlanner(
+                    gripper, grasp, command_offset=task.control.gripper_command_offsets[1]
+                )
             registry = default_registry(
                 zeva=zeva,
                 gripper=gripper,

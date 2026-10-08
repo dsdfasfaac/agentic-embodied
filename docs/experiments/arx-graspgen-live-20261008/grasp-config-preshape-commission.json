@@ -1,0 +1,90 @@
+{
+  "contact_graspnet_endpoint": null,
+  "empty_stop_max_open_fraction": 0.03,
+  "geometry_orientation_search_rad": 0.05,
+  "graspgen_endpoint": "http://127.0.0.1:18093",
+  "learned_grasp_to_tcp": [
+    [
+      0,
+      1,
+      0,
+      0
+    ],
+    [
+      0,
+      0,
+      1,
+      0
+    ],
+    [
+      1,
+      0,
+      0,
+      0.195
+    ],
+    [
+      0,
+      0,
+      0,
+      1
+    ]
+  ],
+  "learned_gripper_id": "robotiq_2f_140",
+  "learned_gripper_transfer_verified": false,
+  "learned_model_sha256": "6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd",
+  "lift_distance_m": 0.02,
+  "max_joint_step_rad": 0.035,
+  "max_travel_m": 0.4,
+  "motion_enabled": true,
+  "pose_tolerance_m": 0.008,
+  "pregrasp_distance_m": 0.05,
+  "review_ttl_s": 2.0,
+  "schema_version": "arx.real.grasp.v1",
+  "sensor_max_age_ms": 150.0,
+  "sensor_max_skew_ms": 100.0,
+  "speed_m_s": 0.03,
+  "target_drift_m": 0.015,
+  "target_exclusion_radius_m": 0.02,
+  "target_surface_offset_m": 0.0,
+  "tcp_clearance_m": 0.012,
+  "held_target_upper_extent_m": 0.04,
+  "learned_parallel_jaw_half_turn": true,
+  "learned_pregrasp_commissioning": false,
+  "target_cloud_mode": "upright_tube_column",
+  "pregrasp_planner": "joint_then_cartesian",
+  "angular_speed_rad_s": 0.3,
+  "target_surface_exclusion_m": 0.005,
+  "gripper_geometry_file": "/home/dodo/chenfu/Agentic-Embodied/robots/arx/manifests/real/ac_one_gripper_component_hulls.json",
+  "gripper_geometry_sha256": "58731a1a682bcc4492592461338131dd824e5a968fbb82654211b760d2d2c187",
+  "graspgen_samples": 1024,
+  "graspgen_horizontal_closing_max": 0.2,
+  "graspgen_approach_alignment_min": 0.7,
+  "learned_grasp_commissioning": true,
+  "validate_pregrasp_engage": false,
+  "wrist_self_reference_file": "/home/dodo/chenfu/Agentic-Embodied/docs/experiments/arx-graspgen-live-20261008/wrist-self-open-reference.json",
+  "wrist_self_reference_sha256": "1304c0b765584ea49f0fc79ef2eaaa5894c6a0e08a252eb7a96f56e9dd33330e",
+  "graspgen_sampling_batches": 8,
+  "pregrasp_escape_m": 0.04,
+  "learned_target_distance_max_m": 0.05,
+  "gripper_slider_feedback_curve": [
+    [
+      -2.54,
+      0.029
+    ],
+    [
+      -2.46338,
+      0.0282
+    ],
+    [
+      -1.4,
+      0.015
+    ],
+    [
+      -0.0536,
+      0
+    ]
+  ],
+  "gripper_slider_uncertainty_m": 0.004,
+  "minimum_pregrasp_open_fraction": 0.5,
+  "gripper_cad_mode": "advisory"
+}

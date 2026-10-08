@@ -737,3 +737,44 @@ def test_model_crop_retains_full_measured_target_for_contact_review():
     unverified = replace(cropped, target_surface_camera_m=None)
     with pytest.raises(ValueError, match='scene'):
         rec._plan(state, state, goal, unverified, 'engage', 90)
+
+
+def test_preload_preshape_closing_is_not_misclassified_as_opening():
+    from robots.arx.gateway.grasp_recovery import TargetVerifiedGripperPlanner
+    from robots.arx.gateway.tools import PolicyGripperPlanner
+    from robots.arx.gateway.contracts import GripperArgs
+    rec = recovery()
+    ctx = context(); ctx['observation']['hardware']['measured_state'][13] = -1.9
+    rec.observer.provider.observe = lambda *a: (_ for _ in ()).throw(AssertionError('closing does not require release evidence'))
+    planner = TargetVerifiedGripperPlanner(PolicyGripperPlanner(closed_policy=0.,open_policy=-3.4),rec,command_offset=.9)
+    plan = planner.prepare(GripperArgs(opening=2.8/3.4,max_steps=60),ApprovedToolContext(ctx['command'],ctx['observation'],{}))
+    assert plan.admission_evidence['reason'] == 'closing_or_already_open'
+    assert plan.admission_evidence['requested_native_open_fraction'] == pytest.approx(1.9/3.4)
+    with pytest.raises(AssertionError,match='release evidence'):
+        planner.prepare(GripperArgs(opening=1.,max_steps=60),ApprovedToolContext(ctx['command'],ctx['observation'],{}))
+
+
+def test_slider_estimate_scopes_measured_native_feedback_and_falls_back():
+    rec = recovery()
+    rec.config = rec.config.model_copy(update={'gripper_slider_feedback_curve':[(-2.5,.028),(-1.4,.015),(-.05,0.)],'gripper_slider_uncertainty_m':.004})
+    rec.geometry = SimpleNamespace(slider=[0.,.044])
+    state = np.zeros(14); state[13] = -1.95
+    assert rec._slider_range(state) == pytest.approx([.0175,.0255])
+    state[13] = -2.8  # command coordinates must not masquerade as measured aperture
+    assert rec._slider_range(state) is None
+
+
+def test_advisory_cad_keeps_collision_evidence_and_default_enforces():
+    rec = recovery()
+    class Geometry:
+        slider = [0.,.044]
+        def check(self,*args,**kwargs):
+            raise ValueError('ARX gripper CAD sweep intersects observed scene: neighbour')
+    rec.geometry = Geometry()
+    with pytest.raises(ValueError,match='CAD sweep'):
+        rec._check_geometry(None,np.eye(4),np.zeros(14))
+    rec.config = rec.config.model_copy(update={'gripper_cad_mode':'advisory'})
+    rec._check_geometry(None,np.eye(4),np.zeros(14))
+    assert len(rec.cad_warnings) == 1 and 'neighbour' in rec.cad_warnings[0]
+    with pytest.raises(ValueError,match='supervised learned grasp'):
+        GraspRecoveryConfig(gripper_cad_mode='advisory')

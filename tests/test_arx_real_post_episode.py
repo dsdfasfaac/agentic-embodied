@@ -98,3 +98,39 @@ def test_hardware_failure_after_unloading_keeps_enabled(tmp_path, monkeypatch):
     assert calls == []
     assert result["status"] == "failed_keep_enabled"
     assert result["controller_disabled"] is False
+
+
+def test_observed_empty_open_checkpoint_does_not_need_cold_target_reacquisition(tmp_path, monkeypatch):
+    import robots.arx.gateway.real_config as config_module
+    args, calls = setup_trial(tmp_path, monkeypatch)
+    state = [0.]*14; state[7] = .65; state[13] = -2.45
+    (args["trial"] / "result.json").write_text(json.dumps({
+        "termination_reason":"gateway_rejected_or_interrupted",
+        "final_observation":{"hardware":{"measured_state":state}}}))
+    evidence = {"observation_id":"terminal-observed", "feature_observation":{"status":"observed"},
+        "features":{"privileged.interaction."+n:False
+                    for n in ("gripper_closed","gripper_contact","grasped","success")}}
+    with sqlite3.connect(args["trial"] / "private/gateway/journal.sqlite3") as db:
+        db.execute("UPDATE records SET payload=?", (json.dumps(evidence),))
+    monkeypatch.setattr(config_module,"load_real_hardware_config",lambda *a:SimpleNamespace(
+        right_gripper_closed_policy=0.,right_gripper_open_policy=-3.4))
+    def hardware_audit(*a, require_features=True):
+        assert not require_features
+        calls.append("audit")
+        return {"measured_state":state, "features":None,"task_start_eligible":True,
+                "hardware":{"auxiliary_feedback":{"right_gripper_current_native":.02}}}
+    monkeypatch.setattr(cleanup,"audit",hardware_audit)
+    result = cleanup.finish(**args)
+    assert result["status"] == "homed_and_disabled"
+    assert result["empty_home_admission"]["source_observation_id"] == "terminal-observed"
+    assert calls == ["audit","home","open","audit","disable"]
+    # A controller reset or closing after the checkpoint invalidates admission.
+    calls.clear()
+    def changed_audit(*a,**kw):
+        result = hardware_audit(*a,**kw)
+        result["measured_state"] = [0.]*14
+        return result
+    monkeypatch.setattr(cleanup,"audit",changed_audit)
+    result = cleanup.finish(**{**args,"output":tmp_path/"changed"})
+    assert result["status"] == "failed_keep_enabled"
+    assert calls == ["audit"]

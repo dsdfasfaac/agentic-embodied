@@ -196,6 +196,8 @@ def run(args):
                         ("arx.execute_grasp", "lift"), ("arx.hold", None)]
                 allowed = [[("arx.hold", None)] + pregrasp_group * n + tail
                            for n in (1, 2)]
+                allowed.append([("arx.hold", None)] + pregrasp_group
+                               + [("arx.set_gripper", None)] + pregrasp_group + tail)
                 close_index = len(prefix) - 4
                 if signature not in allowed or prefix[close_index].arguments.get("opening") != 0.0:
                     raise ValueError(
@@ -218,6 +220,8 @@ def run(args):
                         entry.arguments.get("opening") == 1.0
                         or full_grasp
                         and entry.arguments.get("opening") == 0.0
+                        or full_grasp
+                        and 0.0 < entry.arguments.get("opening", -1) < 1.0
                     )
                     or entry.tool in {"arx.review_grasp", "arx.execute_grasp"}
                     and (
