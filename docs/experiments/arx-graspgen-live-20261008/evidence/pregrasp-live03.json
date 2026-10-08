@@ -1,0 +1,261 @@
+{
+  "schema_version": "arx.pregrasp.commission.v1",
+  "status": "pregrasp_verified",
+  "termination_reason": "measured_pregrasp",
+  "vla_called": false,
+  "controller_disabled": false,
+  "physical_steps": 211,
+  "bundle_sha256": "98e478680e1dd44d50a1a69620b9e213a7d30ea7494cf37b7352c5e3de5612e8",
+  "grasp_config_sha256": "c4bd087f071a6c15ab378fccc563649c55fd89dd36e34431fdf5f65922277919",
+  "final_features": {
+    "feature_observation": {
+      "camera": "right_rgb",
+      "cross_camera_disagreement": false,
+      "cross_camera_error_m": null,
+      "depth_min_mm": 70,
+      "depth_support_fraction": 0.8333333333333334,
+      "lift_reference_monotonic_ns": 251426959394919,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 251426959394919,
+      "unavailable_features": [],
+      "wrist_identity_validations": 150,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": false,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.05403243912589571
+    },
+    "observation_id": "obs-211",
+    "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1"
+  },
+  "raw_trial_path": "/mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/pregrasp-live03",
+  "calls": [
+    {
+      "tool": "arx.hold",
+      "status": "interrupted",
+      "executed_steps": 1,
+      "planned_steps": 1,
+      "error": null,
+      "result": {
+        "completion": "critic_interrupted",
+        "last_committed_step": 1,
+        "command_target_reached": null,
+        "physical_arrival_verified": true
+      }
+    },
+    {
+      "tool": "arx.hold",
+      "status": "completed",
+      "executed_steps": 15,
+      "planned_steps": 15,
+      "error": null,
+      "result": {
+        "completion": "plan_exhausted",
+        "last_committed_step": 16,
+        "command_target_reached": null,
+        "physical_arrival_verified": true
+      }
+    },
+    {
+      "tool": "arx.propose_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "planned_steps": null,
+      "error": null
+    },
+    {
+      "tool": "arx.review_grasp",
+      "status": "completed",
+      "executed_steps": 0,
+      "planned_steps": null,
+      "error": null,
+      "result": {
+        "proposal_id": "grasp-e056b20d3e0241d29f5a351b81b2c082",
+        "observation_id": "obs-16-read-2",
+        "phase": "pregrasp",
+        "eligible": true,
+        "review_token": "grasp-review-4b89ac54015e43ffa708f8572824b7f9",
+        "checks": [
+          {
+            "check": "bounded-joint-ik-and-tcp-clearance",
+            "gripper_cad_geometry_sha256": "007a04bf23c001481cd231ab861a2dcd9aa666a1c86d433974abb1bc66582880",
+            "pregrasp_planner": "joint_then_cartesian",
+            "pass": true,
+            "planned_steps": 212,
+            "minimum_tcp_clearance_m": 0.03385929127600548,
+            "held_target_upper_extent_m": null,
+            "goal_tcp_base": [
+              [
+                0.8572849054308622,
+                0.11580369854419942,
+                0.5016493798176781,
+                0.3777342449307587
+              ],
+              [
+                0.07130475461506851,
+                0.9382779073573199,
+                -0.3384526145577013,
+                0.26827405678581784
+              ],
+              [
+                -0.5098806114936449,
+                0.32592031266553784,
+                0.7961141321876242,
+                -0.005843098220875545
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ],
+            "target_evidence": {
+              "observation_id": "obs-16-read-2",
+              "camera": "front_rgb",
+              "camera_serial": "260422272500",
+              "depth_monotonic_ns": 251363961265893,
+              "state_monotonic_ns": 251364012856402,
+              "calibration_sha256": "854854c1d0e512ccfe6411c1d3ebf8b74394f9138e1a713f4660169ab6cded10",
+              "intrinsics_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+              "controller_fk_sha256": "159964e1ac841d5490e6de9bbc00c2afdbc11c981076d5b5428bb68f5b2bbb86",
+              "motion_joint_bounds_rad": [
+                [
+                  -0.17302589118480682,
+                  0.8112342953681946
+                ],
+                [
+                  -0.05820159986615181,
+                  3.0
+                ],
+                [
+                  -0.04904632642865181,
+                  2.4
+                ],
+                [
+                  -1.6,
+                  1.6
+                ],
+                [
+                  -1.6,
+                  1.6
+                ],
+                [
+                  -1.5,
+                  1.5
+                ]
+              ],
+              "tool_geometry_sha256": "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee",
+              "object_cloud_sha256": "42593e62b7dabaee42adc11d01c9c5232ca983a9a783456668c6cc2192e09dc6",
+              "scene_cloud_sha256": "e9dce1ad4ad7b95978f08bce539f21073c704eeeae6b17f86b0d088990bc7b74",
+              "mask_sha256": "c5bbd3bf57d7cfc4d4154d317efb8f249293fcb6274255b3239f10cf55a0229e",
+              "object_point_count": 113,
+              "scene_point_count": 15648,
+              "target_pixel_xy": [
+                153.0,
+                45.0
+              ],
+              "target_base_xyz_m": [
+                0.4159936041502681,
+                0.2819678164428426,
+                -0.03627971547022796
+              ],
+              "frame": "right_arm_local_base",
+              "depth_units": "m",
+              "segmentation_scope": "measured_seed_connected_upright_tube_surface",
+              "limitations": [
+                "Label is a tube surface proxy, not a complete tube mesh.",
+                "TCP depth clearance does not certify full arm or finger collision freedom."
+              ]
+            },
+            "learned_transfer_physically_verified": false,
+            "learned_pregrasp_commissioning": true,
+            "mapped_target_distance_m": 0.011125959179540387,
+            "selected_candidate": {
+              "transform_camera": [
+                [
+                  -0.9314447045326233,
+                  0.3589976727962494,
+                  -0.05942562595009804,
+                  0.00938954946523497
+                ],
+                [
+                  -0.33952102065086365,
+                  -0.9161671996116638,
+                  -0.21298621594905853,
+                  -0.11957405128006665
+                ],
+                [
+                  -0.1309053748846054,
+                  -0.1782086342573166,
+                  0.9752463698387146,
+                  0.21675442327868266
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ],
+              "score": 0.7227956652641296,
+              "model_candidate_index": 0,
+              "pose_variant": "parallel_jaw_half_turn",
+              "score_semantic": "inherited_not_rescored",
+              "transform_base": [
+                [
+                  0.11580369854419942,
+                  0.5016493798176781,
+                  0.8572849054308622,
+                  0.2534279336432837
+                ],
+                [
+                  0.9382779073573199,
+                  -0.3384526145577013,
+                  0.07130475461506851,
+                  0.2579348673666329
+                ],
+                [
+                  0.32592031266553784,
+                  0.7961141321876242,
+                  -0.5098806114936449,
+                  0.06808959044570298
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          }
+        ],
+        "certificate_level": "sensor_tcp_clearance_and_joint_ik",
+        "limitations": [
+          "No full arm/finger collision certificate.",
+          "D405 sees only exposed target surfaces.",
+          "Learned scores are model-gripper specific."
+        ]
+      }
+    },
+    {
+      "tool": "arx.execute_grasp",
+      "status": "completed",
+      "executed_steps": 195,
+      "planned_steps": 212,
+      "error": null,
+      "result": {
+        "completion": "plan_exhausted",
+        "last_committed_step": 211,
+        "command_target_reached": true,
+        "physical_arrival_verified": true
+      }
+    }
+  ]
+}

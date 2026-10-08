@@ -1,0 +1,196 @@
+{
+  "schema_version": "arx.real.input.v1",
+  "candidate_sha256": "a0cf09480fc15f1b5fbd835bf6d519f8e63a20317cc67ce47fa96c0c894914f8",
+  "candidate_file_sha256": "60545edef75720945975823d46f59180208b28aaa19d05e39e77932b5a076244",
+  "task_manifest_sha256": "60b9db6251795f2eb7a458d4bbc01aa8c077e66e6e95245bd4e76b02d8c94c56",
+  "task_id": 0,
+  "task_name": "pickup_test_tube",
+  "model_contract_sha256": "51bec2a13e4dc0e4b6cdaed4dd17ba683a56a922b1ecff5d176a4d4b1c27e24c",
+  "tool_catalog_sha256": "ef421a9138449f8ab024a51c4d3341b87c26d21fe682714feb91440c0be13a66",
+  "cameras": [
+    {
+      "name": "front_rgb",
+      "device_id": "260422272500",
+      "calibration_id": "arx-task7-front-v1",
+      "calibration_sha256": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+      "width": 320,
+      "height": 240,
+      "channels": 3,
+      "dtype": "uint8",
+      "color_order": "RGB"
+    },
+    {
+      "name": "left_rgb",
+      "device_id": "260422271945",
+      "calibration_id": "arx-task7-left-v1",
+      "calibration_sha256": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+      "width": 320,
+      "height": 240,
+      "channels": 3,
+      "dtype": "uint8",
+      "color_order": "RGB"
+    },
+    {
+      "name": "right_rgb",
+      "device_id": "260422275847",
+      "calibration_id": "arx-task7-right-v1",
+      "calibration_sha256": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add",
+      "width": 320,
+      "height": 240,
+      "channels": 3,
+      "dtype": "uint8",
+      "color_order": "RGB"
+    }
+  ],
+  "depth_cameras": [
+    "front_depth_mm",
+    "right_depth_mm"
+  ],
+  "joint_channels": [
+    "left_joint_1",
+    "left_joint_2",
+    "left_joint_3",
+    "left_joint_4",
+    "left_joint_5",
+    "left_joint_6",
+    "left_gripper_policy",
+    "right_joint_1",
+    "right_joint_2",
+    "right_joint_3",
+    "right_joint_4",
+    "right_joint_5",
+    "right_joint_6",
+    "right_gripper_policy"
+  ],
+  "auxiliary_channels": [
+    "right_gripper_current_native"
+  ],
+  "feature_sources": [
+    {
+      "name": "privileged.interaction.gripper_closed",
+      "provider_id": "dodo-ac-one-picktube-rgbd-v3",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "joint_feedback",
+      "source_ids": [
+        "right_gripper_policy"
+      ],
+      "scalar_type": "boolean",
+      "units": "boolean",
+      "max_age_ms": 150
+    },
+    {
+      "name": "privileged.interaction.gripper_contact",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "rgbd_fused",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "scalar_type": "boolean",
+      "units": "boolean",
+      "max_age_ms": 150
+    },
+    {
+      "name": "privileged.interaction.lift_m",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "rgbd_fused",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_rgb",
+        "right_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6"
+      ],
+      "scalar_type": "number",
+      "units": "m",
+      "max_age_ms": 150
+    },
+    {
+      "name": "privileged.interaction.grasped",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "rgbd_fused",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "scalar_type": "boolean",
+      "units": "boolean",
+      "max_age_ms": 150
+    },
+    {
+      "name": "privileged.interaction.success",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "rgbd_fused",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_gripper_policy",
+        "right_gripper_current_native",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "scalar_type": "boolean",
+      "units": "boolean",
+      "max_age_ms": 150
+    },
+    {
+      "name": "privileged.selected.target_gripper_distance_m",
+      "provider_id": "dodo-picktube-dual-rgbd-5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+      "provider_sha256": "13d7b6cee254f7710fa2ab5c099b072b5299b23a2988a054a6cce7506fc701a1",
+      "source_kind": "rgbd_fused",
+      "source_ids": [
+        "front_rgb",
+        "front_depth_mm",
+        "right_joint_1",
+        "right_joint_2",
+        "right_joint_3",
+        "right_joint_4",
+        "right_joint_5",
+        "right_joint_6",
+        "right_rgb",
+        "right_depth_mm"
+      ],
+      "scalar_type": "number",
+      "units": "m",
+      "max_age_ms": 150
+    }
+  ],
+  "max_critic_history_steps": 48,
+  "max_critic_cooldown_steps": 96,
+  "max_recovery_tool_calls": 16
+}

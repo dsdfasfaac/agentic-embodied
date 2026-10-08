@@ -132,7 +132,7 @@ def freeze(
             "joint_channels": list(REAL_JOINT_CHANNELS),
             "auxiliary_channels": list(REAL_ARX_CURRENT_CHANNELS),
             "feature_sources": provider.feature_sources(),
-            "max_critic_history_steps": 16,
+            "max_critic_history_steps": max(16, *(rule.dwell_steps for rule in bundle.critic_rules)),
             "max_critic_cooldown_steps": max(
                 16, *(rule.cooldown_steps for rule in bundle.critic_rules)
             ),

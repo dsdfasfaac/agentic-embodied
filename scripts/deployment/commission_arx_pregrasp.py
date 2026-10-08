@@ -2,7 +2,8 @@
 """Supervised commissioning of a frozen bundle prefix through the real gateway.
 
 By default no VLA call is made. A one-step hold lets the real bundle critic
-trigger; the bundle's ordered recovery prefix through pregrasp is executed.
+trigger; the ordered recovery prefix runs through open pregrasp. --full-grasp
+requires explicit supervised configuration and adds engage, close and contact-gated lift.
 --resume-vla-once also admits its reviewed reentry and one fresh VLA chunk. The optional
 physical step cap is a commissioning stop, never reported as critic success.
 Closing the gateway leaves the separately managed controllers running.

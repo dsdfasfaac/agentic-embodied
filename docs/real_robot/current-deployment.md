@@ -1,4 +1,14 @@
-# 当前 ARX PickTube 部署（2026-10-07）
+# 当前 ARX 部署（2026-10-08）
+
+当前正在进行 [GraspGen 真机验收](../experiments/arx-graspgen-live-20261008/README.md)。已实测完成 learned pose 的张爪预抓取，195 个执行步到位；完整夹紧和抬升尚未验收。控制器保持使能，归位因右腕反馈停止进展而暂停，正在核对现场线缆与接触情况。
+
+新配置与冻结契约位于 `docs/experiments/arx-graspgen-live-20261008/`；完整验收使用 `bundle-full-commission.json`、`grasp-config-full-commission.json`、`hardware.json` 和 `frozen-full/`。由 `commission_arx_pregrasp.py --full-grasp` 执行，须有人看护并明确授权运动；该范围不调用 VLA，不将未验证的 transfer 自动晋升为正式配置。
+
+注意：下面保留的是 **10 月 7 日的历史部署记录**。特征 provider 和工具 schema 已变化，旧 SHA 命令不能直接用于当前源码。历史成功来自几何恢复；当前 GraspGen 已执行 learned pregrasp，但尚不能宣称完整抓取成功。
+
+---
+
+# 历史 ARX PickTube 部署（2026-10-07）
 
 此页指向当前已验证配置。当前候选未获晋升；最近的任务成功是有人看护、分段续跑的结果。代码整理后的配置预检不等于新的真机 rollout 验收。
 

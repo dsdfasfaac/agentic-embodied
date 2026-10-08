@@ -22,3 +22,11 @@ This package tests learned Robotiq proposals transferred to the ARX TCP. It is s
 `grasp-config-commission.json` and `bundle-pregrasp.json` are the measured open-pregrasp test. `grasp-config-full-commission.json` and `bundle-full-commission.json` are the follow-up complete grasp test; use `commission_arx_pregrasp.py --full-grasp`. Both require `hardware.json` and their own frozen input/catalog directory.
 
 The Robotiq model SHA is `6a378f83e3b691db76992d62fceb088b04d31d3827923d668f911e045e683acd`. The nominal metric transform is under physical validation, not marked verified. CAD checks cover the visible scene and gripper hulls, not hidden obstacles or a full arm certificate. Wider generalization needs additional scenes and trials.
+
+## Current physical pause
+
+The empty open pregrasp was followed by an attempted measured home. The 2 mrad progress cutoff first rejected a 1.907 mrad encoder movement; the staging check now requires 1.5 mrad **toward** the goal, while retaining tracking and final-home tolerances. Subsequent bounded commands still did not move right joint six away from 0.451858 rad, so this is not resolved by the quantization adjustment. Other joints responded. Motion is paused, controller remains enabled, both grippers remain open, and the target is still observed without contact. Onsite cable/contact inspection is required before another movement. No learned closure or lift has been executed or declared successful.
+
+The source is committed and deployed; the current GraspGen service was restarted from the synchronized source and its health/model SHA confirmed. Full commissioning reserves 546 physical steps in 12 compiled calls under a 600-step runtime cap.
+
+`baseline-geometric-bundle.json`, `baseline-geometric-grasp-config.json` and `frozen-baseline/` preserve a runnable static contract for the previous geometric candidate against the current provider/schema. Its hardware remains the previous wrist-observer configuration, not the expanded learned-motion profile. This refresh is a static check, not another physical acceptance. Historical experiment files were not rewritten.
