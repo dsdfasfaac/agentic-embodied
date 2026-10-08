@@ -182,6 +182,8 @@ class RealCoreFactory:
                 settings = GraspRecoveryConfig.model_validate_json(
                     Path(self.grasp_config).read_text()
                 )
+                if settings.gripper_cad_mode == "advisory" and not self.allow_learned_pregrasp_commissioning:
+                    raise ValueError("advisory CAD requires the supervised commissioning harness")
                 if (
                     (
                         settings.learned_pregrasp_commissioning

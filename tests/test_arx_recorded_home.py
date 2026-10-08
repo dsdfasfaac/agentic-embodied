@@ -76,3 +76,12 @@ def test_learned_pregrasp_enters_by_vertical_escape_before_recorded_return():
     assert xyz[-1, 2] >= initial_p[2] + .06 - .0002
     bridge = [q for q, phase in zip(targets, plan['phases']) if phase == 'recorded_entry']
     assert min(kinematics.fk(q[7:13])[0][2] for q in bridge) >= xyz[-1, 2] - .002
+
+
+def test_tilted_preshape_returns_above_rack_floor_before_recorded_path():
+    current=goal();current[7:13]=[.21114635,2.13874245,1.61764717,-.16956615,-.86156273,-.34237385];current[13]=-1.92931
+    k=fk();targets,p=plan_home(current,goal(),k,load_recording())
+    bridge=[q for q,phase in zip(targets,p['phases']) if phase=='recorded_entry']
+    assert bridge and min(k.fk(q[7:13])[0][2] for q in bridge) >= p['raised_entry_floor_m']-.0002
+    assert p['phases'][0]=='vertical_escape'
+    assert all(q[13]==current[13] for q in targets)

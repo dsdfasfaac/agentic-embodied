@@ -306,8 +306,9 @@ class PickTubeRgbdProvider:
             my, mx = np.nonzero(mask)
             coverage = min((xx.max() - xx.min() + 1) / (mx.max() - mx.min() + 1),
                            (yy.max() - yy.min() + 1) / (my.max() - my.min() + 1))
-            if (len(xx) < 30 or support_fraction < .5 or coverage < .8
-                    or np.median(np.abs(support - median)) > 3):
+            if (len(xx) < 12 or support_fraction < .35 or coverage < .35
+                    or np.median(np.abs(support - median)) > 3
+                    or np.quantile(support, .9) - np.quantile(support, .1) > 6):
                 raise ValueError("pink tube has insufficient valid metric depth")
         if np.median(np.abs(support - median)) > 25:
             raise ValueError("pink tube depth is inconsistent")

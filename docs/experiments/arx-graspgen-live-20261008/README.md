@@ -157,3 +157,18 @@ Dodo's Python 3.12.3 intermittently faulted during Pydantic imports before
 motion. The next trial uses a separate CPython 3.12.13 runtime with existing
 ROS and data libraries; the original environment is retained. This is a
 runtime isolation measure, not a demonstrated root-cause diagnosis.
+
+The narrow-jaw trial `full-grasp-preshape-live03` measured front pregrasp arrival
+(194 steps), then native jaw -1.9293 (18 steps), with no contact, grasp or lift.
+Its wrist proposal failed because only 28/46 label pixels had depth, covering
+54% of label height. All supported depths were 125–127 mm. Established wrist
+identity now accepts at least 12 supported points, 35% support and coverage,
+MAD <=3 mm and central 80% depth spread <=6 mm; acquisition/front gates and
+world-position continuity remain unchanged. No depth is filled or reused.
+
+A tilted wrist also exposed an unnecessarily strict recorded-return entry:
+its joint bridge had to stay within 2 mm of the highest endpoint. The empty
+return still escapes vertically at current x/y first, but its entry bridge
+now stays above max(80 mm, initial TCP height +40 mm) before joining the taught
+return. All interpolated points remain joint bounded and slow; this is an
+empty-jaw corridor check, not full-arm collision certification.

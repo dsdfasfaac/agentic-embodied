@@ -124,7 +124,11 @@ def plan_home(current, goal, fk, recording, *, control_hz=15):
                         vertical.append(trial_q.copy())
                     bridge = np.array([fk.fk(trial_q + a * (recorded[candidate] - trial_q))[0]
                                        for a in np.linspace(0, 1, 101)])
-                    if bridge[:, 2].min() < height - .002:
+                    # The raised bridge may dip during wrist rotation. Keep
+                    # it above the rack clearance floor, rather than requiring
+                    # every point to stay at its highest endpoint altitude.
+                    escape_floor = max(.08, initial_p[2] + .04)
+                    if bridge[:, 2].min() < escape_floor:
                         raise ValueError('raised entry bridge lowers below escape plane')
                     for step in vertical:
                         append_segment(step, 'vertical_escape')
@@ -149,6 +153,7 @@ def plan_home(current, goal, fk, recording, *, control_hz=15):
         'grippers_preserved': current[[6, 13]].tolist(),
         'left_arm_preserved': current[:6].tolist(),
         'initial_tcp_m': initial_p.tolist(), 'goal_tcp_m': goal_p.tolist(),
+        'raised_entry_floor_m': max(.08, initial_p[2] + .04),
         'joint_speed_limit_rad_s': JOINT_SPEED,
         'max_joint_step_rad': max_delta,
         'scope': 'Recorded empty-gripper corridor and FK entry; no full-arm collision certification',

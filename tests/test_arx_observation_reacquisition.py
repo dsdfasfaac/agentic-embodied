@@ -340,8 +340,12 @@ def test_established_wrist_partial_depth_needs_spatial_and_metric_support():
     p.wrist_validations=2
     with pytest.raises(ValueError):p._label_sample(rgb,depth,tracker,np.eye(4),project,'right_rgb',hardware)
     p.wrist_validations=3
-    # A half-label edge strip cannot authorize the remaining depth centroid.
+    # An established identity tolerates half-label stereo holes, while the
+    # caller still enforces fresh cross-view/world-position continuity.
     depth[mask]=0;depth[40:50,100:105]=79
+    assert p._label_sample(rgb,depth,tracker,np.eye(4),project,'right_rgb',hardware)['depth_support_fraction'] == .5
+    # A narrow sliver remains insufficient.
+    depth[mask]=0;depth[40:50,100:103]=79
     with pytest.raises(ValueError):p._label_sample(rgb,depth,tracker,np.eye(4),project,'right_rgb',hardware)
     # Dispersed scene depths cannot fill stereo holes with plausible support.
     depth[mask]=79;depth[40:50:2,100:110]=99;depth[40:43,100:110]=0
