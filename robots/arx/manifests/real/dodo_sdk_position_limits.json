@@ -1,0 +1,26 @@
+{
+  "schema_version": "arx.sdk.position_limits.v1",
+  "library_path": "/home/dodo/chenfu/ARX_X5/ROS2/X5_ws/src/arx_x5_ros2/arx_x5_controller/lib/arx_x5_src/libarx_x5_src.so",
+  "library_sha256": "d07d53d14da17f0a1db2753e3339f9e4c055dad72df613c811b9692c4bede85c",
+  "controller_constructor_address": "0x14fd76",
+  "position_control_address": "0x1539a0",
+  "inspection": "Controller constructor writes lower at offset 0x388 and upper at 0x3c0. statePositionControl applies limit to each commanded joint using those arrays.",
+  "joint_min_rad": [
+    -2.618,
+    -0.1,
+    -0.1,
+    -1.29,
+    -1.4835298641951802,
+    -1.7453292519943295
+  ],
+  "joint_max_rad": [
+    3.14,
+    3.6,
+    3.0,
+    1.29,
+    1.4835298641951802,
+    1.7453292519943295
+  ],
+  "observation_only": true,
+  "scope": "Installed dodo x86_64 vendor library; not a generic physical hard limit or SDK fault-code check."
+}

@@ -128,6 +128,8 @@ class RealHardwareConfig(StrictModel):
     right_joint_limit_profile_sha256: str | None = Field(
         default=None, pattern=r"^[0-9a-f]{64}$"
     )
+    controller_sdk_library_file: Path | None = None
+    controller_sdk_library_sha256: str | None = Field(default=None, pattern=r"^[0-9a-f]{64}$")
     right_gripper_closed_policy: float
     right_gripper_open_policy: float
     ros2_topics: dict[str, str] | None = None
@@ -135,6 +137,8 @@ class RealHardwareConfig(StrictModel):
 
     @model_validator(mode="after")
     def check(self):
+        if bool(self.controller_sdk_library_file) != bool(self.controller_sdk_library_sha256):
+            raise ValueError("SDK library path and SHA must be provided together")
         if tuple(camera.name for camera in self.cameras) != ARX_CAMERA_NAMES:
             raise ValueError("three ordered camera names required")
         if len({camera.serial for camera in self.cameras}) != 3:
@@ -173,7 +177,10 @@ class RealHardwareConfig(StrictModel):
 def load_real_hardware_config(path: Path, expected_sha256: str) -> RealHardwareConfig:
     if file_sha256(path) != expected_sha256:
         raise ValueError("real hardware configuration SHA-256 mismatch")
-    return RealHardwareConfig.model_validate_json(Path(path).read_text())
+    config = RealHardwareConfig.model_validate_json(Path(path).read_text())
+    if config.controller_sdk_library_file is not None and file_sha256(config.controller_sdk_library_file) != config.controller_sdk_library_sha256:
+        raise ValueError("installed controller SDK library SHA mismatch")
+    return config
 
 
 def validate_real_hardware_config(

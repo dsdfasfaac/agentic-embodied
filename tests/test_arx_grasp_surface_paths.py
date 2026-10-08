@@ -79,6 +79,7 @@ def hardware_for_bounds(provider, bounds, sha=None):
 def test_expanded_motion_bounds_require_pinned_source_and_stay_inside_cad():
     provider = PickTubeRgbdProvider()
     bounds = [link.limits.copy() for link in provider.controller_fk.calibration.links]
+    bounds[3][1] = 1.27
     bounds[5] = [-1.5, 1.5]
     with pytest.raises(ValueError, match="FK envelope"):
         provider.validate_hardware(hardware_for_bounds(provider, bounds))
@@ -115,3 +116,11 @@ def test_model_pose_conditions_select_without_modifying_learned_poses():
         "preferred_approach_camera":[1,0,0],"approach_alignment_min":.7})
     assert keep.tolist()==[False,True,False]
     assert np.array_equal(poses,original)
+
+
+def test_expanded_cad_pose_must_also_fit_installed_sdk_limits():
+    provider = PickTubeRgbdProvider()
+    bounds = [link.limits.copy() for link in provider.controller_fk.calibration.links]
+    bounds[3] = [-1.6, 1.6]  # Inside CAD but beyond the installed SDK's ±1.29.
+    with pytest.raises(ValueError, match='installed SDK limits'):
+        provider.validate_hardware(hardware_for_bounds(provider, bounds, URDF_LIMITS_SHA256))

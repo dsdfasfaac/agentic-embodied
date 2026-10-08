@@ -35,6 +35,8 @@ NOMINAL_CHAIN_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_on
 NOMINAL_CHAIN_SHA256 = "9ffc93ed44190f9e78a58f4010a5d65d7be828b12543233825ad41ce31c6c1ee"
 URDF_LIMITS_PATH = Path(__file__).resolve().parents[1] / "manifests/real/ac_one_urdf_limits.json"
 URDF_LIMITS_SHA256 = "a806164f6159d3e661211c0c6cd5426e8439c3df2be6848eda524e70019598e8"
+SDK_LIMITS_PATH = Path(__file__).resolve().parents[1] / "manifests/real/dodo_sdk_position_limits.json"
+SDK_LIMITS_SHA256 = "6b6c191d42366add7eab8e53f1a2a8af376807e5f255b48dabb247a784c8d6b7"
 RIGHT_JOINT_IDS = [f"right_joint_{i}" for i in range(1, 7)]
 RIGHT_GRIPPER_CURRENT = "right_gripper_current_native"
 # The validated wrist D405 reaches 70 mm; contact observations were being
@@ -120,13 +122,15 @@ class PickTubeRgbdProvider:
                     raise ValueError("right controller joint limits differ from audited FK envelope")
                 source = _pinned_json(URDF_LIMITS_PATH, URDF_LIMITS_SHA256)
                 physical = source["right_arm_rad"]
-                for pair, recorded, joint in zip(configured, bounds, physical):
+                sdk = _pinned_json(SDK_LIMITS_PATH, SDK_LIMITS_SHA256)
+                sdk_bounds = list(zip(sdk["joint_min_rad"], sdk["joint_max_rad"]))
+                for pair, recorded, joint, sdk_pair in zip(configured, bounds, physical, sdk_bounds):
                     # Retain the already accepted zero/feedback offset interval;
                     # expansions must stay inside CAD limits with 20 mrad margin.
-                    lower = min(recorded[0], joint["lower"] + .02)
-                    upper = max(recorded[1], joint["upper"] - .02)
+                    lower = max(min(recorded[0], joint["lower"] + .02), sdk_pair[0] + .02)
+                    upper = min(max(recorded[1], joint["upper"] - .02), sdk_pair[1] - .02)
                     if pair[0] < lower or pair[1] > upper:
-                        raise ValueError("configured joint bounds exceed pinned AC one limits")
+                        raise ValueError("configured joint bounds exceed pinned AC one or installed SDK limits")
                 calibrated = self.controller_fk.calibration
                 links = [link.model_copy(update={"limits": list(pair)})
                          for link, pair in zip(calibrated.links, configured)]

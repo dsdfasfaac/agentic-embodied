@@ -38,8 +38,34 @@ def _read_fresh(device: ArxRos2Device, deadline: float):
     raise TimeoutError(last_error)
 
 
+def _tracking_correction(target, measured, before, goal, active_joints, tolerance, max_step):
+    """Advance only stalled joints, within the existing feedback acceptance envelope.
+
+    Small measured-relative targets can stall at a servo's static tracking offset.
+    Each corrective command is at most 5 mrad; feedback lead never reaches the
+    configured arrival tolerance. Directional progress remains required.
+    """
+    updated = target.copy()
+    for axis in active_joints:
+        direction = np.sign(goal[axis] - before[axis])
+        if ((measured[axis] - before[axis]) * direction >= 0.0015
+                or abs(goal[axis] - measured[axis]) <= tolerance[axis]):
+            continue
+        lead = max(0.0, tolerance[axis] - 0.005)
+        desired = target[axis] + direction * min(0.005, max_step)
+        if direction > 0:
+            updated[axis] = min(desired, goal[axis], measured[axis] + lead)
+        else:
+            updated[axis] = max(desired, goal[axis], measured[axis] - lead)
+        # A change in feedback must never pull the next command backward.
+        if (updated[axis] - target[axis]) * direction < 0:
+            updated[axis] = target[axis]
+    return updated
+
+
 def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
-          execute_steps: int, output: Path, max_joint_step_rad: float = 0.015) -> dict:
+          execute_steps: int, output: Path, max_joint_step_rad: float = 0.015,
+          compensate_tracking_lag: bool = False) -> dict:
     if not math.isfinite(max_joint_step_rad) or not 0 < max_joint_step_rad <= 0.035:
         raise ValueError("joint staging step must be finite and in (0, 0.035] rad")
     config = load_real_hardware_config(hardware_path, hardware_sha)
@@ -59,6 +85,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
         "hardware_sha256": hardware_sha,
         "task": task.name,
         "requested_execute_steps": execute_steps,
+        "compensate_tracking_lag": compensate_tracking_lag,
         "joint_step_limit_rad": max_joint_step_rad,
         # Five observed encoder ticks are ~1.907 mrad. The old 2 mrad
         # cutoff incorrectly rejected this motion; require four directed ticks
@@ -115,6 +142,8 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             command_id = "stage-" + uuid.uuid4().hex
             receipt = device.send(target.astype(np.float32), command_id)
             deadline = time.monotonic() + 2.0
+            next_correction = time.monotonic() + 0.2
+            corrections = []
             last = None
             while time.monotonic() < deadline:
                 sample = _read_fresh(device, deadline)
@@ -135,6 +164,18 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
                 )
                 if tracking_ok and grip_progress and joint_progress:
                     break
+                if (compensate_tracking_lag and tracking_ok and grip_progress
+                        and time.monotonic() >= next_correction):
+                    updated = _tracking_correction(target, sample.positions, current, goal,
+                        active_joints, tolerance, max_joint_step_rad)
+                    if not np.array_equal(updated, target):
+                        target = updated
+                        receipt = device.send(target.astype(np.float32), "stage-correction-" + uuid.uuid4().hex)
+                        corrections.append({"target": target.tolist(),
+                            "measured_before": sample.positions.tolist(),
+                            "sent_monotonic_ns": receipt.sent_monotonic_ns,
+                            "receipt_status": receipt.status})
+                    next_correction = time.monotonic() + 0.2
                 time.sleep(0.02)
             arrived = last is not None and bool(
                 np.all(np.abs(last.positions - target) <= tolerance)
@@ -147,6 +188,7 @@ def stage(hardware_path: Path, hardware_sha: str, task_path: Path,
             )
             report["command_log"].append({
                 "index": index, "target": target.tolist(),
+                "tracking_corrections": corrections,
                 "receipt_status": receipt.status,
                 "sent_monotonic_ns": receipt.sent_monotonic_ns,
                 "measured_state": None if last is None else last.positions.tolist(),
@@ -189,12 +231,14 @@ def main() -> None:
     parser.add_argument("--max-joint-step-rad", type=float, default=0.015,
                         help="Measured staging increment; at most the deployed 0.035 rad VLA limit")
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--compensate-tracking-lag", action="store_true",
+                        help="Supervised staging: small corrections within existing feedback tolerance")
     args = parser.parse_args()
     if not 0 <= args.execute_steps <= 150:
         parser.error("execute-steps must be 0..150")
     try:
         result = stage(args.hardware_config, args.hardware_sha256,
-                       args.task, args.execute_steps, args.output, args.max_joint_step_rad)
+                       args.task, args.execute_steps, args.output, args.max_joint_step_rad, args.compensate_tracking_lag)
     except Exception as exc:
         print(json.dumps({"status": "failed", "error": str(exc),
                           "report": str(args.output)}, sort_keys=True))
