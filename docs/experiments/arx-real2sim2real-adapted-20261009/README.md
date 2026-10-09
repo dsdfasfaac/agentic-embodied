@@ -1,5 +1,10 @@
 # 原 sim bundle 的真机部署适配，2026-10-09
 
+本目录保留此前 **8 cm 距离门槛版本**及其历史结果。当前执行入口为
+[原 critic、仅预算适配版本](../arx-real2sim2real-budgetonly-20261009/README.md)，
+已恢复原触发条件、50 步 cooldown 与恢复顺序。本目录先前对远处空闭爪的
+“误入”判断没有学习轨迹依据，不作为原规则失效的结论。
+
 父候选是原附件 `cand-005-alignment-restage-settle-v2`，SHA `7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c`。原文件保存在相邻 `arx-real2sim2real-zeroshot-20261009`，未修改。
 
 本候选 `cand-005-alignment-restage-settle-v2-real-v1` 为人工部署适配，generation=1、parent_sha256 指向父候选。不能计作原候选原样 zero-shot 或自动学习的成功。

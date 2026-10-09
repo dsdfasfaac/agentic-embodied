@@ -1,0 +1,23 @@
+{
+  "budget_evidence": {
+    "path": "../arx-real2sim2real-adapted-20261009/evidence/gripper-acceptance01-summary.json",
+    "sha256": "28124799934ef80a7a2d1d0c7efee72305f84c8f796fdabf3ae1ffbd1590bbce"
+  },
+  "candidate_sha256": "9cfd5e5c11a99f65de99a960aab75520bf1ed89e19fd616c6be50793a9e6e487",
+  "files": {
+    "dodo-config-preflight.json": {
+      "bytes": 4543,
+      "sha256": "4897996297b4f91cb29d145a9a033bfe576aeae40ad4c8b2a68d09b8700cdc0b"
+    },
+    "offline-feature-replay.json": {
+      "bytes": 2322,
+      "sha256": "525d426e54e91038aa56993908130350f3b2118d5a0d54906f46860474e5da4d"
+    },
+    "software-validation.json": {
+      "bytes": 601,
+      "sha256": "32447c8597fa23e270d578d6b08f7bc3b3d6dc1e01e040637e060a3cd56b4d39"
+    }
+  },
+  "raw_root": "dodo:/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009",
+  "schema_version": "arx.real.evidence_index.v1"
+}

@@ -1,5 +1,15 @@
 # ARX CandidateBundle real-robot execution on dodo
 
+## Current sim-bundle transfer configuration (2026-10-09)
+
+Use the [budget-only experiment](../experiments/arx-real2sim2real-budgetonly-20261009/README.md)
+for the user's latest sim-learned bundle. Its original critic (12-action dwell,
+50-action cooldown) and open–hold–VLA motion order are preserved. Only the
+opening budget changes from 20 to 60 actions; the real compiled budget is 129.
+The earlier 8 cm guard is removed. Static dodo preflight and recorded-feature
+replay passed; this configuration has not yet had a live rollout. The older
+sample configurations and results below describe their dated experiments.
+
 ## Current verified state (2026-10-05)
 
 The direct deployment checkout is `/home/dodo/chenfu/Agentic-Embodied` on

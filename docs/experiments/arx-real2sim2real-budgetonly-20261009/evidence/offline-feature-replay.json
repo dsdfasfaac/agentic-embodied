@@ -1,0 +1,56 @@
+{
+  "candidate_id": "cand-005-alignment-restage-settle-v2-real-budget-v1",
+  "candidate_sha256": "9cfd5e5c11a99f65de99a960aab75520bf1ed89e19fd616c6be50793a9e6e487",
+  "hardware_opened": false,
+  "results": [
+    {
+      "actual_recorded_proposals": 1,
+      "evidence_rows": 38,
+      "first_replayed_event": {
+        "features": {
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.gripper_closed": true,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0037682295647645248,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.41752656691821416
+        },
+        "observation_id": "obs-37",
+        "physical_step": 37,
+        "rule_ids": [
+          "critic_postclosure_sustained_noncontact_nonretention"
+        ]
+      },
+      "journal": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial03/private/gateway/journal.sqlite3",
+      "journal_sha256": "0ab48b25cba617ed3a4acca0161813b314c095ef63544bb4af60769eb1012977",
+      "replayed_proposals": 1,
+      "trial": "trial03"
+    },
+    {
+      "actual_recorded_proposals": 0,
+      "evidence_rows": 603,
+      "first_replayed_event": {
+        "features": {
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.gripper_closed": true,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0040102744373905486,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.48032779820538773
+        },
+        "observation_id": "obs-37",
+        "physical_step": 37,
+        "rule_ids": [
+          "critic_postclosure_sustained_noncontact_nonretention"
+        ]
+      },
+      "journal": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06/private/gateway/journal.sqlite3",
+      "journal_sha256": "8095bff8d43f6b3f2f0f4027ef416951cce6fb4091bf5e7e673ed5e43f8e4de0",
+      "replayed_proposals": 10,
+      "trial": "trial06"
+    }
+  ],
+  "robot_commands_sent": 0,
+  "schema_version": "arx.real.bundle.offline_replay.v1",
+  "scope": "Read-only replay of recorded feature evidence; counterfactual detection only. No recovered trajectory or success inference."
+}
