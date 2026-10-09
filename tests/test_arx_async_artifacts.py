@@ -13,7 +13,7 @@ import pytest
 
 from robots.arx.gateway.artifacts import ArtifactWriter
 from robots.arx.gateway.public import ImageStore
-from scripts.deployment.prepare_arx_trial_storage import prepare
+from scripts.deployment.prepare_arx_trial_storage import prepare, admit_gateway_output
 from tests.test_arx_gateway import make_core, call, limits, ScriptCritic
 
 
@@ -129,6 +129,19 @@ def test_storage_layout_resolves_small_journal_and_large_data_separately(tmp_pat
     assert (gateway/'grasp-sensors').resolve() == output/'sensor-artifacts/grasp-sensors'
     with pytest.raises(ValueError,match='new'):
         prepare(output,tmp_path/'ssd')
+    admit_gateway_output(gateway)
+    # Consuming admission does not permit starting a second episode.
+    with pytest.raises(ValueError,match='already exists'):
+        admit_gateway_output(gateway)
+
+
+def test_prepared_directory_with_existing_image_cannot_admit(tmp_path):
+    output = tmp_path/'trial'
+    prepare(output,tmp_path/'ssd')
+    gateway = output/'private/gateway'
+    (gateway/'public/images/existing.png').write_bytes(b'old episode')
+    with pytest.raises(ValueError,match='already exists'):
+        admit_gateway_output(gateway)
 
 
 def test_registered_pending_http_image_waits_for_background_bytes(tmp_path, monkeypatch):

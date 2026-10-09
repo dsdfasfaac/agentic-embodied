@@ -109,7 +109,8 @@ def main():
     limits = RuntimeLimits.model_validate_json(args.runtime_config.read_text())
     if limits.max_steps > task.max_steps:
         parser.error("gateway max_steps exceeds frozen task limit")
-    args.output.mkdir(parents=True, exist_ok=False)
+    from scripts.deployment.prepare_arx_trial_storage import admit_gateway_output
+    admit_gateway_output(args.output)
     os.chmod(args.output, 0o700)
     episode_id = uuid.uuid4().hex
     agent, harness = secrets.token_urlsafe(32), secrets.token_urlsafe(32)

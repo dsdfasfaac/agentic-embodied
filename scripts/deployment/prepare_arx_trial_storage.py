@@ -30,7 +30,30 @@ def prepare(output: Path, fast_root: Path):
               'large_sensor_artifacts': str(large), 'durable_journal': 'SQLite FULL WAL',
               'note': 'Keep the small SSD journal directory; the trial gateway link resolves to it.'}
     (output/'private/storage-layout.json').write_text(json.dumps(result, indent=2)+'\n')
+    (fast/'.prepared-storage.json').write_text(json.dumps(result, indent=2)+'\n')
     return result
+
+
+def admit_gateway_output(output: Path):
+    """Allow only an untouched prepared directory, never an existing episode."""
+    if not output.exists():
+        output.mkdir(parents=True, exist_ok=False)
+        return
+    marker = output/'.prepared-storage.json'
+    try:
+        layout = json.loads(marker.read_text())
+        expected = {'.prepared-storage.json', 'public', 'grasp-sensors'}
+        if (layout['schema_version'] != 'arx.real.storage_layout.v1'
+                or Path(layout['gateway']).resolve() != output.resolve()
+                or (Path(layout['output'])/'private/gateway').resolve() != output.resolve()
+                or {p.name for p in output.iterdir()} != expected
+                or {p.name for p in (output/'public').iterdir()} != {'images'}
+                or any((output/'public/images').iterdir())
+                or any((output/'grasp-sensors').iterdir())):
+            raise ValueError('prepared storage is not empty or identity changed')
+    except (KeyError, OSError, ValueError) as exc:
+        raise ValueError('gateway output already exists and is not unused prepared storage') from exc
+    marker.unlink()
 
 
 def main():
