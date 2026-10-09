@@ -6,6 +6,7 @@ from __future__ import annotations
 import dataclasses
 import json
 import math
+import re
 from copy import deepcopy
 from pathlib import Path
 from typing import Any, Literal
@@ -239,12 +240,16 @@ def _check_threshold(feature: RealFeatureSource, operator: str, value: Any) -> N
     elif kind == "integer":
         valid = type(value) is int
     elif kind == "boolean":
-        valid = type(value) is bool
+        valid = (type(value) is bool or
+                 (type(value) in (int, float) and math.isfinite(value) and 0 <= value <= 1))
     else:
         valid = type(value) is str
     if not valid:
         raise ValueError(f"threshold type differs from real feature: {feature.name}")
-    if operator not in ("eq", "ne") and kind not in ("number", "integer"):
+    if operator not in ("eq", "ne") and not (
+        kind in ("number", "integer") or
+        (kind == "boolean" and type(value) in (int, float) and operator != "stagnant")
+    ):
         raise ValueError(f"numeric operator requires numeric real feature: {feature.name}")
     if operator == "stagnant" and value < 0:
         raise ValueError("stagnant tolerance must be nonnegative")
@@ -289,6 +294,12 @@ def _contains_reference(value: Any) -> bool:
     if isinstance(value, list):
         return any(_contains_reference(item) for item in value)
     return False
+
+
+def symbolic_reentry_label(value: Any) -> bool:
+    """A bundle label is descriptive; only a fresh review grants authority."""
+    return value is None or (type(value) is str and
+                             re.fullmatch(r"[A-Za-z][A-Za-z0-9_-]{0,127}", value) is not None)
 
 
 def _check_recoveries(
@@ -337,7 +348,7 @@ def _check_recoveries(
                 review_seen = True
             elif step.tool == "arx.zeva":
                 token = arguments.get("reentry_token")
-                if token not in (None, "token-from-review"):
+                if not symbolic_reentry_label(token):
                     raise ValueError("Zeva token must come from a fresh review")
                 if not review_seen:
                     review_entry = tools.get("arx.review_reentry")

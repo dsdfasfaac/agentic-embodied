@@ -96,6 +96,24 @@ class RealFeatureProvider:
         return result
 
 
+def numeric_binary_features(bundle, measured):
+    """Encode measured booleans for simulation rules written with 0/1 thresholds.
+
+    Raw hardware evidence and success termination retain boolean types. Unknown
+    observations remain unknown and cannot contribute to a critic dwell window.
+    """
+    result = dict(measured)
+    encoded = {}
+    for rule in bundle.critic_rules:
+        for predicate in (rule, *rule.activation_conditions):
+            if type(predicate.threshold) in (int, float):
+                value = resolve_feature(measured, predicate.feature)
+                if type(value) is bool:
+                    result[predicate.feature] = float(value)
+                    encoded[predicate.feature] = float(value)
+    return result, encoded
+
+
 class BundleMonitor:
     def __init__(self, bundle, provider=None, *, terminal_feature=None):
         self.bundle, self.provider = bundle, provider
@@ -118,6 +136,7 @@ class BundleMonitor:
                 "features": {source.name: measured[source.name]
                              for source in self.provider.sources},
                 "feature_observation": measured.get("feature_observation", {"status": "observed"}),
+                "critic_numeric_binary_features": numeric_binary_features(self.bundle, measured)[1],
             }
 
     def completion_evidence(self):
@@ -142,7 +161,8 @@ class BundleMonitor:
         self._remember_features(observation, measured)
         events = []
         quality = measured.get("feature_observation", {"status": "observed", "unavailable_features": []})
-        for item in self.temporal.evaluate(measured, step_index=observation["step_index"],
+        critic_view, _ = numeric_binary_features(self.bundle, measured)
+        for item in self.temporal.evaluate(critic_view, step_index=observation["step_index"],
                                           unavailable_features=set(quality.get("unavailable_features", []))):
             rule = self.by_id[item["rule_id"]]
             events.append(Proposal(
@@ -161,6 +181,7 @@ class BundleMonitor:
 class RealBundleReentry:
     def __init__(self, bundle, provider=None, *, max_sensor_age_ms=1000,
                  max_sensor_skew_ms=1000, require_hardware=True, monitor=None):
+        self.bundle = bundle
         self.rules = {rule.rule_id: rule for rule in bundle.critic_rules}
         self.recoveries = {rule.recovery_id: rule for rule in bundle.recovery_rules}
         self.provider = provider
@@ -198,6 +219,7 @@ class RealBundleReentry:
         rule = self.recoveries[context["policy_id"]]
         measured = self.provider.augment(obs, context["images"][-1]) if self.provider else obs
         unavailable = set(measured.get("feature_observation", {}).get("unavailable_features", []))
+        measured, _ = numeric_binary_features(self.bundle, measured)
         checks.append({"check_id": "feature-observability", "status": "unknown" if unavailable else "pass",
                        "evidence_ids": [obs["observation_id"]],
                        "reason_code": "target_unobserved" if unavailable else "observed"})

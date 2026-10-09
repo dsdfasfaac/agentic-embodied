@@ -7,7 +7,7 @@ from copy import deepcopy
 from dataclasses import dataclass
 
 from robots.arx.gateway.contracts import RecoveryBinding
-from .real_input import _TOOL_MODELS
+from .real_input import _TOOL_MODELS, symbolic_reentry_label
 
 
 @dataclass(frozen=True)
@@ -97,7 +97,7 @@ def compile_programs(bundle, *, max_tool_calls=64, max_physical_steps=None,
                 reviewed = True
                 args["observation_ids"] = ["obs-preflight"]
             elif step.tool == "arx.zeva":
-                if args.get("reentry_token") not in (None, "token-from-review"):
+                if not symbolic_reentry_label(args.get("reentry_token")):
                     raise ValueError("VLA reentry token must come from a fresh review")
                 if not reviewed:
                     # A provisional bundle may omit the read-only review. The
