@@ -1,0 +1,31 @@
+{
+  "scope": "offline replay; no robot or model calls",
+  "software_revision": "9d389a1",
+  "samples": 10,
+  "foreground_median_ms": 37.5274249818176,
+  "foreground_max_ms": 43.73910598224029,
+  "sample_ms": [
+    43.73910598224029,
+    37.694673985242844,
+    37.36017597839236,
+    36.814438994042575,
+    37.32930403202772,
+    38.49963104585186,
+    38.79648901056498,
+    38.498102978337556,
+    36.854966019745916,
+    37.29749098420143
+  ],
+  "sensor_archives": 10,
+  "all_archive_sha_verified": true,
+  "peak_pending": 19,
+  "storage_layout": {
+    "schema_version": "arx.real.storage_layout.v1",
+    "output": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/async-storage-timing01",
+    "gateway": "/mnt/nvme0/chenfu/arx_gateway_journals/async-storage-timing01-72e471821a3a2749d2c9",
+    "journal": "/mnt/nvme0/chenfu/arx_gateway_journals/async-storage-timing01-72e471821a3a2749d2c9/journal.sqlite3",
+    "large_sensor_artifacts": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/async-storage-timing01/sensor-artifacts",
+    "durable_journal": "SQLite FULL WAL",
+    "note": "Keep the small SSD journal directory; the trial gateway link resolves to it."
+  }
+}

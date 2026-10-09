@@ -1,0 +1,10 @@
+{
+  "controller_disabled": false,
+  "error": "homing incomplete; leave controller enabled",
+  "homing_is_rollout_step": false,
+  "operator_confirmed_unloaded": false,
+  "schema_version": "arx.real.post_episode.v1",
+  "status": "failed_keep_enabled",
+  "termination_reason": "environment_ended",
+  "trial": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06"
+}

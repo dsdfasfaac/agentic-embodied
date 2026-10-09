@@ -1,0 +1,219 @@
+{
+  "schema_version": "arx.real.async_trial_summary.v1",
+  "raw_trial": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06",
+  "source_revision": "59df991",
+  "candidate_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
+  "record_counts": {
+    "ObservationPublished": 603,
+    "arrival_observed": 600,
+    "artifact_finalization": 1,
+    "artifact_write_queued": 602,
+    "baseline_initialized": 1,
+    "command_dispatch_started": 600,
+    "command_sent": 600,
+    "critic_assessment": 602,
+    "critic_lifecycle": 1,
+    "dispatch_intent": 38,
+    "effective_arguments": 38,
+    "exposure": 38,
+    "grasp_sensor_evidence": 602,
+    "observation_reacquired": 2,
+    "observation_wait_started": 2,
+    "private_evaluation": 600,
+    "real_feature_evidence": 603,
+    "step_commit": 600,
+    "step_intent": 600,
+    "tool_result": 38
+  },
+  "minimum_distance_m": 0.31406483166875365,
+  "nearest_observation": {
+    "critic_numeric_binary_features": {
+      "privileged.interaction.grasped": 0.0,
+      "privileged.interaction.gripper_closed": 1.0,
+      "privileged.interaction.gripper_contact": 0.0,
+      "privileged.interaction.success": 0.0
+    },
+    "feature_observation": {
+      "camera": "front_rgb",
+      "cross_camera_disagreement": false,
+      "cross_camera_error_m": null,
+      "depth_min_mm": 80,
+      "depth_support_fraction": 0.9090909090909091,
+      "lift_reference_monotonic_ns": 343605672965619,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 343696419020368,
+      "unavailable_features": [],
+      "wrist_identity_validations": 46,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": true,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0028071819232542983,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.31406483166875365
+    },
+    "observation_id": "obs-596",
+    "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d"
+  },
+  "final_feature_evidence": {
+    "critic_numeric_binary_features": {
+      "privileged.interaction.grasped": 0.0,
+      "privileged.interaction.gripper_closed": 1.0,
+      "privileged.interaction.gripper_contact": 0.0,
+      "privileged.interaction.success": 0.0
+    },
+    "feature_observation": {
+      "camera": "front_rgb",
+      "cross_camera_disagreement": false,
+      "cross_camera_error_m": null,
+      "depth_min_mm": 80,
+      "depth_support_fraction": 0.9264705882352942,
+      "lift_reference_monotonic_ns": 343605672965619,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 343696752418180,
+      "unavailable_features": [],
+      "wrist_identity_validations": 46,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": true,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0040102744373905486,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.33344334043625157
+    },
+    "observation_id": "obs-600",
+    "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d"
+  },
+  "known_contact_frames": 0,
+  "known_grasp_frames": 0,
+  "known_success_frames": 0,
+  "unknown_feature_frames": 2,
+  "near_trigger_frames": 0,
+  "command_interval": {
+    "median_ms": 79.063909,
+    "min_ms": 76.478036,
+    "max_ms": 1468.720041,
+    "mean_ms": 158.86655715525876,
+    "n": 599
+  },
+  "within_chunk_interval": {
+    "median_ms": 78.542989,
+    "min_ms": 76.478036,
+    "max_ms": 205.410851,
+    "mean_ms": 90.58174945551602,
+    "n": 562
+  },
+  "chunk_boundary_interval": {
+    "median_ms": 1183.083935,
+    "min_ms": 1036.184329,
+    "max_ms": 1468.720041,
+    "mean_ms": 1196.057420054054,
+    "n": 37
+  },
+  "send_to_observation": {
+    "median_ms": 36.2637095,
+    "min_ms": 17.872684,
+    "max_ms": 133.39651,
+    "mean_ms": 44.53779345666667,
+    "n": 600
+  },
+  "critic": {
+    "median_ms": 3.361964481882751,
+    "min_ms": 2.457335009239614,
+    "max_ms": 6.292009958997369,
+    "mean_ms": 3.527441637341453,
+    "n": 602
+  },
+  "task_motion_elapsed_s": 95.161067736,
+  "archive_verification": {
+    "queued": 602,
+    "persisted": 602,
+    "same_observation_ids": true,
+    "all_sha_verified": true,
+    "unique_png_images": 1809,
+    "all_png_sha_verified": true
+  },
+  "artifact_finalization": [
+    {
+      "async_sensor_storage": true,
+      "finalization": "complete",
+      "format": "gateway_journal_v1",
+      "peak_pending": 22
+    }
+  ],
+  "storage_layout": {
+    "schema_version": "arx.real.storage_layout.v1",
+    "output": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06",
+    "gateway": "/mnt/nvme0/chenfu/arx_gateway_journals/trial06-b998a5732c9fed111ebb",
+    "journal": "/mnt/nvme0/chenfu/arx_gateway_journals/trial06-b998a5732c9fed111ebb/journal.sqlite3",
+    "large_sensor_artifacts": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06/sensor-artifacts",
+    "durable_journal": "SQLite FULL WAL",
+    "note": "Keep the small SSD journal directory; the trial gateway link resolves to it."
+  },
+  "comparison": {
+    "trial04_all_interval_median_ms": 320.979136,
+    "speedup": 4.059742808820647
+  },
+  "conclusion": "Budget ended without grasp or critic-triggered recovery; timing improvement is not task success.",
+  "verified_home": {
+    "source_revision": "d467368",
+    "status": "complete",
+    "command_count": 317,
+    "measured_right_home_verified": true,
+    "return_source": "verified empty rollout arrivals in reverse order",
+    "resolved_observations": {
+      "obs-40": {
+        "observation_id": "obs-40-reacquire-1",
+        "step": 40,
+        "maximum_joint_drift_rad": 0.0064849853515625,
+        "measured_state": [
+          0.031853675842285156,
+          0.00782012939453125,
+          0.00324249267578125,
+          -0.038720130920410156,
+          -0.02422332763671875,
+          -0.00820159912109375,
+          -2.9375524520874023,
+          0.01201629638671875,
+          0.6506061553955078,
+          0.6223773956298828,
+          0.4362173080444336,
+          -0.048256874084472656,
+          0.08716678619384766,
+          -0.13294410705566406
+        ],
+        "source_sequence": 450,
+        "witness_sequence": 455
+      },
+      "obs-494": {
+        "observation_id": "obs-494-reacquire-2",
+        "step": 494,
+        "maximum_joint_drift_rad": 0.0133514404296875,
+        "measured_state": [
+          0.031853675842285156,
+          0.00782012939453125,
+          0.00362396240234375,
+          -0.038338661193847656,
+          -0.02689361572265625,
+          -0.00820159912109375,
+          -2.9375524520874023,
+          0.15087318420410156,
+          1.0526819229125977,
+          0.9607458114624023,
+          0.10814857482910156,
+          -0.16155529022216797,
+          -0.01926422119140625,
+          -0.031472206115722656
+        ],
+        "source_sequence": 5562,
+        "witness_sequence": 5567
+      }
+    }
+  }
+}

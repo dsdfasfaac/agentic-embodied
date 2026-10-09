@@ -3,6 +3,10 @@
   "raw_root": "dodo:/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009",
   "candidate_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
   "files": {
+    "async-storage-timing01-result.json": {
+      "sha256": "440ebeeaf750b2375a396a997ff4461e5f0b4a793bf847be1092669ffe9032da",
+      "bytes": 1189
+    },
     "gripper-acceptance01-home-result.json": {
       "sha256": "a3a4591289e7afca55abca1f0ce5bd3a85bd7436961bb096e1866318b96f561c",
       "bytes": 707
@@ -14,6 +18,10 @@
     "gripper-acceptance01-summary.json": {
       "sha256": "28124799934ef80a7a2d1d0c7efee72305f84c8f796fdabf3ae1ffbd1590bbce",
       "bytes": 2848
+    },
+    "software-validation-async.json": {
+      "sha256": "a0fa93c1b916ec69e93e0b5f1217597c740dc74f897aba4ad2c64ec1c0dd684c",
+      "bytes": 808
     },
     "software-validation.json": {
       "sha256": "3e72806edd87eb84343d87bdb871161a33c81e5c96e249c719ee08b192e1f3fb",
@@ -34,6 +42,34 @@
     "trial04-summary.json": {
       "sha256": "6f307289dc31e05a3096b317c895a2ccc34d23e5f903fdb5b5192186edac7492",
       "bytes": 3847
+    },
+    "trial05-startup-failure.json": {
+      "sha256": "f04b3588972e5d396873b24bd40d1f926e569c158150f8be58303a0b2fd88679",
+      "bytes": 934
+    },
+    "trial06-home-result.json": {
+      "sha256": "9cb15abf4f184389b9264cf2449fb6dcf1bd823d51e7f757b7af98e3c541fb29",
+      "bytes": 419
+    },
+    "trial06-identities.json": {
+      "sha256": "107e36aaa7995907d6c400909b08bfc009dc6cfc0cc6eba74b751a36d0252d72",
+      "bytes": 802
+    },
+    "trial06-initial-home-rejection.json": {
+      "sha256": "87c2f3a2bd1d0727a9c91182f5072a71f44399197140ec4ec8e9ea28764a6541",
+      "bytes": 375
+    },
+    "trial06-result.json": {
+      "sha256": "3db2bb237f5de2f542f563bcbd2efa2bf996581fafddb9e2fd20eabac6fc0dbc",
+      "bytes": 1056
+    },
+    "trial06-storage-layout.json": {
+      "sha256": "b835e8d7d741026c41ba6f0059069e1b8ca933daab4c820faefb4dac2cfadf02",
+      "bytes": 560
+    },
+    "trial06-summary.json": {
+      "sha256": "a97ad7b15438f7f36bd0e0324006a0f71706b5dbd5cde0d5967c4d54c1ef3166",
+      "bytes": 7408
     }
   }
 }

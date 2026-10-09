@@ -1,0 +1,9 @@
+{
+  "schema_version": "arx.real.storage_layout.v1",
+  "output": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06",
+  "gateway": "/mnt/nvme0/chenfu/arx_gateway_journals/trial06-b998a5732c9fed111ebb",
+  "journal": "/mnt/nvme0/chenfu/arx_gateway_journals/trial06-b998a5732c9fed111ebb/journal.sqlite3",
+  "large_sensor_artifacts": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06/sensor-artifacts",
+  "durable_journal": "SQLite FULL WAL",
+  "note": "Keep the small SSD journal directory; the trial gateway link resolves to it."
+}

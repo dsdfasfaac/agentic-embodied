@@ -52,7 +52,7 @@ bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh \
 
 输出目录必须为新目录。脚本不启动或关闭控制器；若失败，保持使能以便检查。验收成功后使用 `finish_arx_real_episode.py` 对该输出目录验证归位，再关闭控制器。工具请求、真实反馈、逐步观测和审核留在其 `private/gateway/journal.sqlite3`；仓库只保存小型结果、身份信息和摘要。
 
-## 异步存储对照（trial05）
+## 异步存储对照（trial06）
 
 使用同一候选和输入契约，显式选用 `runtime-limits-async.json`；任务、模型和动作预算未修改。图像PNG采用快速的无损编码，字节SHA在发布前计算，大文件落盘以及RGB-D压缩在4个后台工作线程执行。队列最多128个任务，满时施加等待；写入错误在下一次动作之前传播。critic仍在控制线程上检查当前实测图像和状态；SQLite保持FULL WAL，动作意图、发送回执与实测到位记录保持原有持久化边界。结束前等待所有后台写入，并记录最终SHA；失败不能标记完整。HTTP图片接口对已发布、尚在保存的图片作有限等待。
 
@@ -62,11 +62,28 @@ bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh \
 cd /home/dodo/chenfu/Agentic-Embodied
 bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh \
   scripts/deployment/prepare_arx_trial_storage.py \
-  --output /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial05 \
+  --output /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial-NEW \
   --fast-root /mnt/nvme0/chenfu/arx_gateway_journals
 ARX_RUNTIME_CONFIG=docs/experiments/arx-real2sim2real-adapted-20261009/runtime-limits-async.json \
   bash docs/experiments/arx-real2sim2real-adapted-20261009/run-trial.sh \
-  /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial05
+  /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial-NEW
 ```
 
-上述动作命令仍需既有实测起始位准入。100项相关测试通过，覆盖慢盘时不阻塞critic屏障、写入失败停止动作、队列有界且不丢观测、无损像素和PNG字节SHA、关闭前证据保存以及HTTP待保存图片。尚未加入推理预取；段间的新观测推理仍同步等待。
+上述动作命令仍需既有实测起始位准入，`trial-NEW`须替换为新目录。101项控制与存储测试通过，覆盖慢盘时不阻塞critic屏障、写入失败停止动作、队列有界且不丢观测、无损像素和PNG字节SHA、关闭前证据保存、HTTP待保存图片及仅允许未使用存储目录准入。另有14项归位测试通过。尚未加入推理预取；段间的新观测推理仍同步等待。
+
+### 实测比较
+
+| 指标 | trial04 同步存储 | trial06 异步存储 + NVMe日志 |
+| --- | --- | --- |
+| 全部发送间隔中位数 | 320.98ms | 79.06ms（约4.06倍改善） |
+| 段内发送间隔中位数 | 318.60ms | 78.54ms（约12.73Hz） |
+| 16步段间发送间隔中位数 | 1346.98ms | 1183.08ms |
+| 动作数 / 推理调用 | 600 / 38 | 600 / 38 |
+| 最近粉色目标距离 | 0.25009m | 0.31406m |
+| 接触、抓取、成功、恢复 | 均0 | 均0 |
+
+trial06使用代码59df991，候选SHA与trial04一致；结束原因仍是600步预算耗尽。600次发送均有实测到位记录。602份RGB-D档案（包含2次只读重观测）与1809张PNG全部完成文件SHA复核，队列峰值22个任务，低于128上限，最终证据标记complete。性能改善没有带来本轮任务成功，也不能证明候选优于父版本。两轮运动结果不同，不能仅从距离变化推断标定或模型是唯一原因。
+
+trial05因gateway拒绝预先建立的日志目录而在0动作时启动失败，完整保留在证据中；修复目录准入后使用新trial06目录执行，没有覆盖失败记录。trial06首次归位计划因两条已解决的unknown观测被拒绝，未发归位动作，控制器保持使能。代码d467368核对第40、494步的只读等待、同一步重新观测、等待期间无新命令以及关节姿态漂移（分别6.48、13.35mrad）。使用这两条真实重观测作为轨迹证据，不把原unknown记录改写成false；无有效见证、持物、姿态漂移或等待期间有命令均拒绝归位。随后按已验证空爪轨迹返回，317条归位命令完成并实测到位，再张爪验证起始位，最终关闭控制器。
+
+原始大数据为dodo `/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial06`；其小型日志目录在NVMe，完整路径见 `evidence/trial06-storage-layout.json`。结果和计时摘要分别为 `evidence/trial06-result.json`、`evidence/trial06-summary.json`、`evidence/trial06-home-result.json`。
