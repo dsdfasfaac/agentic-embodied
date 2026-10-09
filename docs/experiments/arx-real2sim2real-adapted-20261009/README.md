@@ -51,3 +51,22 @@ bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh \
 ```
 
 输出目录必须为新目录。脚本不启动或关闭控制器；若失败，保持使能以便检查。验收成功后使用 `finish_arx_real_episode.py` 对该输出目录验证归位，再关闭控制器。工具请求、真实反馈、逐步观测和审核留在其 `private/gateway/journal.sqlite3`；仓库只保存小型结果、身份信息和摘要。
+
+## 异步存储对照（trial05）
+
+使用同一候选和输入契约，显式选用 `runtime-limits-async.json`；任务、模型和动作预算未修改。图像PNG采用快速的无损编码，字节SHA在发布前计算，大文件落盘以及RGB-D压缩在4个后台工作线程执行。队列最多128个任务，满时施加等待；写入错误在下一次动作之前传播。critic仍在控制线程上检查当前实测图像和状态；SQLite保持FULL WAL，动作意图、发送回执与实测到位记录保持原有持久化边界。结束前等待所有后台写入，并记录最终SHA；失败不能标记完整。HTTP图片接口对已发布、尚在保存的图片作有限等待。
+
+使用 `prepare_arx_trial_storage.py` 将小型gateway目录放在NVMe，通过输出目录内的链接保持原有访问路径；其 `public/images` 和 `grasp-sensors` 再链接到大盘上的 `sensor-artifacts`。不要删除NVMe上的小型日志目录；路径保存在每轮的 `private/storage-layout.json`。此操作只创建新目录，不启动硬件。
+
+```bash
+cd /home/dodo/chenfu/Agentic-Embodied
+bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh \
+  scripts/deployment/prepare_arx_trial_storage.py \
+  --output /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial05 \
+  --fast-root /mnt/nvme0/chenfu/arx_gateway_journals
+ARX_RUNTIME_CONFIG=docs/experiments/arx-real2sim2real-adapted-20261009/runtime-limits-async.json \
+  bash docs/experiments/arx-real2sim2real-adapted-20261009/run-trial.sh \
+  /mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial05
+```
+
+上述动作命令仍需既有实测起始位准入。100项相关测试通过，覆盖慢盘时不阻塞critic屏障、写入失败停止动作、队列有界且不丢观测、无损像素和PNG字节SHA、关闭前证据保存以及HTTP待保存图片。尚未加入推理预取；段间的新观测推理仍同步等待。

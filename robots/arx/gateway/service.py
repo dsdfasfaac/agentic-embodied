@@ -116,8 +116,16 @@ def create_app(worker, *, agent_capability: str, harness_capability: str):
                 break
         if not registered:
             raise HTTPException(404)
+        path = worker.output / "public" / "images" / (content_id + ".png")
+        # A registered image may still be in the background durability queue.
+        # Waiting in this request thread never blocks the robot owner.
+        deadline = time.monotonic() + 2.0
+        while not path.is_file() and time.monotonic() < deadline:
+            time.sleep(.01)
+        if not path.is_file():
+            raise HTTPException(503, "image persistence pending or failed")
         return FileResponse(
-            worker.output / "public" / "images" / (content_id + ".png"),
+            path,
             media_type="image/png",
         )
 

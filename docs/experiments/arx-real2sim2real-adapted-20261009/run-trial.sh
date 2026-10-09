@@ -12,7 +12,7 @@ exec bash /mnt/hdd16t/chenfu/grasp_recovery/adaptation-20261008/run-env31213.sh 
  --hardware-sha256 18b47ac84ce7dbec7631d2b10c875e3cd3b938ae72e0374b9f97b2d70f94a431 \
  --task robots/arx/manifests/pickup_test_tube.yaml \
  --model-contract robots/arx/manifests/task7_model_a.yaml \
- --runtime-config "$EXP/runtime-limits.json" --runner-limits "$EXP/runner-limits.json" \
+ --runtime-config "${ARX_RUNTIME_CONFIG:-$EXP/runtime-limits.json}" --runner-limits "$EXP/runner-limits.json" \
  --bundle "$EXP/bundle.json" --tool-catalog "$EXP/frozen/tool-catalog.json" \
  --real-input-contract "$EXP/frozen/real-input-contract.json" \
  --real-input-sha256 c3e2315d5986e0ce61e522b5254a73238f6caf11cf19dca27142f787cc0d4229 \

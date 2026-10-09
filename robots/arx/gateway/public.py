@@ -30,8 +30,9 @@ def atomic_write(path: Path, payload: bytes) -> None:
 
 
 class ImageStore:
-    def __init__(self, root: Path):
+    def __init__(self, root: Path, writer=None):
         self.root = root
+        self.writer = writer
         self.registered: set[str] = set()
 
     def publish(self, images):
@@ -41,12 +42,19 @@ class ImageStore:
             if pixels.dtype != np.uint8 or pixels.ndim != 3 or pixels.shape[2] != 3:
                 raise ValueError("camera must be uint8 RGB")
             stream = io.BytesIO()
-            Image.fromarray(pixels).save(stream, format="PNG")
+            # Real-time mode uses inexpensive lossless PNG packaging. File SHA
+            # and the public byte contract stay known before publication.
+            Image.fromarray(pixels).save(stream, format="PNG", **(
+                {"compress_level": 0} if self.writer is not None else {}))
             payload = stream.getvalue()
             sha = hashlib.sha256(payload).hexdigest()
             content_id = "rgb-" + sha
             if content_id not in self.registered:
-                atomic_write(self.root / (content_id + ".png"), payload)
+                path = self.root / (content_id + ".png")
+                if self.writer is None:
+                    atomic_write(path, payload)
+                else:
+                    self.writer.submit(atomic_write, path, payload)
                 self.registered.add(content_id)
             references[camera] = {
                 "content_id": content_id,

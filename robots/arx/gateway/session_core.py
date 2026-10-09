@@ -61,7 +61,11 @@ class ArxSessionCore:
     ):
         self.episode_id, self.backend, self.registry = episode_id, backend, registry
         self.journal, self.limits = journal, limits
-        self.images = ImageStore(output / "public" / "images")
+        self.artifacts = None
+        if limits.async_sensor_storage:
+            from .artifacts import ArtifactWriter
+            self.artifacts = ArtifactWriter()
+        self.images = ImageStore(output / "public" / "images", self.artifacts)
         self.critic, self.bindings, self.package_sha256 = (
             critic,
             tuple(bindings),
@@ -499,19 +503,31 @@ class ArxSessionCore:
         import hashlib
 
         frames = self._images()
-        stream = io.BytesIO()
-        np.savez_compressed(stream, **frames)
-        data = stream.getvalue()
         # ImageStore already owns this episode's public output directory.
         root = self.images.root.parent.parent
         target = root / "grasp-sensors" / (self.current["observation_id"] + ".npz")
-        atomic_write(target, data)
-        self._record("grasp_sensor_evidence", {
+        evidence = {
             "observation_id": self.current["observation_id"],
             "path": str(target.relative_to(root)),
-            "sha256": hashlib.sha256(data).hexdigest(),
             "depth_units": "mm", "observation": deepcopy(self.current),
-        })
+        }
+        if self.artifacts is not None:
+            from .artifacts import retain_sensor_archive
+            self.artifacts.submit(retain_sensor_archive, target, frames, evidence)
+            self._record("artifact_write_queued", {
+                "observation_id": evidence["observation_id"], "path": evidence["path"]})
+        else:
+            stream = io.BytesIO()
+            np.savez_compressed(stream, **frames)
+            data = stream.getvalue()
+            atomic_write(target, data)
+            self._record("grasp_sensor_evidence", dict(
+                evidence, sha256=hashlib.sha256(data).hexdigest()))
+
+    def _drain_artifacts(self, *, flush=False):
+        if self.artifacts is not None:
+            for kind, evidence in (self.artifacts.flush() if flush else self.artifacts.poll()):
+                self._record(kind, evidence)
 
     def _admit_motion(self, request):
         if self.recovery and request.tool == "arx.zeva":
@@ -672,6 +688,9 @@ class ArxSessionCore:
             result["write_certainty"] = "completed"
 
     def _gate(self, result):
+        if self.artifacts is not None:
+            with self.journal.batch():
+                self._drain_artifacts()
         if self.cancel_requested():
             return "cancelled"
         if self.state in {"INTERRUPTED", "ENDED"}:
@@ -922,9 +941,18 @@ class ArxSessionCore:
         )
 
     def finalize_episode_artifacts(self):
+        try:
+            self._drain_artifacts(flush=True)
+        except Exception:
+            self._record("artifact_finalization", {
+                "finalization": "incomplete", "format": "gateway_journal_v1",
+                "async_sensor_storage": True})
+            raise
         self._record(
             "artifact_finalization",
-            {"finalization": "complete", "format": "gateway_journal_v1"},
+            {"finalization": "complete", "format": "gateway_journal_v1",
+             "async_sensor_storage": self.artifacts is not None,
+             "peak_pending": self.artifacts.peak_pending if self.artifacts else 0},
         )
 
     def close(self):
@@ -940,6 +968,8 @@ class ArxSessionCore:
             self.finalize_episode_artifacts()
         finally:
             self.backend.close()
+            if self.artifacts is not None:
+                self.artifacts.close()
             self.closed = True
             self.state = "EXECUTION_UNCERTAIN" if uncertain else "ENDED"
             self.recovery = None
