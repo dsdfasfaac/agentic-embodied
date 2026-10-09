@@ -1,0 +1,7 @@
+{
+  "schema_version": "arx.real.validation.v1",
+  "command": "/tmp/arx-grasp-tests-20261006/bin/python -m pytest -q tests/test_arx_real_bundle_adaptation.py tests/test_arx_sim_bundle_transfer.py tests/test_arx_bundle_execution.py tests/test_arx_observation_reacquisition.py tests/test_arx_real_input.py tests/test_arx_gateway.py",
+  "source_revision": "7e3d3de",
+  "result": "91 passed in 4.09s",
+  "exit_code": 0
+}

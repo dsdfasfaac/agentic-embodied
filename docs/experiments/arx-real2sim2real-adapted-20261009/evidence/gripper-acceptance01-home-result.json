@@ -1,0 +1,20 @@
+{
+  "controller_disabled": true,
+  "controller_stop": {
+    "returncode": 0,
+    "stderr": "",
+    "stdout": "stopped pid=343445\n"
+  },
+  "empty_home_admission": {
+    "measured_current_native": -0.08547019958496094,
+    "measured_open_fraction": 0.7295720717486214,
+    "source": "observed unheld terminal state plus fresh unchanged open-jaw hardware",
+    "source_observation_id": "obs-111"
+  },
+  "homing_is_rollout_step": false,
+  "operator_confirmed_unloaded": false,
+  "schema_version": "arx.real.post_episode.v1",
+  "status": "homed_and_disabled",
+  "termination_reason": "gripper_commissioning_complete",
+  "trial": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/gripper-acceptance01"
+}

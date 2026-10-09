@@ -1,0 +1,101 @@
+{
+  "schema_version": "arx.real.adapted_trial_summary.v1",
+  "candidate_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
+  "raw_trial": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial04",
+  "source_revision": "b33b7e3",
+  "record_counts": {
+    "ObservationPublished": 601,
+    "arrival_observed": 600,
+    "artifact_finalization": 1,
+    "baseline_initialized": 1,
+    "command_dispatch_started": 600,
+    "command_sent": 600,
+    "critic_assessment": 600,
+    "critic_lifecycle": 1,
+    "dispatch_intent": 38,
+    "effective_arguments": 38,
+    "exposure": 38,
+    "grasp_sensor_evidence": 600,
+    "private_evaluation": 600,
+    "real_feature_evidence": 601,
+    "step_commit": 600,
+    "step_intent": 600,
+    "tool_result": 38
+  },
+  "minimum_distance_m": 0.25009272108798747,
+  "nearest_observation": {
+    "critic_numeric_binary_features": {
+      "privileged.interaction.grasped": 0.0,
+      "privileged.interaction.gripper_closed": 1.0,
+      "privileged.interaction.gripper_contact": 0.0,
+      "privileged.interaction.success": 0.0
+    },
+    "feature_observation": {
+      "camera": "front_rgb",
+      "cross_camera_disagreement": false,
+      "cross_camera_error_m": null,
+      "depth_min_mm": 80,
+      "depth_support_fraction": 0.9384615384615385,
+      "lift_reference_monotonic_ns": 338486517847179,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 338630929113436,
+      "unavailable_features": [],
+      "wrist_identity_validations": 61,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": true,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0052366500413909,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.25009272108798747
+    },
+    "observation_id": "obs-391",
+    "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d"
+  },
+  "final_feature_evidence": {
+    "critic_numeric_binary_features": {
+      "privileged.interaction.grasped": 0.0,
+      "privileged.interaction.gripper_closed": 1.0,
+      "privileged.interaction.gripper_contact": 0.0,
+      "privileged.interaction.success": 0.0
+    },
+    "feature_observation": {
+      "camera": "front_rgb",
+      "cross_camera_disagreement": false,
+      "cross_camera_error_m": null,
+      "depth_min_mm": 80,
+      "depth_support_fraction": 0.9069767441860465,
+      "lift_reference_monotonic_ns": 338486517847179,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 338712133358534,
+      "unavailable_features": [],
+      "wrist_identity_validations": 61,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": true,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": 0.0032187906107709607,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.28363155494768416
+    },
+    "observation_id": "obs-600",
+    "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d"
+  },
+  "known_contact_frames": 0,
+  "known_grasp_frames": 0,
+  "known_success_frames": 0,
+  "unknown_feature_frames": 0,
+  "near_trigger_frames": 0,
+  "command_interval_ms": {
+    "median": 320.979136,
+    "min": 256.91495,
+    "max": 1695.495088
+  },
+  "conclusion": "600-action task budget ended without target approach, contact, grasp, success or recovery. No rescue effectiveness claim."
+}

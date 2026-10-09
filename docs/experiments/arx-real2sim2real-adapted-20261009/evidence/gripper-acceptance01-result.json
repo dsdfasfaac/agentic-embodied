@@ -1,0 +1,507 @@
+{
+  "schema_version": "arx.real.gripper.commissioning.v1",
+  "status": "completed",
+  "termination_reason": "gripper_commissioning_complete",
+  "candidate_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
+  "task_success": false,
+  "recovery_attempted": false,
+  "reentry_token_granted": false,
+  "vla_calls": 0,
+  "tools": [
+    {
+      "request": {
+        "schema_version": "arx.tool.request.v1",
+        "request_id": "9382591c977d448d95ff9a0d99a7f4f3",
+        "decision_ref": "9382591c977d448d95ff9a0d99a7f4f3",
+        "observation_id": "obs-0",
+        "control_epoch": 0,
+        "tool": "arx.set_gripper",
+        "arguments": {
+          "opening": 0.0,
+          "max_steps": 60
+        },
+        "evidence_ids": [],
+        "reason": "Supervised empty-jaw commissioning at measured home; no VLA"
+      },
+      "result": {
+        "schema_version": "arx.tool.result.v1",
+        "request_id": "9382591c977d448d95ff9a0d99a7f4f3",
+        "operation_id": "9382591c977d448d95ff9a0d99a7f4f3",
+        "event_sequence": 537,
+        "status": "completed",
+        "tool": "arx.set_gripper",
+        "observation_id_before": "obs-0",
+        "observation_id_after": "obs-53",
+        "control_epoch": 0,
+        "executed_steps": 53,
+        "planned_steps": 60,
+        "write_certainty": "completed",
+        "error": null,
+        "critic_event_ids": [],
+        "result": {
+          "completion": "plan_exhausted",
+          "last_committed_step": 53,
+          "command_target_reached": true,
+          "physical_arrival_verified": true
+        },
+        "budget_remaining": {
+          "steps": 547,
+          "decisions": 63,
+          "recoveries": 4
+        },
+        "recovery_context": null
+      },
+      "feature_evidence": {
+        "observation_id": "obs-53",
+        "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d",
+        "features": {
+          "privileged.interaction.gripper_closed": true,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0022056505824244177,
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.4269864444739309
+        },
+        "feature_observation": {
+          "status": "observed",
+          "unavailable_features": [],
+          "camera": "front_rgb",
+          "target_monotonic_ns": 339593944595966,
+          "cross_camera_error_m": 0.015065311345452087,
+          "cross_camera_disagreement": true,
+          "depth_support_fraction": 0.9411764705882353,
+          "depth_min_mm": 80,
+          "partial_depth_support": false,
+          "wrist_identity_validations": 37,
+          "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+          "lift_reference_monotonic_ns": 339581810203809
+        },
+        "critic_numeric_binary_features": {
+          "privileged.interaction.gripper_contact": 0.0,
+          "privileged.interaction.gripper_closed": 1.0,
+          "privileged.interaction.grasped": 0.0,
+          "privileged.interaction.success": 0.0
+        }
+      }
+    },
+    {
+      "request": {
+        "schema_version": "arx.tool.request.v1",
+        "request_id": "99560a234c1b499cb297655a26f9305a",
+        "decision_ref": "99560a234c1b499cb297655a26f9305a",
+        "observation_id": "obs-53",
+        "control_epoch": 0,
+        "tool": "arx.set_gripper",
+        "arguments": {
+          "opening": 1.0,
+          "max_steps": 60
+        },
+        "evidence_ids": [],
+        "reason": "Supervised empty-jaw commissioning at measured home; no VLA"
+      },
+      "result": {
+        "schema_version": "arx.tool.result.v1",
+        "request_id": "99560a234c1b499cb297655a26f9305a",
+        "operation_id": "99560a234c1b499cb297655a26f9305a",
+        "event_sequence": 1071,
+        "status": "completed",
+        "tool": "arx.set_gripper",
+        "observation_id_before": "obs-53",
+        "observation_id_after": "obs-106",
+        "control_epoch": 0,
+        "executed_steps": 53,
+        "planned_steps": 60,
+        "write_certainty": "completed",
+        "error": null,
+        "critic_event_ids": [],
+        "result": {
+          "completion": "plan_exhausted",
+          "last_committed_step": 106,
+          "command_target_reached": true,
+          "physical_arrival_verified": true
+        },
+        "budget_remaining": {
+          "steps": 494,
+          "decisions": 62,
+          "recoveries": 4
+        },
+        "recovery_context": null
+      },
+      "feature_evidence": {
+        "observation_id": "obs-106",
+        "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d",
+        "features": {
+          "privileged.interaction.gripper_closed": false,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0,
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.4267734232735138
+        },
+        "feature_observation": {
+          "status": "observed",
+          "unavailable_features": [],
+          "camera": "front_rgb",
+          "target_monotonic_ns": 339611946445061,
+          "cross_camera_error_m": 0.016203395873609756,
+          "cross_camera_disagreement": true,
+          "depth_support_fraction": 0.9253731343283582,
+          "depth_min_mm": 80,
+          "partial_depth_support": false,
+          "wrist_identity_validations": 73,
+          "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+          "lift_reference_monotonic_ns": 339611946445061
+        },
+        "critic_numeric_binary_features": {
+          "privileged.interaction.gripper_contact": 0.0,
+          "privileged.interaction.gripper_closed": 0.0,
+          "privileged.interaction.grasped": 0.0,
+          "privileged.interaction.success": 0.0
+        }
+      }
+    },
+    {
+      "request": {
+        "schema_version": "arx.tool.request.v1",
+        "request_id": "9240c986e78847bc9798732267efcade",
+        "decision_ref": "9240c986e78847bc9798732267efcade",
+        "observation_id": "obs-106",
+        "control_epoch": 0,
+        "tool": "arx.hold",
+        "arguments": {
+          "steps": 5
+        },
+        "evidence_ids": [],
+        "reason": "Supervised empty-jaw commissioning at measured home; no VLA"
+      },
+      "result": {
+        "schema_version": "arx.tool.result.v1",
+        "request_id": "9240c986e78847bc9798732267efcade",
+        "operation_id": "9240c986e78847bc9798732267efcade",
+        "event_sequence": 1123,
+        "status": "completed",
+        "tool": "arx.hold",
+        "observation_id_before": "obs-106",
+        "observation_id_after": "obs-111",
+        "control_epoch": 0,
+        "executed_steps": 5,
+        "planned_steps": 5,
+        "write_certainty": "completed",
+        "error": null,
+        "critic_event_ids": [],
+        "result": {
+          "completion": "plan_exhausted",
+          "last_committed_step": 111,
+          "command_target_reached": null,
+          "physical_arrival_verified": true
+        },
+        "budget_remaining": {
+          "steps": 489,
+          "decisions": 61,
+          "recoveries": 4
+        },
+        "recovery_context": null
+      },
+      "feature_evidence": {
+        "observation_id": "obs-111",
+        "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d",
+        "features": {
+          "privileged.interaction.gripper_closed": false,
+          "privileged.interaction.gripper_contact": false,
+          "privileged.interaction.lift_m": 0.0,
+          "privileged.interaction.grasped": false,
+          "privileged.interaction.success": false,
+          "privileged.selected.target_gripper_distance_m": 0.4217273456673636
+        },
+        "feature_observation": {
+          "status": "observed",
+          "unavailable_features": [],
+          "camera": "front_rgb",
+          "target_monotonic_ns": 339613613058045,
+          "cross_camera_error_m": 0.008198655352722274,
+          "cross_camera_disagreement": false,
+          "depth_support_fraction": 0.9305555555555556,
+          "depth_min_mm": 80,
+          "partial_depth_support": false,
+          "wrist_identity_validations": 76,
+          "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4",
+          "lift_reference_monotonic_ns": 339613613058045
+        },
+        "critic_numeric_binary_features": {
+          "privileged.interaction.gripper_contact": 0.0,
+          "privileged.interaction.gripper_closed": 0.0,
+          "privileged.interaction.grasped": 0.0,
+          "privileged.interaction.success": 0.0
+        }
+      }
+    }
+  ],
+  "readonly_reentry_assessment": {
+    "schema_version": "arx.reentry.assessment.v1",
+    "recovery_id": "commissioning-open-check",
+    "observation_id": "obs-111",
+    "policy_id": "recovery_alignment_open_settle_replan",
+    "status": "eligible",
+    "checks": [
+      {
+        "check_id": "device-health",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "healthy"
+      },
+      {
+        "check_id": "sensor-freshness",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "fresh"
+      },
+      {
+        "check_id": "measured-arrival",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "arrived"
+      },
+      {
+        "check_id": "open-unheld:privileged.interaction.gripper_closed",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "observed_false"
+      },
+      {
+        "check_id": "open-unheld:privileged.interaction.gripper_contact",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "observed_false"
+      },
+      {
+        "check_id": "open-unheld:privileged.interaction.grasped",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "observed_false"
+      },
+      {
+        "check_id": "open-unheld:privileged.interaction.success",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "observed_false"
+      },
+      {
+        "check_id": "feature-observability",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "observed"
+      },
+      {
+        "check_id": "critic_postclosure_sustained_noncontact_nonretention",
+        "status": "pass",
+        "evidence_ids": [
+          "obs-111"
+        ],
+        "reason_code": "rule_clear"
+      }
+    ]
+  },
+  "physical_steps": 111,
+  "right_arm_command_unchanged": true,
+  "final_observation": {
+    "schema_version": "arx.public.observation.v1",
+    "episode_nonce": "b55fbd54ee164b9a8e31e588489ad8ff",
+    "observation_id": "obs-111",
+    "step_index": 111,
+    "simulation_time_s": 38.191761879,
+    "lifecycle": "nominal",
+    "cameras": {
+      "front_rgb": {
+        "content_id": "rgb-62aa7c4481e455e5732e3d527add651e2d5184bf30dcc6b995b8177a2b2d189f",
+        "sha256": "62aa7c4481e455e5732e3d527add651e2d5184bf30dcc6b995b8177a2b2d189f",
+        "width": 320,
+        "height": 240,
+        "encoding": "png"
+      },
+      "left_rgb": {
+        "content_id": "rgb-a218ef073dd3e40f5683898034644f480e65588ed7760ce6b10e4ab15fe10afa",
+        "sha256": "a218ef073dd3e40f5683898034644f480e65588ed7760ce6b10e4ab15fe10afa",
+        "width": 320,
+        "height": 240,
+        "encoding": "png"
+      },
+      "right_rgb": {
+        "content_id": "rgb-5be24acfccb4eb754c2bc894eff5bc76e23b1023797df2023a948337b7c5500d",
+        "sha256": "5be24acfccb4eb754c2bc894eff5bc76e23b1023797df2023a948337b7c5500d",
+        "width": 320,
+        "height": 240,
+        "encoding": "png"
+      }
+    },
+    "clock_domain": "host_monotonic_ns",
+    "hardware": {
+      "clock_domain": "host_monotonic_ns",
+      "observation_completed_ns": 339613670590743,
+      "measured_state": [
+        0.032235145568847656,
+        0.00514984130859375,
+        0.00324249267578125,
+        -0.037957191467285156,
+        -0.02422332763671875,
+        -0.00820159912109375,
+        -2.91123104095459,
+        0.01544952392578125,
+        0.00286102294921875,
+        0.00400543212890625,
+        -0.03032684326171875,
+        -0.00705718994140625,
+        0.01468658447265625,
+        -2.4805450439453125
+      ],
+      "state_monotonic_ns": 339613670046874,
+      "state_acquisition_started_ns": 339613669473839,
+      "camera_monotonic_ns": {
+        "front_rgb": 339613613058045,
+        "left_rgb": 339613664780212,
+        "right_rgb": 339613667604192
+      },
+      "depth_monotonic_ns": {
+        "front_depth_mm": 339613613058045,
+        "right_depth_mm": 339613667604192
+      },
+      "camera_calibration_sha256": {
+        "front_rgb": "75dcfabf7b3f76d46a99edbd95b25b61409dcc4509f61e73bacd48c358364f33",
+        "left_rgb": "5b2c8e9540b3f7bb0bc289dadb1fd363a21f90ac4774ba4bdff0e5a19e305835",
+        "right_rgb": "09644e8ab297c023f87415e1610f46bf15916b69b731970e4c964ae0bc7f1add"
+      },
+      "sensor_age_ms": 57.532698,
+      "sensor_skew_ms": 56.988829,
+      "device_health": {
+        "transport_responsive": true,
+        "fault_codes": [],
+        "diagnostics_available": false,
+        "detail": "fresh ROS2 RobotStatus; no CAN ACK or motor fault bits"
+      },
+      "camera_health": {
+        "front_rgb": {
+          "responsive": true,
+          "device_id": "260422272500"
+        },
+        "left_rgb": {
+          "responsive": true,
+          "device_id": "260422271945"
+        },
+        "right_rgb": {
+          "responsive": true,
+          "device_id": "260422275847"
+        }
+      },
+      "right_tcp_xyz_m": [
+        -0.00013388899099475715,
+        0.001669750770819158,
+        -0.001712923386010895
+      ],
+      "right_tcp_frame": "right_arm_local_base",
+      "right_tcp_monotonic_ns": 339613670046874,
+      "auxiliary_feedback": {
+        "right_gripper_current_native": -0.08058643341064453
+      },
+      "auxiliary_monotonic_ns": {
+        "right_gripper_current_native": 339613670046874
+      },
+      "position_error": [
+        0.0,
+        -0.0011444091796875,
+        0.000762939453125,
+        0.002288818359375,
+        0.0026702880859375,
+        0.0110626220703125,
+        0.06876897811889648,
+        -0.0011444091796875,
+        0.00152587890625,
+        0.0003814697265625,
+        0.0,
+        -0.0003814697265625,
+        -0.0011444091796875,
+        0.018718242645263672
+      ],
+      "expected_feedback_target": [
+        0.032235145568847656,
+        0.00629425048828125,
+        0.00247955322265625,
+        -0.040246009826660156,
+        -0.02689361572265625,
+        -0.01926422119140625,
+        -2.9800000190734863,
+        0.01659393310546875,
+        0.00133514404296875,
+        0.00362396240234375,
+        -0.03032684326171875,
+        -0.00667572021484375,
+        0.01583099365234375,
+        -2.499263286590576
+      ],
+      "arrival_reference_target": [
+        0.032235145568847656,
+        0.00629425048828125,
+        0.00247955322265625,
+        -0.040246009826660156,
+        -0.02689361572265625,
+        -0.01926422119140625,
+        -2.9800000190734863,
+        0.01659393310546875,
+        0.00133514404296875,
+        0.00362396240234375,
+        -0.03032684326171875,
+        -0.00667572021484375,
+        0.01583099365234375,
+        -2.499263286590576
+      ],
+      "gripper_arrival": {
+        "13": {
+          "mode": "position",
+          "closing_command": false,
+          "commanded_open_fraction": 0.735077440738678,
+          "measured_open_fraction": 0.7295720717486214,
+          "settled": false,
+          "current": -0.08058643341064453
+        }
+      },
+      "arrival_verified": true,
+      "command_receipt": {
+        "command_id": "cmd-de64e8e82c4f43d4b710ea8df71007f7",
+        "sent_monotonic_ns": 339613603375506,
+        "status": "ros_publish_returned",
+        "detail": "ROS2 publisher returned; controller/CAN receipt unavailable",
+        "expected_feedback_target": [
+          0.032235145568847656,
+          0.00629425048828125,
+          0.00247955322265625,
+          -0.040246009826660156,
+          -0.02689361572265625,
+          -0.01926422119140625,
+          -2.9800000190734863,
+          0.01659393310546875,
+          0.00133514404296875,
+          0.00362396240234375,
+          -0.03032684326171875,
+          -0.00667572021484375,
+          0.01583099365234375,
+          -2.499263286590576
+        ]
+      }
+    },
+    "event_sequence": 1119
+  }
+}

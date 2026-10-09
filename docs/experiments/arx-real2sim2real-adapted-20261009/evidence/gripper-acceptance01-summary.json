@@ -1,0 +1,96 @@
+{
+  "schema_version": "arx.real.gripper.commissioning_summary.v1",
+  "source_revision": "7e3d3de",
+  "raw_root": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009",
+  "record_counts": {
+    "ObservationPublished": 114,
+    "arrival_observed": 111,
+    "artifact_finalization": 1,
+    "baseline_initialized": 1,
+    "command_dispatch_started": 111,
+    "command_sent": 111,
+    "commissioning_reentry_assessment": 1,
+    "critic_assessment": 111,
+    "critic_lifecycle": 1,
+    "effective_arguments": 3,
+    "grasp_sensor_evidence": 113,
+    "private_evaluation": 111,
+    "real_feature_evidence": 112,
+    "step_commit": 111,
+    "step_intent": 111,
+    "tool_result": 3
+  },
+  "physical_steps": 111,
+  "tools": [
+    {
+      "tool": "arx.set_gripper",
+      "executed_steps": 53,
+      "physical_arrival_verified": true
+    },
+    {
+      "tool": "arx.set_gripper",
+      "executed_steps": 53,
+      "physical_arrival_verified": true
+    },
+    {
+      "tool": "arx.hold",
+      "executed_steps": 5,
+      "physical_arrival_verified": true
+    }
+  ],
+  "readonly_reentry_status": "eligible",
+  "task_success": false,
+  "recovery_attempted": false,
+  "reentry_token_granted": false,
+  "vla_calls": 0,
+  "home": {
+    "trial04-home": {
+      "status": "complete",
+      "return_source": "verified empty rollout arrivals in reverse order",
+      "trajectory_sha256": "302209078d5148338b885b4302fb545fe54cb8f34a37bcc13531f9a54518277d",
+      "source_sha256": "72aa96b6816c65af8314824eda6fa53a9c613e165d4edb9137066f634b2fa761",
+      "measured_right_home_verified": true,
+      "final_state": [
+        0.032235145568847656,
+        0.00476837158203125,
+        0.00324249267578125,
+        -0.037957191467285156,
+        -0.02460479736328125,
+        -0.00820159912109375,
+        -2.937933921813965,
+        0.01621246337890625,
+        0.00133514404296875,
+        0.00400543212890625,
+        -0.02765655517578125,
+        -0.01392364501953125,
+        0.043679237365722656,
+        -0.06961917877197266
+      ],
+      "commands": 1344
+    },
+    "gripper-acceptance01-home": {
+      "status": "complete",
+      "return_source": null,
+      "trajectory_sha256": "302209078d5148338b885b4302fb545fe54cb8f34a37bcc13531f9a54518277d",
+      "source_sha256": "72aa96b6816c65af8314824eda6fa53a9c613e165d4edb9137066f634b2fa761",
+      "measured_right_home_verified": true,
+      "final_state": [
+        0.032235145568847656,
+        0.00514984130859375,
+        0.00324249267578125,
+        -0.037957191467285156,
+        -0.02422332763671875,
+        -0.00820159912109375,
+        -2.9116125106811523,
+        0.01583099365234375,
+        0.00247955322265625,
+        0.00362396240234375,
+        -0.03032684326171875,
+        -0.00667572021484375,
+        0.034905433654785156,
+        -2.48016357421875
+      ],
+      "commands": 5
+    }
+  }
+}
