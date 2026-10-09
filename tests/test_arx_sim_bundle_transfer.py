@@ -55,7 +55,7 @@ def test_numeric_binary_dwell_unknown_and_measured_reentry():
     assert monitor.last_feature_evidence['features'][prefix+'gripper_closed'] is True
     assert monitor.last_feature_evidence['critic_numeric_binary_features'][prefix+'gripper_closed'] == 1.
     assert monitor.completion_evidence() is None
-    monitor.temporal.reset()
+    monitor.reset(obs(0), {})
     for step in range(1, 8):
         monitor.observe(obs(step), {})
     values[prefix+'gripper_contact'] = None

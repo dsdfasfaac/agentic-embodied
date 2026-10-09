@@ -1,0 +1,31 @@
+{
+  "schema_version": "arx.real.bundle.adaptation.v1",
+  "candidate_id": "cand-005-alignment-restage-settle-v2-real-v1",
+  "parent_bundle_sha256": "7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c",
+  "bundle_file_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
+  "bundle_semantic_sha256": "2a5de6c8e79106b97ea8f9c34df677323cac4b6ad27558fc5db6c7ae87430f85",
+  "real_input_sha256": "c3e2315d5986e0ce61e522b5254a73238f6caf11cf19dca27142f787cc0d4229",
+  "feature_provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d",
+  "hardware_sha256": "18b47ac84ce7dbec7631d2b10c875e3cd3b938ae72e0374b9f97b2d70f94a431",
+  "manual_deployment_adaptation": true,
+  "unchanged_zero_shot": false,
+  "changes": {
+    "target_distance_gate_m": 0.08,
+    "opening_max_steps": 60,
+    "physical_cooldown_steps": 129
+  },
+  "distance_gate_rationale": "5cm observer contact range plus a provisional3cm pre-contact margin; excludes observed42cm early empty closure. This threshold is not statistically calibrated.",
+  "recovery_budget": {
+    "opening": 60,
+    "hold": 5,
+    "vla": 64,
+    "total": 129,
+    "tool_calls": 4
+  },
+  "reentry": "Healthy fresh synchronized measured arrival; open right jaws; no observed target contact, grasp or success; clear critic.",
+  "base_model": "Task7 Model A iter5000 dodo loopback5583 seed42; unchanged checkpoint",
+  "unchanged_control": "15Hz maximum; 0.08 gripper step; 0.35 filter; +0.9 preload; hardware joint bounds; 600 physical actions and 4 recoveries",
+  "terminal_success": "Pink target retained and >=1cm lift for5freshframes; unchanged real observer",
+  "post_episode": "Measured home before disable; request onsite unloading if possibly holding glass",
+  "data": "/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/trial04"
+}

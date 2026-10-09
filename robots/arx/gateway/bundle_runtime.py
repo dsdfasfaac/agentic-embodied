@@ -120,6 +120,8 @@ class BundleMonitor:
         self.temporal = TemporalCritic(bundle.critic_rules)
         self.by_id = {rule.rule_id: rule for rule in bundle.critic_rules}
         self.last_feature_evidence = None
+        self._physical_step = None
+        self._cooldown_until = {}
         if terminal_feature is not None and (
             provider is None or not any(source.name == terminal_feature and
                                         source.scalar_type == "boolean"
@@ -150,11 +152,42 @@ class BundleMonitor:
 
     def reset(self, observation, images):
         self.temporal.reset()
+        self._physical_step = observation["step_index"]
+        self._cooldown_until.clear()
         if self.provider:
             self._remember_features(observation, self.provider.augment(observation, images))
 
     def lifecycle(self, event):
         pass
+
+    def _evaluate_real_actions(self, measured, step, unavailable):
+        # Fresh read-only frames may update success evidence, but are not extra
+        # physical actions for dwell/cooldown. Unknown or false guards still
+        # break the evidence window, even during a read-only refresh.
+        if self._physical_step is not None and step < self._physical_step:
+            raise ValueError("real critic physical step regressed")
+        if step == self._physical_step:
+            for rule in self.bundle.critic_rules:
+                needed = {rule.feature, *(p.feature for p in rule.activation_conditions)}
+                if needed & unavailable or not all(
+                    TemporalCritic._predicate(p, measured) for p in rule.activation_conditions
+                ):
+                    state = self.temporal._state[rule.rule_id]
+                    state.consecutive = 0
+                    state.history.clear()
+            return []
+        self._physical_step = step
+        for rule in self.bundle.critic_rules:
+            # TemporalCritic clears its local cooldown on a false activation
+            # guard. Real recovery must retain its physical-action horizon
+            # through reopening and fresh nominal inference.
+            self.temporal._state[rule.rule_id].cooldown_remaining = max(
+                0, self._cooldown_until.get(rule.rule_id, -1) - step + 1)
+        events = self.temporal.evaluate(measured, step_index=step,
+                                        unavailable_features=unavailable)
+        for event in events:
+            self._cooldown_until[event["rule_id"]] = step + self.by_id[event["rule_id"]].cooldown_steps
+        return events
 
     def observe(self, observation, images):
         measured = self.provider.augment(observation, images) if self.provider else observation
@@ -162,8 +195,11 @@ class BundleMonitor:
         events = []
         quality = measured.get("feature_observation", {"status": "observed", "unavailable_features": []})
         critic_view, _ = numeric_binary_features(self.bundle, measured)
-        for item in self.temporal.evaluate(critic_view, step_index=observation["step_index"],
-                                          unavailable_features=set(quality.get("unavailable_features", []))):
+        unavailable = set(quality.get("unavailable_features", []))
+        proposals = (self._evaluate_real_actions(critic_view, observation["step_index"], unavailable)
+                     if self.provider else self.temporal.evaluate(
+                         critic_view, step_index=observation["step_index"], unavailable_features=unavailable))
+        for item in proposals:
             rule = self.by_id[item["rule_id"]]
             events.append(Proposal(
                 detector_id="bundle", failure_mode=rule.rule_id, rule_id=rule.rule_id,
@@ -219,6 +255,18 @@ class RealBundleReentry:
         rule = self.recoveries[context["policy_id"]]
         measured = self.provider.augment(obs, context["images"][-1]) if self.provider else obs
         unavailable = set(measured.get("feature_observation", {}).get("unavailable_features", []))
+        raw_measured = measured
+        # An opening recovery may clear its distance guard while still closed.
+        # Granting a token requires the real postcondition of that tool as well.
+        gripper_steps = [s for s in rule.steps if s.tool == "arx.set_gripper"]
+        if gripper_steps and gripper_steps[-1].parameters.get("opening", 0) >= .7:
+            for name in ("gripper_closed", "gripper_contact", "grasped", "success"):
+                feature = "privileged.interaction." + name
+                value = raw_measured.get(feature)
+                status = "pass" if value is False else "unknown" if value is None else "fail"
+                checks.append({"check_id": "open-unheld:" + feature, "status": status,
+                               "evidence_ids": [obs["observation_id"]],
+                               "reason_code": "observed_false" if status == "pass" else "open_unheld_not_verified"})
         measured, _ = numeric_binary_features(self.bundle, measured)
         checks.append({"check_id": "feature-observability", "status": "unknown" if unavailable else "pass",
                        "evidence_ids": [obs["observation_id"]],
