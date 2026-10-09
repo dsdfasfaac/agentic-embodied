@@ -161,6 +161,57 @@ def plan_home(current, goal, fk, recording, *, control_hz=15):
 
 
 
+def resolve_empty_feature_witnesses(rows):
+    """Resolve only read-only, verified same-pose reacquisition before the next command."""
+    observations = {p['observation_id']: (s, p) for s,k,p in rows if k=='ObservationPublished'}
+    features = [(s,p) for s,k,p in rows if k=='real_feature_evidence']
+    resolutions = {}
+    prefix = 'privileged.interaction.'
+    def empty(f):
+        distance = f.get('features',{}).get('privileged.selected.target_gripper_distance_m')
+        return (f.get('feature_observation',{}).get('status')=='observed'
+                and all(f['features'].get(prefix+n) is False for n in ('gripper_contact','grasped','success'))
+                and type(distance) in (int,float) and math.isfinite(distance) and distance>=.10)
+    for seq,feature in features:
+        if feature.get('feature_observation',{}).get('status')=='observed':
+            if not empty(feature):
+                raise ValueError('rollout return requires continuously observed empty target-clear motion')
+            continue
+        source = observations.get(feature.get('observation_id'))
+        if source is None:
+            raise ValueError('unknown observation lacks same-pose evidence')
+        _, before = source
+        step = before['step_index']
+        next_motion = min((s for s,k,p in rows if s>seq and k in
+                           ('step_intent','command_dispatch_started','command_sent')), default=math.inf)
+        candidates = [(s,f) for s,f in features if seq<s<next_motion and empty(f)
+                      and f.get('observation_id','').startswith(f'obs-{step}-reacquire-')]
+        if not candidates:
+            raise ValueError('unknown observation was not resolved before motion')
+        valid_seq, witness = candidates[0]
+        if witness['observation_id'] not in observations:
+            raise ValueError('read-only witness lacks published measurement')
+        _, after = observations[witness['observation_id']]
+        if (after['step_index'] != step or
+                not any(seq<s<valid_seq and k=='observation_wait_started' and
+                        p.get('step')==step and p.get('robot_commands_sent') is False for s,k,p in rows) or
+                not any(valid_seq<s<next_motion and k=='observation_reacquired' and
+                        p.get('step')==step and p.get('observation_id')==after['observation_id'] for s,k,p in rows)):
+            raise ValueError('unknown observation lacks a completed read-only wait')
+        a,b = np.asarray(before['hardware']['measured_state']),np.asarray(after['hardware']['measured_state'])
+        tolerance = np.full(14,.035); tolerance[[6,13]]=.10
+        if (a.shape!=(14,) or b.shape!=(14,) or not np.isfinite(a).all() or not np.isfinite(b).all()
+                or np.any(np.abs(b-a)>tolerance)
+                or after['hardware'].get('arrival_verified') is not True
+                or after['hardware']['observation_completed_ns']<=before['hardware']['observation_completed_ns']):
+            raise ValueError('read-only witness changed pose or lacks fresh verified arrival')
+        resolutions[feature['observation_id']] = {
+            'observation_id':after['observation_id'], 'step':step,
+            'maximum_joint_drift_rad':float(np.max(np.abs(b-a)[[0,1,2,3,4,5,7,8,9,10,11,12]])),
+            'measured_state':b.tolist(), 'source_sequence':seq, 'witness_sequence':valid_seq}
+    return [f for _,f in features if f.get('feature_observation',{}).get('status')=='observed'],resolutions
+
+
 def load_empty_rollout_return(journal_path, initial, goal, provider):
     """Reverse only this episode's measured, verified, target-clear trajectory."""
     import sqlite3
@@ -168,7 +219,9 @@ def load_empty_rollout_return(journal_path, initial, goal, provider):
         def records(kind):
             return [json.loads(row[0]) for row in db.execute(
                 "SELECT payload FROM records WHERE kind=? ORDER BY sequence", (kind,))]
-        features = records("real_feature_evidence")
+        rows = [(s,k,json.loads(p)) for s,k,p in db.execute(
+            'SELECT sequence,kind,payload FROM records ORDER BY sequence')]
+        features, resolved = resolve_empty_feature_witnesses(rows)
         sent = records("command_sent")
         arrived = records("arrival_observed")
         commits = records("step_commit")
@@ -192,13 +245,21 @@ def load_empty_rollout_return(journal_path, initial, goal, provider):
         raise ValueError("invalid rollout arrival states")
     if np.max(np.abs(initial[7:13] - measured[-1, 7:13])) > .035:
         raise ValueError("robot moved since verified rollout endpoint")
+    for index,commit in enumerate(commits):
+        witness = resolved.get(f"obs-{commit['step']}")
+        if witness:
+            measured[index] = witness['measured_state']
+    if np.max(np.abs(initial[7:13] - measured[-1,7:13]))>.035:
+        raise ValueError('robot moved since verified reacquired rollout endpoint')
     joints = np.vstack((measured[::-1, 7:13], goal[7:13]))
     indices = list(range(len(joints)))
     value = {"frame_indices": indices,
              "source_sha256": hashlib.sha256(journal_path.read_bytes()).hexdigest(),
              "right_controller_xyz_m": [provider.controller_fk.fk(q)[0].tolist() for q in joints],
              "return_source": "verified empty rollout arrivals in reverse order",
-             "source_observation_ids": [f"obs-{c['step']}" for c in commits[::-1]],
+             "source_observation_ids": [resolved.get(f"obs-{c['step']}",{}).get(
+                 'observation_id',f"obs-{c['step']}") for c in commits[::-1]],
+             "read_only_resolved_observations":resolved,
              "source_journal": str(journal_path)}
     return value, joints, np.arange(len(joints)) / 15.
 
