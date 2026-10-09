@@ -128,3 +128,22 @@ def test_reentry_denies_far_closed_or_possible_held_target_even_when_rule_clear(
     assert reviewer.inspect(None, context)['status'] == 'ineligible'
     values[PREFIX+'grasped'] = None
     assert reviewer.inspect(None, context)['status'] == 'ineligible'
+
+
+@pytest.mark.parametrize('changed', ['unknown', 'held', 'contact', 'near'])
+def test_empty_home_commissioning_rejects_ambiguous_or_nonempty_observations(changed):
+    from scripts.deployment.commission_arx_empty_gripper import require_empty
+    _, _, values = monitored()
+    values[PREFIX+'gripper_closed'] = False
+    evidence = {'feature_observation': {'status': 'observed'}, 'features': values}
+    require_empty(evidence, closed=False)
+    if changed == 'unknown':
+        evidence['feature_observation']['status'] = 'unknown'
+    elif changed == 'held':
+        values[PREFIX+'grasped'] = True
+    elif changed == 'contact':
+        values[PREFIX+'gripper_contact'] = None
+    else:
+        values[DISTANCE] = .07
+    with pytest.raises(ValueError):
+        require_empty(evidence, closed=False)
