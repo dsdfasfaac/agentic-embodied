@@ -85,3 +85,42 @@ def test_tilted_preshape_returns_above_rack_floor_before_recorded_path():
     assert bridge and min(k.fk(q[7:13])[0][2] for q in bridge) >= p['raised_entry_floor_m']-.0002
     assert p['phases'][0]=='vertical_escape'
     assert all(q[13]==current[13] for q in targets)
+
+
+def test_rollout_return_uses_only_verified_empty_measured_arrivals(tmp_path):
+    import sqlite3
+    from types import SimpleNamespace
+    from scripts.deployment.replay_arx_picktube_home import load_empty_rollout_return
+    path = tmp_path / 'journal.sqlite3'
+    prefix = 'privileged.interaction.'
+    db = sqlite3.connect(path)
+    db.execute('CREATE TABLE records(sequence INTEGER PRIMARY KEY, kind TEXT, payload TEXT)')
+    def add(kind, value):
+        db.execute('INSERT INTO records(kind,payload) VALUES(?,?)', (kind, json.dumps(value)))
+    f = {'feature_observation': {'status': 'observed'}, 'features': {
+        **{prefix + name: False for name in ('gripper_contact', 'grasped', 'success')},
+        'privileged.selected.target_gripper_distance_m': .4}}
+    add('real_feature_evidence', f)
+    for index in range(2):
+        state = np.zeros(14); state[7] = .02 * index
+        add('command_sent', {'command_id': str(index)})
+        add('arrival_observed', {'command_id': str(index), 'verified': True,
+                                'measured_state': state.tolist()})
+        add('step_commit', {'step': index + 1})
+        add('real_feature_evidence', f)
+    db.commit()
+    provider = SimpleNamespace(controller_fk=SimpleNamespace(fk=lambda q: (np.asarray(q[:3]),)))
+    initial = np.zeros(14); initial[7] = .02
+    value, joints, times = load_empty_rollout_return(path, initial, np.zeros(14), provider)
+    assert joints[:, 0].tolist() == [.02, 0., 0.]
+    assert value['source_observation_ids'] == ['obs-2', 'obs-1']
+    assert np.all(np.diff(times) > 0)
+    moved = initial.copy(); moved[7] += .1
+    with pytest.raises(ValueError, match='moved'):
+        load_empty_rollout_return(path, moved, np.zeros(14), provider)
+    f['features'][prefix+'grasped'] = True
+    db.execute('UPDATE records SET payload=? WHERE kind=?', (json.dumps(f), 'real_feature_evidence'))
+    db.commit()
+    with pytest.raises(ValueError, match='empty target-clear'):
+        load_empty_rollout_return(path, initial, np.zeros(14), provider)
+    db.close()

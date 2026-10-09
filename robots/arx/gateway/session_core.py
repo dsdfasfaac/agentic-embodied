@@ -601,31 +601,35 @@ class ArxSessionCore:
                 result["write_certainty"] = "known_partial"
                 if self.recovery:
                     self.recovery["remaining_steps"] -= 1
-                self._record(
-                    "private_evaluation",
-                    {
-                        "step": self.step_index,
-                        "evaluation": _json_value(commit.private_evaluation),
-                        "measured_state": commit.policy.state.tolist(),
-                    },
-                )
-                self._publish(
-                    commit, lifecycle="recovery" if self.recovery else "nominal"
-                )
-                if commit.hardware is not None and self.limits.retain_step_sensors:
-                    self._retain_grasp_sensors()
-                if commit.hardware is not None and commit.hardware.arrival_verified is not True:
-                    self.state = "EXECUTION_UNCERTAIN"
+                # Keep the physical step commit durable immediately; group
+                # post-action evidence and the critic decision into one FULL
+                # WAL commit before this loop can dispatch the next target.
+                with self.journal.batch():
+                    self._record(
+                        "private_evaluation",
+                        {
+                            "step": self.step_index,
+                            "evaluation": _json_value(commit.private_evaluation),
+                            "measured_state": commit.policy.state.tolist(),
+                        },
+                    )
+                    self._publish(
+                        commit, lifecycle="recovery" if self.recovery else "nominal"
+                    )
+                    if commit.hardware is not None and self.limits.retain_step_sensors:
+                        self._retain_grasp_sensors()
+                    if commit.hardware is not None and commit.hardware.arrival_verified is not True:
+                        self.state = "EXECUTION_UNCERTAIN"
+                        self._save()
+                        raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
+                    prepared.on_commit(self._context())
+                    task_success = self._assess(result, terminal=commit.environment_ended)
+                    if not commit.environment_ended and not task_success:
+                        wait_completion, task_success = self._reacquire_observation(result, task_success)
+                        if wait_completion:
+                            completion = wait_completion
                     self._save()
-                    raise GatewayError("PHYSICAL_ARRIVAL_UNVERIFIED")
-                prepared.on_commit(self._context())
-                task_success = self._assess(result, terminal=commit.environment_ended)
-                if not commit.environment_ended and not task_success:
-                    wait_completion, task_success = self._reacquire_observation(result, task_success)
-                    if wait_completion:
-                        completion = wait_completion
-                self._save()
-                self.journal.update(result)
+                    self.journal.update(result)
                 if task_success:
                     self.close()
                     completion = "task_success"

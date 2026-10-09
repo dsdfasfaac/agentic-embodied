@@ -4,11 +4,11 @@
   "bundle_file_sha256": "7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c",
   "bundle_semantic_sha256": "7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c",
   "catalog": "docs/experiments/arx-real2sim2real-zeroshot-20261009/frozen/tool-catalog.json",
-  "catalog_sha256": "95861b16ffe8841f9b81ef3884915d4fd5f67e43472f580e6ff9cab22746518c",
+  "catalog_sha256": "427861998ebcf8b7b62f678b15c6e978b2e1666cbccdaf35d669a5d83dbbc3e0",
   "feature_provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d",
   "grasp_config_sha256": null,
   "real_input_contract": "docs/experiments/arx-real2sim2real-zeroshot-20261009/frozen/real-input-contract.json",
-  "real_input_contract_sha256": "9a54a772bcee8e807820cc261e9bce09ce1cd8a34472e5fc47e9e5b29d029ffd",
+  "real_input_contract_sha256": "bda7b40ebc0535fa7d11094fce27dc44246d99a9c120a6ae3f0f5210a9daf42e",
   "recovery_plans": [
     {
       "recovery_id": "recovery_alignment_open_settle_replan",

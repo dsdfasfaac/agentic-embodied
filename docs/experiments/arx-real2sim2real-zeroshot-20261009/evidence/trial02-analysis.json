@@ -1,0 +1,76 @@
+{
+  "candidate_sha256": "7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c",
+  "physical_steps": 37,
+  "critic_events": [
+    {
+      "detector_id": "bundle",
+      "event_id": "proposal-8803167688271f5ef55aef1660c979083a0cf590a1bc4588a3d04c243f4b147b",
+      "evidence_observation_ids": [
+        "obs-37"
+      ],
+      "failure_mode": "critic_postclosure_sustained_noncontact_nonretention",
+      "limitations": [],
+      "proposal": "interrupt",
+      "reason_code": "critic_postclosure_sustained_noncontact_nonretention",
+      "rule_id": "critic_postclosure_sustained_noncontact_nonretention",
+      "summary": "A closed gripper has sustained absent contact, no retained grasp, and no meaningful lift for 12 physical actions after the closure event; autonomous recovery has not occurred. Interrupt nominal execution and request one bounded open-settle-replan recovery for a safe approach retry."
+    }
+  ],
+  "validation_errors": [
+    {
+      "reason": "gripper recovery step budget cannot reach target",
+      "request_id": "264a7b4c84bd461dba0c2f8d0aba16ae",
+      "type": "ValueError"
+    }
+  ],
+  "final_feature_evidence": {
+    "critic_numeric_binary_features": {
+      "privileged.interaction.grasped": 0.0,
+      "privileged.interaction.gripper_closed": 1.0,
+      "privileged.interaction.gripper_contact": 0.0,
+      "privileged.interaction.success": 0.0
+    },
+    "feature_observation": {
+      "camera": "front_rgb",
+      "cross_camera_disagreement": true,
+      "cross_camera_error_m": 0.01707516668917485,
+      "depth_min_mm": 80,
+      "depth_support_fraction": 0.92,
+      "lift_reference_monotonic_ns": 334802306810643,
+      "partial_depth_support": false,
+      "status": "observed",
+      "target_monotonic_ns": 334808774711767,
+      "unavailable_features": [],
+      "wrist_identity_validations": 13,
+      "wrist_mount_sha256": "5544364061d37735685bda97d97dc2ec3c7b96565bb0a966027c8e1475f08ad4"
+    },
+    "features": {
+      "privileged.interaction.grasped": false,
+      "privileged.interaction.gripper_closed": true,
+      "privileged.interaction.gripper_contact": false,
+      "privileged.interaction.lift_m": -0.001403786822680747,
+      "privileged.interaction.success": false,
+      "privileged.selected.target_gripper_distance_m": 0.4488768370183546
+    },
+    "observation_id": "obs-37",
+    "provider_sha256": "ff6eb8faad5c77d58ffee82cf475320be238ca8481f183245d308474deab7a2d"
+  },
+  "required_opening_steps_from_command": 31,
+  "source_opening_steps": 20,
+  "timing_ms": {
+    "median_command_interval": 419.0937675,
+    "median_arrival_wait": 53.713208,
+    "chunk_gaps": [
+      {
+        "after_step": 16,
+        "ms": 1512.529014
+      },
+      {
+        "after_step": 32,
+        "ms": 1486.954018
+      }
+    ]
+  },
+  "recovery_commands_sent": 0,
+  "held_or_success_observed": false
+}

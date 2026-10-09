@@ -160,7 +160,51 @@ def plan_home(current, goal, fk, recording, *, control_hz=15):
     }
 
 
-def replay_home(hardware_path, hardware_sha, task_path, output, *, execute=False):
+
+def load_empty_rollout_return(journal_path, initial, goal, provider):
+    """Reverse only this episode's measured, verified, target-clear trajectory."""
+    import sqlite3
+    with sqlite3.connect(f"file:{journal_path.resolve()}?mode=ro", uri=True) as db:
+        def records(kind):
+            return [json.loads(row[0]) for row in db.execute(
+                "SELECT payload FROM records WHERE kind=? ORDER BY sequence", (kind,))]
+        features = records("real_feature_evidence")
+        sent = records("command_sent")
+        arrived = records("arrival_observed")
+        commits = records("step_commit")
+    if not commits or not (len(sent) == len(arrived) == len(commits)):
+        raise ValueError("rollout return requires every command's verified arrival")
+    if any(a.get("verified") is not True or a["command_id"] != b["command_id"]
+           for a, b in zip(arrived, sent)):
+        raise ValueError("rollout return has unverified or mismatched arrivals")
+    prefix = "privileged.interaction."
+    if len(features) < len(commits) + 1 or any(
+        f.get("feature_observation", {}).get("status") != "observed" or
+        any(f["features"].get(prefix + name) is not False
+            for name in ("gripper_contact", "grasped", "success")) or
+        not isinstance(f["features"].get("privileged.selected.target_gripper_distance_m"), (int, float)) or
+        f["features"]["privileged.selected.target_gripper_distance_m"] < .10
+        for f in features
+    ):
+        raise ValueError("rollout return requires continuously observed empty target-clear motion")
+    measured = np.asarray([a["measured_state"] for a in arrived], dtype=float)
+    if measured.shape != (len(commits), 14) or not np.isfinite(measured).all():
+        raise ValueError("invalid rollout arrival states")
+    if np.max(np.abs(initial[7:13] - measured[-1, 7:13])) > .035:
+        raise ValueError("robot moved since verified rollout endpoint")
+    joints = np.vstack((measured[::-1, 7:13], goal[7:13]))
+    indices = list(range(len(joints)))
+    value = {"frame_indices": indices,
+             "source_sha256": hashlib.sha256(journal_path.read_bytes()).hexdigest(),
+             "right_controller_xyz_m": [provider.controller_fk.fk(q)[0].tolist() for q in joints],
+             "return_source": "verified empty rollout arrivals in reverse order",
+             "source_observation_ids": [f"obs-{c['step']}" for c in commits[::-1]],
+             "source_journal": str(journal_path)}
+    return value, joints, np.arange(len(joints)) / 15.
+
+
+def replay_home(hardware_path, hardware_sha, task_path, output, *, execute=False,
+                rollout_journal=None):
     config = load_real_hardware_config(hardware_path, hardware_sha)
     if config.arm_transport != 'arx_ros2' or config.timing.control_hz != 15 or not config.command_right:
         raise ValueError('recorded home requires the dodo 15Hz ROS2 deployment')
@@ -187,7 +231,15 @@ def replay_home(hardware_path, hardware_sha, task_path, output, *, execute=False
     try:
         sample = _read_fresh(device, time.monotonic() + 5)
         initial = np.asarray(sample.positions, dtype=float)
-        targets, plan = plan_home(initial, goal, provider.tool_fk, recording)
+        try:
+            targets, plan = plan_home(initial, goal, provider.tool_fk, recording)
+        except ValueError:
+            if rollout_journal is None:
+                raise
+            recording = load_empty_rollout_return(Path(rollout_journal), initial, goal, provider)
+            targets, plan = plan_home(initial, goal, provider.tool_fk, recording)
+            report.update(return_source=recording[0]["return_source"],
+                          rollout_source=recording[0])
         for target in targets:
             device._native_target(target[7:], config.right.calibration())
         report.update(initial_state=initial.tolist(), plan=plan,

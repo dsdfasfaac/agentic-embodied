@@ -86,7 +86,8 @@ def finish(*, trial: Path, hardware: Path, hardware_sha: str,
             report["status"] = "requires_unloading"
             return report
         homing = replay_home(hardware, hardware_sha, task,
-                             output / "recorded-homing.json", execute=True)
+                             output / "recorded-homing.json", execute=True,
+                             rollout_journal=trial / "private/gateway/journal.sqlite3")
         if homing["status"] != "complete":
             raise ValueError("homing incomplete; leave controller enabled")
         # The recorded path preserved grippers. Only once the arm is home may

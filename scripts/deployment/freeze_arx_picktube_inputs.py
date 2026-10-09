@@ -47,6 +47,7 @@ def freeze(
     grasp_config: Path | None = None,
     depth_cameras: tuple[str, ...] = ("front_depth_mm",),
     hardware_config: Path | None = None,
+    include_eef: bool = True,
 ) -> dict:
     root = Path(__file__).resolve().parents[2]
     task_path = root / "robots/arx/manifests/pickup_test_tube.yaml"
@@ -91,7 +92,7 @@ def freeze(
     catalog = default_registry(
         zeva=stub,
         gripper=stub,
-        eef=stub,
+        eef=stub if include_eef else None,
         reentry=stub,
         grasp=stub if grasp_config else None,
     ).describe()
@@ -175,6 +176,8 @@ def main() -> None:
     parser.add_argument("--output-dir", type=Path, required=True)
     parser.add_argument("--grasp-config", type=Path)
     parser.add_argument("--hardware-config", type=Path)
+    parser.add_argument("--no-eef", action="store_true",
+                        help="Match a real gateway without a calibrated EEF planner")
     parser.add_argument(
         "--depth-cameras",
         nargs="+",
@@ -190,6 +193,7 @@ def main() -> None:
                 grasp_config=args.grasp_config,
                 depth_cameras=tuple(args.depth_cameras),
                 hardware_config=args.hardware_config,
+                include_eef=not args.no_eef,
             ),
             indent=2,
             sort_keys=True,

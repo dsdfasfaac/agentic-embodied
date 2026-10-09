@@ -1,0 +1,54 @@
+# 原始 sim bundle 的真机 zero-shot 测试，2026-10-09
+
+## 冻结输入
+
+- Candidate：`cand-005-alignment-restage-settle-v2`。
+- 原附件逐字节保存为 `bundle.json`，SHA-256：`7d922aeff6d64b77a7c0db938aad7052d4a80c29baa2f76a21b350ef306d6f7c`。
+- 原 critic、阈值、12 步 dwell、50 步 cooldown、20 步张爪、5 步保持、4 个 VLA chunk 均未修改。
+- 布尔真机观测只在 numeric critic 视图中编码为 0/1；原始证据保持 bool，未知观测保持未知。
+- 命名重入标记由现场审核返回的新令牌替换。插入只读 `arx.review_reentry`，不增加恢复动作。
+- 本 bundle 不包含 GraspGen、几何位移或自动抬升工具，实际执行也没有启用它们。
+- 基础 VLA 为已有的 Task7 Model A iter5000，dodo 本地 5583 服务、seed42。附件未声明 sim 基础模型权重身份，不能确认两者完全一致。
+
+## 本轮结果
+
+`trial01` 因冻结目录多包含未安装的 EEF 工具而在启动前拒绝；未发出 rollout 命令。冻结目录改为匹配实际后端，原 bundle 不变。
+
+`trial02`：
+
+1. 现场已确认；三路相机、14D 反馈及起始姿态通过检查。
+2. 执行 37 个实测到位的 VLA 动作。
+3. 原 bundle 的 critic 在第 37 步触发：闭爪、无目标接触、无抓取、无有效抬升、未成功，满足连续 12 步。
+4. 触发时目标仍距夹爪约 **0.449 m**。这说明该规则会把早期远离目标的空闭爪也视作抓取失败；本轮没有进入实际抓取验收阶段。
+5. 恢复第一步 `arx.set_gripper(opening=1,max_steps=20)` 被拒绝：当前命令到张爪端点至少需要 **31 步**，真机每步限制为 0.08。恢复发送命令数为 **0**。
+6. 保持、重入和恢复后 VLA 均未执行；没有成功，也没有可归因的 rescue。runner 原始分类为 `infrastructure_error / recovery_step_failed`。
+7. 标准返回段无法接入当前早期姿态，程序未发出该归位方案。随后按本轮连续观测为空、离目标至少 10 cm、全部实测到位的轨迹反向返回，92 条归位命令；最终归位验证通过，再关闭控制器。
+
+原 bundle prose 把 4 个 chunk 写作最多 20 个动作；真机接口每 chunk 为 16 步，实际上限为 64 步。完整编译恢复预算是 89 步。本轮在第一恢复步被拒绝，未触及该预算差异，也未触及命名重入标记的运行时使用阶段。
+
+## 顿挫诊断和修复
+
+实测发送间隔中位数 **419.1 ms**，约 2.4 Hz；16、32 步后的 chunk 切换分别停 **1.513 s / 1.487 s**。实测到位等待中位数 **53.7 ms**。配置的 15 Hz 是发送频率上限，串行链路超时后不会补发。
+
+只读基准使用同一 RGB-D 快照、5 次重复、3 个新 PNG、1 个 NPZ、12 条代表性日志，保留 fsync 和 SQLite FULL WAL：
+
+| 存储 | 原日志同步中位数 | 合并日志同步中位数 | 原完整 I/O 块中位数 | 合并后完整 I/O 块中位数 |
+|---|---:|---:|---:|---:|
+| HDD | 178.8 ms | 12.1 ms | 345.2 ms | 221.3 ms |
+| NVMe | 73.4 ms | 6.2 ms | 198.9 ms | 132.7 ms |
+
+已实现 `Journal.batch()`：同一步的动作后观测、critic 判断、状态快照合并为一个 FULL WAL 事务；动作意图和实测 step commit 单独持久化，下一条动作必须等事务完成。事务错误回滚部分观测，已经持久化的物理动作事实保留。
+
+**基准不是修复后的真机频率验收。** 本轮 419 ms 数据来自修复前；新代码尚未重新运动测试。图像同步写入、RGB-D 压缩和 chunk 推理停顿仍存在，不能宣称已经达到 15 Hz 或完全连续运动。后续需把影像归档从动作时钟分离，并实现有版本和失效检查的异步推理衔接。
+
+## 证据与执行
+
+- `evidence/trial02-result.json`：runner 原始结果。
+- `evidence/trial02-analysis.json`：critic、恢复拒绝原因、最后特征与时间间隔。
+- `evidence/trial02-home-result.json`：最终实测归位及失能结果。
+- `evidence/io-benchmark*.json`：只读存储基准。
+- 原始逐帧 RGB-D、SQLite journal、命令和实测状态位于 dodo：`/mnt/hdd16t/chenfu/grasp_recovery/real2sim2real-20261009/`。
+- `run-trial.sh` 仅启动 rollout，不使能控制器、不摆放物体；需事先完成现场确认和实测 staging。为新输出目录运行，禁止复用旧 episode。
+- 89 项相关测试通过，包含事务持久化、错误回滚、bundle 编译、真实 bool 编码、未知值打断 dwell、重入审核和归位路径。
+
+本轮只是迁移尝试，不满足原 validation plan 的成对同种子验证和两次 candidate 成功，未做候选晋升。

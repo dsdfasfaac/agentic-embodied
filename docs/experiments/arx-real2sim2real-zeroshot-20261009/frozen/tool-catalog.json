@@ -1,5 +1,5 @@
 {
-  "catalog_sha256": "95861b16ffe8841f9b81ef3884915d4fd5f67e43472f580e6ff9cab22746518c",
+  "catalog_sha256": "427861998ebcf8b7b62f678b15c6e978b2e1666cbccdaf35d669a5d83dbbc3e0",
   "schema_version": "arx.tool.catalog.v1",
   "tools": [
     {
@@ -89,116 +89,6 @@
       },
       "kind": "execution",
       "name": "arx.hold",
-      "output_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "command_target_reached": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Command Target Reached"
-          },
-          "completion": {
-            "enum": [
-              "plan_exhausted",
-              "budget_exhausted",
-              "critic_interrupted",
-              "environment_ended",
-              "task_success",
-              "cancelled",
-              "observation_unavailable",
-              "error"
-            ],
-            "title": "Completion",
-            "type": "string"
-          },
-          "last_committed_step": {
-            "minimum": 0,
-            "title": "Last Committed Step",
-            "type": "integer"
-          },
-          "physical_arrival_verified": {
-            "default": false,
-            "title": "Physical Arrival Verified",
-            "type": "boolean"
-          }
-        },
-        "required": [
-          "completion",
-          "last_committed_step",
-          "command_target_reached"
-        ],
-        "title": "ExecutionOutput",
-        "type": "object"
-      },
-      "requirements": [
-        "command_state"
-      ],
-      "requires_reobservation": true,
-      "version": 1
-    },
-    {
-      "allowed_states": [
-        "READY",
-        "RUNNING_NOMINAL",
-        "INTERRUPTED",
-        "RECOVERING"
-      ],
-      "capabilities": [
-        "motion.move_eef"
-      ],
-      "description": "Plan a bounded relative right TCP command; arrival is not measured.",
-      "input_schema": {
-        "additionalProperties": false,
-        "properties": {
-          "delta_rotvec_rad": {
-            "items": {
-              "type": "number"
-            },
-            "maxItems": 3,
-            "minItems": 3,
-            "title": "Delta Rotvec Rad",
-            "type": "array"
-          },
-          "delta_xyz_m": {
-            "items": {
-              "type": "number"
-            },
-            "maxItems": 3,
-            "minItems": 3,
-            "title": "Delta Xyz M",
-            "type": "array"
-          },
-          "frame": {
-            "default": "tool",
-            "enum": [
-              "world",
-              "tool"
-            ],
-            "title": "Frame",
-            "type": "string"
-          },
-          "speed_m_s": {
-            "default": 0.01,
-            "exclusiveMinimum": 0,
-            "maximum": 0.03,
-            "title": "Speed M S",
-            "type": "number"
-          }
-        },
-        "required": [
-          "delta_xyz_m"
-        ],
-        "title": "EefArgs",
-        "type": "object"
-      },
-      "kind": "execution",
-      "name": "arx.move_eef",
       "output_schema": {
         "additionalProperties": false,
         "properties": {

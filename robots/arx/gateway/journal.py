@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
+from contextlib import contextmanager
 from pathlib import Path
 
 from .contracts import GatewayError, canonical, digest
@@ -13,6 +14,7 @@ from .contracts import GatewayError, canonical, digest
 class Journal:
     def __init__(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
+        self._batch_depth = 0
         self.db = sqlite3.connect(path, timeout=10, check_same_thread=False)
         self.db.execute("PRAGMA journal_mode=WAL")
         self.db.execute("PRAGMA synchronous=FULL")
@@ -29,8 +31,34 @@ class Journal:
           CREATE TABLE IF NOT EXISTS snapshot (id INTEGER PRIMARY KEY CHECK(id=1), payload TEXT NOT NULL);
         """)
 
+    @contextmanager
+    def batch(self):
+        """Durably commit one post-action observation/critic barrier together.
+
+        Action intent and physical step commit stay outside this batch. The
+        owner must exit successfully before dispatching another motor command.
+        FULL synchronous WAL durability remains enabled.
+        """
+        if self._batch_depth:
+            yield
+            return
+        self._batch_depth += 1
+        try:
+            with self.db:
+                yield
+        finally:
+            self._batch_depth -= 1
+
+    @contextmanager
+    def _transaction(self):
+        if self._batch_depth:
+            yield
+        else:
+            with self.db:
+                yield
+
     def record(self, kind, payload, *, public=False):
-        with self.db:
+        with self._transaction():
             cursor = self.db.execute(
                 "INSERT INTO records(kind,public,payload) VALUES(?,?,?)",
                 (kind, int(public), canonical(payload)),
@@ -41,7 +69,7 @@ class Journal:
         if source not in {"agent", "runner"}:
             raise ValueError("invalid decision source")
         value = digest(request.model_dump())
-        with self.db:
+        with self._transaction():
             row = self.db.execute(
                 "SELECT digest FROM decisions WHERE ref=?", (request.decision_ref,)
             ).fetchone()
@@ -71,7 +99,7 @@ class Journal:
         return None
 
     def admit(self, request, result):
-        with self.db:
+        with self._transaction():
             self.db.execute(
                 "INSERT INTO operations VALUES(?,?,?,?,0)",
                 (
@@ -83,7 +111,7 @@ class Journal:
             )
 
     def update(self, result, *, final=False):
-        with self.db:
+        with self._transaction():
             self.db.execute(
                 "UPDATE operations SET result=?,final=? WHERE request_id=? AND final=0",
                 (canonical(result), int(final), result["request_id"]),
@@ -96,7 +124,7 @@ class Journal:
         return json.loads(row[0]) if row else None
 
     def save_snapshot(self, snapshot):
-        with self.db:
+        with self._transaction():
             self.db.execute(
                 "INSERT OR REPLACE INTO snapshot VALUES(1,?)", (canonical(snapshot),)
             )
